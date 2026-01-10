@@ -497,31 +497,34 @@ window.addEventListener('resize', fixMapSize);
   setTimeout(() => map.invalidateSize(), 0);
   window.addEventListener('resize', () => map.invalidateSize());
 
-  // Keep polygon cards visually constant size during zoom by counter-scaling
-  function adjustCardScale(){
+  // Update card sizes to fit polygon interior in pixel space
+  function updateCardSizes(){
     try{
-      const z = map.getZoom();
-      popupLayers.forEach(m => {
-        const el = m && m.getElement && m.getElement();
+      popupLayers.forEach(obj => {
+        const marker = obj.marker;
+        const pts = obj.pts;
+        const el = marker && marker.getElement && marker.getElement();
         if(!el) return;
-        const base = (el._baseZoom !== undefined) ? el._baseZoom : z;
-        const scale = Math.pow(2, z - base);
-        // apply inverse scale to keep size visually constant
-        el.style.transform = `translate(-50%,-50%) scale(${1/scale})`;
+        const inner = el.firstElementChild || el;
+        // compute pixel bounding box of polygon points
+        const ptsPx = pts.map(p => map.latLngToLayerPoint([p.N, p.E]));
+        const xs = ptsPx.map(p => p.x);
+        const ys = ptsPx.map(p => p.y);
+        const w = Math.max(40, Math.abs(Math.max(...xs) - Math.min(...xs)));
+        const h = Math.max(24, Math.abs(Math.max(...ys) - Math.min(...ys)));
+        inner.style.width = w + 'px';
+        inner.style.height = h + 'px';
+        inner.style.overflow = 'hidden';
+        inner.style.display = 'flex';
+        inner.style.alignItems = 'center';
+        inner.style.justifyContent = 'center';
+        // keep marker centered
+        el.style.transform = 'translate(-50%,-50%)';
       });
     }catch(e){/*ignore*/}
   }
-  map.on('zoom', adjustCardScale);
-  map.on('zoomend', () => {
-    // reset base zoom to current and remove inline scale
-    const z = map.getZoom();
-    popupLayers.forEach(m => {
-      const el = m && m.getElement && m.getElement();
-      if(!el) return;
-      el._baseZoom = z;
-      el.style.transform = 'translate(-50%,-50%) scale(1)';
-    });
-  });
+  map.on('zoomend', updateCardSizes);
+  map.on('moveend', updateCardSizes);
 
   // Layers
   let gridLayer = null;
@@ -536,7 +539,7 @@ window.addEventListener('resize', fixMapSize);
     if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
     // remove popups added for polygon cards
     if(popupLayers && popupLayers.length){
-      popupLayers.forEach(p => { try{ map.removeLayer(p); }catch(e){} });
+      popupLayers.forEach(obj => { try{ if(obj && obj.marker) map.removeLayer(obj.marker); }catch(e){} });
       popupLayers = [];
     }
     // remove any side polygon details element
@@ -696,17 +699,8 @@ window.addEventListener('resize', fixMapSize);
         iconSize: null
       });
       const marker = L.marker([centroid.N, centroid.E], { icon, interactive: false }).addTo(map);
-      // ensure marker element exists and set base zoom for counter-scaling
-      const el = marker.getElement && marker.getElement();
-      if(el){
-        el.style.transformOrigin = 'center center';
-        el.style.willChange = 'transform';
-        // position offset so divIcon centers correctly
-        el.style.transform = 'translate(-50%,-50%) scale(1)';
-        el._baseZoom = map.getZoom();
-      }
-      // track marker so we can remove it on clear
-      popupLayers.push(marker);
+      // track marker with associated polygon points so we can size it later
+      popupLayers.push({ marker: marker, pts: polyPts });
       
 
       // تحديث الحدود
