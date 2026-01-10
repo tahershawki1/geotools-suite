@@ -1,0 +1,41 @@
+// اختبار سريع لتشخيص مشاكل الخريطة
+// انسخ والصق في DevTools Console
+
+console.log("=== اختبار الخريطة ===\n");
+
+// 1. التحقق من ارتفاع عنصر الخريطة
+const mapHeight = document.getElementById("map")?.clientHeight;
+console.log("1. ارتفاع عنصر الخريطة:");
+console.log(`   document.getElementById("map")?.clientHeight = ${mapHeight}`);
+console.log(`   ✓ يجب أن يكون 320 (ليس 0)\n`);
+
+// 2. التحقق من تحميل Leaflet
+console.log("2. هل Leaflet محمّل؟");
+console.log(`   typeof L = ${typeof L}`);
+console.log(`   ✓ يجب أن يكون 'object' أو 'function'\n`);
+
+// 3. التحقق من حالة الخريطة بعد التحويل
+console.log("3. بعد عمل تحويل، تحقق من:");
+console.log(`   _map && _map._loaded = ${_map && _map._loaded}`);
+console.log(`   ✓ يجب أن يكون true\n`);
+
+// 4. تشخيص المشاكل
+console.log("=== التشخيص ===");
+if (mapHeight === 0) {
+  console.error("❌ مشكلة CSS: ارتفاع الخريطة = 0");
+  console.log("   الحل: تحقق من CSS في <div id=\"map\"> ... style");
+} else if (mapHeight > 0) {
+  console.log("✅ CSS سليم: ارتفاع الخريطة = " + mapHeight);
+}
+
+if (typeof L === "undefined") {
+  console.error("❌ مشكلة تحميل: Leaflet لم يُحمّل");
+  console.log("   الحل: تحقق من CDN links في <head>");
+} else {
+  console.log("✅ Leaflet محمّل بنجاح");
+}
+
+console.log("\n=== للبدء بالاختبار ===");
+console.log("1. أدخل إحداثيات وقم بالتحويل");
+console.log("2. تحقق من ظهور الخريطة");
+console.log("3. اضغط على صف من الجدول الجماعي لعرض النقطة");

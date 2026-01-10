@@ -233,6 +233,7 @@
             <option value="4">Decimal: 4</option>
           </select>
         </div>
+        <button class="btn-nav-top" title="مسح البيانات المحفوظة" onclick="clearLastInputs()">🗑️ مسح</button>
       </div>
       <button class="btn-calc" id="btn-convert-single" onclick="runSingleDltm()">تحويل الآن ✨</button>
 
@@ -383,6 +384,7 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
         <button class="btn-calc" style="flex:1;" onclick="runReverseDltm()">تحويل الآن ✨</button>
         <button class="btn-nav-top" onclick="showOnMapFromWgs()">عرض على الخريطة</button>
+        <button class="btn-nav-top" title="مسح البيانات المحفوظة" onclick="clearLastInputs()">🗑️ مسح</button>
       </div>
 
       <div id="reverse-box" class="result-card">
@@ -425,6 +427,50 @@
       if (typeof showLoader === "function") return showLoader(show);
     } catch {}
     // fallback: no-op
+  }
+
+  // ----------------------------
+  // Local Storage for Last Inputs
+  // ----------------------------
+  function saveLastInputs() {
+    const e = document.getElementById("inp-e").value;
+    const n = document.getElementById("inp-n").value;
+    const lon = document.getElementById("inp-lon").value;
+    const lat = document.getElementById("inp-lat").value;
+    const format = document.getElementById("out-format").value;
+    const precision = document.getElementById("out-prec").value;
+    
+    localStorage.setItem("dltm_lastE", e);
+    localStorage.setItem("dltm_lastN", n);
+    localStorage.setItem("dltm_lastLon", lon);
+    localStorage.setItem("dltm_lastLat", lat);
+    localStorage.setItem("dltm_lastFormat", format);
+    localStorage.setItem("dltm_lastPrecision", precision);
+  }
+
+  function loadLastInputs() {
+    const e = localStorage.getItem("dltm_lastE");
+    const n = localStorage.getItem("dltm_lastN");
+    const lon = localStorage.getItem("dltm_lastLon");
+    const lat = localStorage.getItem("dltm_lastLat");
+    const format = localStorage.getItem("dltm_lastFormat") || "dms";
+    const precision = localStorage.getItem("dltm_lastPrecision") || "8";
+    
+    if(e) document.getElementById("inp-e").value = e;
+    if(n) document.getElementById("inp-n").value = n;
+    if(lon) document.getElementById("inp-lon").value = lon;
+    if(lat) document.getElementById("inp-lat").value = lat;
+    document.getElementById("out-format").value = format;
+    document.getElementById("out-prec").value = precision;
+  }
+
+  function clearLastInputs() {
+    localStorage.removeItem("dltm_lastE");
+    localStorage.removeItem("dltm_lastN");
+    localStorage.removeItem("dltm_lastLon");
+    localStorage.removeItem("dltm_lastLat");
+    localStorage.removeItem("dltm_lastFormat");
+    localStorage.removeItem("dltm_lastPrecision");
   }
 
   // ----------------------------
@@ -687,6 +733,8 @@
     const n = parseFloat(document.getElementById("inp-n").value);
     if (isNaN(e) || isNaN(n)) return alert("أدخل إحداثيات صحيحة");
 
+    saveLastInputs();
+
     const btn = document.getElementById("btn-convert-single");
     btn.disabled = true;
     btn.innerText = "جاري التحويل...";
@@ -800,6 +848,11 @@
         `<td>${escapeHtml(r.utmZone)}</td>` +
         `<td>${Number(r.utmE).toFixed(2)}</td>` +
         `<td>${Number(r.utmN).toFixed(2)}</td>`;
+      
+      // اضافة القدرة على الضغط لعرض على الخريطة
+      tr.style.cursor = "pointer";
+      tr.addEventListener("click", () => showPointOnMap(r.latitude, r.longitude));
+      
       tbody.appendChild(tr);
     });
 
@@ -911,23 +964,66 @@
     URL.revokeObjectURL(u);
   }
 
-  let _map, _marker, _lastLatLon = null;
+  let _map = null;
+  let _marker = null;
+  let _lastLatLon = null;
 
-  function ensureMap(){
-    if(_map) return;
-    _map = L.map("map").setView([25.2, 55.3], 10);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(_map);
+  function destroyMapIfAny() {
+    try {
+      if (_map) {
+        _map.remove();   // يحل مشكلة "Map container is already initialized"
+        _map = null;
+        _marker = null;
+      }
+    } catch (e) {
+      _map = null;
+      _marker = null;
+    }
   }
 
-  function showPointOnMap(lat, lon){
-    ensureMap();
-    _lastLatLon = {lat, lon};
+  function ensureMap() {
+    // لو الصفحة اتعمل لها reload داخل SPA وفضلت نفس الـ id
+    if (_map) return;
+
+    const mapEl = document.getElementById("map");
+    if (!mapEl) return;
+
+    // لو Leaflet شايف إن الكونتينر متأثر من تهيئة قديمة
+    if (mapEl._leaflet_id) {
+      destroyMapIfAny();
+      // امسح الـ leaflet id القديم
+      try { delete mapEl._leaflet_id; } catch {}
+    }
+
+    _map = L.map("map", { zoomControl: true }).setView([25.2, 55.3], 10);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(_map);
+  }
+
+  function showPointOnMap(lat, lon) {
+    _lastLatLon = { lat, lon };
+
     const box = document.getElementById("mapBox");
-    box.style.display = "block";
-    setTimeout(() => _map.invalidateSize(), 100);
-    _map.setView([lat, lon], 17);
-    if(_marker) _marker.remove();
-    _marker = L.marker([lat, lon]).addTo(_map);
+    if (box) box.style.display = "block";
+
+    // مهم جدًا: انتظر frame واحدة بعد إظهار الـ div
+    requestAnimationFrame(() => {
+      ensureMap();
+      if (!_map) return;
+
+      _map.setView([lat, lon], 17);
+
+      if (_marker) _map.removeLayer(_marker);
+      _marker = L.marker([lat, lon]).addTo(_map);
+
+      // الأهم: اجبار Leaflet يعيد حساب المقاسات
+      setTimeout(() => {
+        try { _map.invalidateSize(true); } catch {}
+      }, 120);
+    });
   }
 
   window.copyGoogleMapsLink = async function(){
@@ -960,6 +1056,7 @@
     const lon = parseFloat(document.getElementById("inp-lon").value);
     const lat = parseFloat(document.getElementById("inp-lat").value);
     if(isNaN(lat) || isNaN(lon)) return alert("أدخل Latitude/Longitude صحيحين");
+    saveLastInputs();
     const r = convertWGS84toDLTM(lat, lon);
     if(!r.success) return alert("خطأ: " + r.error);
     document.getElementById("res-dltm-e").innerText = r.easting.toFixed(3);
@@ -1056,5 +1153,57 @@
     const ok = await copyTextSmart(text);
     alert(ok ? "تم النسخ ✅" : "تعذر النسخ ❌");
   }
+
+  // ----------------------------
+  // Local Storage for Last Inputs
+  // ----------------------------
+  window.saveLastInputs = function() {
+    const e = document.getElementById("inp-e").value;
+    const n = document.getElementById("inp-n").value;
+    const lon = document.getElementById("inp-lon").value;
+    const lat = document.getElementById("inp-lat").value;
+    const format = document.getElementById("out-format").value;
+    const precision = document.getElementById("out-prec").value;
+    
+    localStorage.setItem("dltm_lastE", e);
+    localStorage.setItem("dltm_lastN", n);
+    localStorage.setItem("dltm_lastLon", lon);
+    localStorage.setItem("dltm_lastLat", lat);
+    localStorage.setItem("dltm_lastFormat", format);
+    localStorage.setItem("dltm_lastPrecision", precision);
+  };
+
+  window.loadLastInputs = function() {
+    const e = localStorage.getItem("dltm_lastE");
+    const n = localStorage.getItem("dltm_lastN");
+    const lon = localStorage.getItem("dltm_lastLon");
+    const lat = localStorage.getItem("dltm_lastLat");
+    const format = localStorage.getItem("dltm_lastFormat") || "dms";
+    const precision = localStorage.getItem("dltm_lastPrecision") || "8";
+    
+    if(e) document.getElementById("inp-e").value = e;
+    if(n) document.getElementById("inp-n").value = n;
+    if(lon) document.getElementById("inp-lon").value = lon;
+    if(lat) document.getElementById("inp-lat").value = lat;
+    document.getElementById("out-format").value = format;
+    document.getElementById("out-prec").value = precision;
+  };
+
+  window.clearLastInputs = function() {
+    localStorage.removeItem("dltm_lastE");
+    localStorage.removeItem("dltm_lastN");
+    localStorage.removeItem("dltm_lastLon");
+    localStorage.removeItem("dltm_lastLat");
+    localStorage.removeItem("dltm_lastFormat");
+    localStorage.removeItem("dltm_lastPrecision");
+    document.getElementById("inp-e").value = "";
+    document.getElementById("inp-n").value = "";
+    document.getElementById("inp-lon").value = "";
+    document.getElementById("inp-lat").value = "";
+    alert("تم حذف البيانات المحفوظة ✨");
+  };
+
+  // Load saved inputs on page load
+  loadLastInputs();
 })();
 </script>
