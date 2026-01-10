@@ -1,3 +1,6 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
 <style>
   .container-dltm {
     max-width: 900px;
@@ -160,6 +163,27 @@
     font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
+  }
+
+  #mapBox {
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    display: none;
+  }
+
+  #map {
+    width: 100% !important;
+    height: 320px !important;
+    z-index: 1;
+  }
+
+  .leaflet-container {
+    font-family: 'Cairo', sans-serif;
+    background: #f0f0f0;
+    width: 100% !important;
+    height: 100% !important;
   }
 </style>
 
@@ -900,6 +924,7 @@
     _lastLatLon = {lat, lon};
     const box = document.getElementById("mapBox");
     box.style.display = "block";
+    setTimeout(() => _map.invalidateSize(), 100);
     _map.setView([lat, lon], 17);
     if(_marker) _marker.remove();
     _marker = L.marker([lat, lon]).addTo(_map);
