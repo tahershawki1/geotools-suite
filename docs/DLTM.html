@@ -140,6 +140,27 @@
     .result-grid-2{ grid-template-columns: 1fr; }
     .result-grid-3{ grid-template-columns: 1fr; }
   }
+
+  .field-line{
+    display:flex;
+    gap:10px;
+    align-items: baseline;
+    margin-top: 6px;
+  }
+
+  .field-name{
+    min-width: 62px;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--text-muted);
+  }
+
+  .field-hint{
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
 </style>
 
 <div class="container-dltm">
@@ -188,14 +209,30 @@
         <div class="result-grid-2">
           <div class="result-field">
             <div class="field-label">Longitude</div>
-            <div class="field-value" id="res-lon">-</div>
-            <div class="field-hint" id="res-lon-dd">-</div>
+
+            <div class="field-line">
+              <span class="field-name">DMS:</span>
+              <span class="field-value" id="res-lon-dms">-</span>
+            </div>
+
+            <div class="field-line">
+              <span class="field-name">Decimal:</span>
+              <span class="field-hint" id="res-lon-dd">-</span>
+            </div>
           </div>
 
           <div class="result-field">
             <div class="field-label">Latitude</div>
-            <div class="field-value" id="res-lat">-</div>
-            <div class="field-hint" id="res-lat-dd">-</div>
+
+            <div class="field-line">
+              <span class="field-name">DMS:</span>
+              <span class="field-value" id="res-lat-dms">-</span>
+            </div>
+
+            <div class="field-line">
+              <span class="field-name">Decimal:</span>
+              <span class="field-hint" id="res-lat-dd">-</span>
+            </div>
           </div>
         </div>
 
@@ -483,21 +520,17 @@
 
     if (!res.success) return alert("خطأ: " + res.error);
 
-    // DMS output like screenshot
-    document.getElementById("res-lon").innerText = toDMS(res.longitude, true);
-    document.getElementById("res-lat").innerText = toDMS(res.latitude, false);
+    // Longitude/Latitude (DMS + Decimal)
+    document.getElementById("res-lon-dms").innerText = toDMS(res.longitude, true);
+    document.getElementById("res-lat-dms").innerText = toDMS(res.latitude, false);
 
-    // Decimal degrees (hint under each)
-    document.getElementById("res-lon-dd").innerText = `Decimal: ${res.longitude.toFixed(8)}`;
-    document.getElementById("res-lat-dd").innerText = `Decimal: ${res.latitude.toFixed(8)}`;
+    document.getElementById("res-lon-dd").innerText = res.longitude.toFixed(8);
+    document.getElementById("res-lat-dd").innerText = res.latitude.toFixed(8);
 
+    // UTM
     document.getElementById("res-utm-z").innerText = String(res.utm.zone) + String(res.utm.hemisphere);
     document.getElementById("res-utm-e").innerText = Number(res.utm.easting).toFixed(3);
     document.getElementById("res-utm-n").innerText = Number(res.utm.northing).toFixed(3);
-
-    const note = document.getElementById("res-note");
-    note.style.display = "block";
-    note.innerText = "Tip: يمكنك نسخ الإحداثيات بصيغة DMS أو Decimal أو UTM من أزرار النسخ.";
 
     document.getElementById("res-box-single").style.display = "block";
   };
@@ -622,26 +655,57 @@
     return v;
   }
 
-  window.copySingle = async function(mode){
-    try{
-      const lonDms = document.getElementById("res-lon").innerText;
-      const latDms = document.getElementById("res-lat").innerText;
-      const lonDd  = document.getElementById("res-lon-dd").innerText.replace("Decimal: ","");
-      const latDd  = document.getElementById("res-lat-dd").innerText.replace("Decimal: ","");
-      const utmZ = document.getElementById("res-utm-z").innerText;
-      const utmE = document.getElementById("res-utm-e").innerText;
-      const utmN = document.getElementById("res-utm-n").innerText;
+  function fallbackCopyText(text){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "-9999px";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
 
-      let text = "";
-      if(mode === "dms") text = `Lon: ${lonDms}\nLat: ${latDms}`;
-      else if(mode === "dd") text = `Lon: ${lonDd}\nLat: ${latDd}`;
-      else text = `UTM: ${utmZ}\nE: ${utmE}\nN: ${utmN}`;
-
-      await navigator.clipboard.writeText(text);
-      alert("تم النسخ ✅");
-    }catch(e){
-      alert("تعذر النسخ. جرّب من المتصفح السماح بالClipboard.");
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (e) {
+      ok = false;
     }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  async function copyTextSmart(text){
+    // Try modern clipboard first
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (e) {
+      // ignore and fallback
+    }
+    // Fallback
+    return fallbackCopyText(text);
+  }
+
+  window.copySingle = async function(mode){
+    const lonDms = document.getElementById("res-lon-dms")?.innerText || "";
+    const latDms = document.getElementById("res-lat-dms")?.innerText || "";
+    const lonDd  = document.getElementById("res-lon-dd")?.innerText || "";
+    const latDd  = document.getElementById("res-lat-dd")?.innerText || "";
+    const utmZ = document.getElementById("res-utm-z")?.innerText || "";
+    const utmE = document.getElementById("res-utm-e")?.innerText || "";
+    const utmN = document.getElementById("res-utm-n")?.innerText || "";
+
+    let text = "";
+    if(mode === "dms") text = `Longitude (DMS): ${lonDms}\nLatitude (DMS): ${latDms}`;
+    else if(mode === "dd") text = `Longitude (Decimal): ${lonDd}\nLatitude (Decimal): ${latDd}`;
+    else text = `UTM: ${utmZ}\nEasting: ${utmE}\nNorthing: ${utmN}`;
+
+    const ok = await copyTextSmart(text);
+    alert(ok ? "تم النسخ ✅" : "تعذر النسخ ❌");
   }
 });
 </script>
