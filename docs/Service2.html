@@ -857,7 +857,8 @@ window.addEventListener('resize', fixMapSize);
         showMsg('Points imported successfully.', '');
       }
 
-      elInput.value = pts.map(p => `${p.N}, ${p.E}`).join('\n') + '\n';
+      // Preserve original content so any ID column remains available for splitting
+      elInput.value = content.trim() + '\n';
     };
     reader.onerror = () => showMsg('Failed to read file.', 'err');
     reader.readAsText(file);
