@@ -497,6 +497,32 @@ window.addEventListener('resize', fixMapSize);
   setTimeout(() => map.invalidateSize(), 0);
   window.addEventListener('resize', () => map.invalidateSize());
 
+  // Keep polygon cards visually constant size during zoom by counter-scaling
+  function adjustCardScale(){
+    try{
+      const z = map.getZoom();
+      popupLayers.forEach(m => {
+        const el = m && m.getElement && m.getElement();
+        if(!el) return;
+        const base = (el._baseZoom !== undefined) ? el._baseZoom : z;
+        const scale = Math.pow(2, z - base);
+        // apply inverse scale to keep size visually constant
+        el.style.transform = `translate(-50%,-50%) scale(${1/scale})`;
+      });
+    }catch(e){/*ignore*/}
+  }
+  map.on('zoom', adjustCardScale);
+  map.on('zoomend', () => {
+    // reset base zoom to current and remove inline scale
+    const z = map.getZoom();
+    popupLayers.forEach(m => {
+      const el = m && m.getElement && m.getElement();
+      if(!el) return;
+      el._baseZoom = z;
+      el.style.transform = 'translate(-50%,-50%) scale(1)';
+    });
+  });
+
   // Layers
   let gridLayer = null;
   let pointsLayer = null;
@@ -670,6 +696,15 @@ window.addEventListener('resize', fixMapSize);
         iconSize: null
       });
       const marker = L.marker([centroid.N, centroid.E], { icon, interactive: false }).addTo(map);
+      // ensure marker element exists and set base zoom for counter-scaling
+      const el = marker.getElement && marker.getElement();
+      if(el){
+        el.style.transformOrigin = 'center center';
+        el.style.willChange = 'transform';
+        // position offset so divIcon centers correctly
+        el.style.transform = 'translate(-50%,-50%) scale(1)';
+        el._baseZoom = map.getZoom();
+      }
       // track marker so we can remove it on clear
       popupLayers.push(marker);
       
