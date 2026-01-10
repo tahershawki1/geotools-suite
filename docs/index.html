@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <base target="_top">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GeoTools Suite</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-  <!-- Proj4js - Global for all tools -->
+
+  <!-- Proj4js - Global for Transform tool -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+
+  <!-- Leaflet (Global for map tools) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root {
@@ -62,7 +65,8 @@
     }
     .nav-links {
       display: flex;
-      gap: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
     .btn-nav-top {
       padding: 8px 16px;
@@ -74,6 +78,7 @@
       background: #fff;
       color: var(--text-main);
       transition: all 0.2s;
+      white-space: nowrap;
     }
     .btn-nav-top:hover {
       background: var(--primary-light);
@@ -118,32 +123,65 @@
     .header { text-align: center; margin-bottom: 50px; }
     .header h1 { font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
     .header p { font-size: 18px; color: var(--text-muted); }
+
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
     .card {
-      background: var(--card-bg); padding: 30px; border-radius: 24px; border: 1px solid var(--border);
-      box-shadow: var(--shadow); transition: all 0.3s ease;
-      cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; text-decoration: none; color: inherit;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-decoration: none;
+      color: inherit;
     }
     .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
-    .icon-box { width: 50px; height: 50px; background: var(--primary-light); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--primary); font-size: 24px; }
+    .icon-box {
+      width: 50px;
+      height: 50px;
+      background: var(--primary-light);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--primary);
+      font-size: 24px;
+    }
     .card h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
     .card p { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
 
-    .footer { margin-top: auto; padding: 40px 0; text-align: center; color: var(--text-muted); font-size: 14px; border-top: 1px solid var(--border); background: #fff; width: 100%; }
+    .footer {
+      margin-top: auto;
+      padding: 40px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      border-top: 1px solid var(--border);
+      background: #fff;
+      width: 100%;
+    }
   </style>
 </head>
+
 <body>
   <div id="loader"><div class="spinner"></div></div>
 
   <nav class="navbar">
-    <a href="#" class="nav-logo" onclick="loadPage('')">
+    <a href="#" class="nav-logo" onclick="loadPage(''); return false;">
       <span>🌐</span> GeoTools Suite
     </a>
+
     <div class="nav-links">
       <button class="btn-nav-top" onclick="loadPage('')">الرئيسية</button>
       <button class="btn-nav-top" onclick="loadPage('Converter')">محول الملفات</button>
       <button class="btn-nav-top" onclick="loadPage('DLTM')">محول دبي</button>
       <button class="btn-nav-top" onclick="loadPage('Transform')">تحويل الإحداثيات</button>
+      <button class="btn-nav-top" onclick="loadPage('Service2')">حساب المساحات</button>
     </div>
   </nav>
 
@@ -189,6 +227,9 @@
   </div>
 
   <script>
+    // بصمة نسخة للتأكد أنك ترى النسخة الجديدة على Pages
+    console.log("GeoTools SPA fetch-loader active - v2026-01-10");
+
     function showLoader(show) {
       document.getElementById('loader').style.display = show ? 'flex' : 'none';
     }
@@ -216,47 +257,49 @@
       document.getElementById('app-container').style.opacity = '0.5';
 
       try {
-        // على GitHub Pages الملفات موجودة جنب index.html داخل /docs
         const url = `./${pageName}.html`;
         const res = await fetch(url, { cache: "no-cache" });
-        if (!res.ok) throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
+
+        if (!res.ok) {
+          throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
+        }
 
         const html = await res.text();
         contentDiv.innerHTML = html;
 
-        // تشغيل سكربتات الصفحة بنفس أسلوبك الحالي (لكن بدون google.script.run)
+        // تشغيل سكربتات الصفحة المحقونة
         const scripts = Array.from(contentDiv.querySelectorAll('script'));
-        let index = 0;
+        let i = 0;
 
-        function next() {
-          if (index >= scripts.length) {
+        const runNext = () => {
+          if (i >= scripts.length) {
             document.getElementById('app-container').style.opacity = '1';
             showLoader(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
           }
 
-          const oldScript = scripts[index++];
+          const oldScript = scripts[i++];
           const newScript = document.createElement('script');
 
           if (oldScript.src) {
             newScript.src = oldScript.src;
-            newScript.onload = next;
-            newScript.onerror = next;
+            newScript.onload = runNext;
+            newScript.onerror = runNext;
             document.head.appendChild(newScript);
           } else {
             try {
-              (0, eval)(oldScript.textContent || oldScript.text);
+              (0, eval)(oldScript.textContent || oldScript.text || "");
             } catch (e) {
-              console.error("Script error:", e);
+              console.error("Injected script error:", e);
             }
-            next();
+            runNext();
           }
 
           if (oldScript.parentNode) oldScript.parentNode.removeChild(oldScript);
-        }
+        };
 
-        next();
+        runNext();
       } catch (err) {
         alert('Error loading page: ' + err.message);
         showLoader(false);
