@@ -493,11 +493,20 @@ window.addEventListener('resize', fixMapSize);
   let pointsLayer = null;
   let lineLayer = null;
   let polyLayer = null;
+  let popupLayers = [];
 
   function clearDraw(){
     if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
     if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
     if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
+    // remove popups added for polygon cards
+    if(popupLayers && popupLayers.length){
+      popupLayers.forEach(p => { try{ map.removeLayer(p); }catch(e){} });
+      popupLayers = [];
+    }
+    // remove any side polygon details element
+    const existingDetails = document.getElementById('polygon-details');
+    if(existingDetails && existingDetails.parentNode){ existingDetails.parentNode.removeChild(existingDetails); }
   }
 
   function buildGrid(bounds, step){
@@ -572,7 +581,6 @@ window.addEventListener('resize', fixMapSize);
     let allBounds = null;
     let totalArea = 0;
     let totalPerimeter = 0;
-    let resultHTML = '';
 
     polygons.forEach((polyPts, polyIdx) => {
       if(polyPts.length < 2) return;
@@ -631,17 +639,13 @@ window.addEventListener('resize', fixMapSize);
       `;
       
       // إضافة البطاقة على الخريطة كـ popup ثابت عند إحداثيات المركز
-      L.popup({ closeButton: false, autoClose: false, className: 'polygon-card-popup' })
+      const popup = L.popup({ closeButton: false, autoClose: false, className: 'polygon-card-popup' })
         .setLatLng([centroid.N, centroid.E])
         .setContent(cardHTML)
         .addTo(map);
-
-      resultHTML += `<div style="margin-bottom: 12px; padding: 12px; background: ${color}22; border-left: 3px solid ${color}; border-radius: 8px;">
-        <div style="font-weight: 800; margin-bottom: 6px; color: ${color};">Polygon ${polyIdx + 1}</div>
-        <div style="font-size: 12px;">Points: ${polyPts.length}</div>
-        <div style="font-size: 12px;">Area: ${fmt(stats.area, 3)} m²</div>
-        <div style="font-size: 12px;">Perimeter: ${fmt(stats.perimeter, 3)} m</div>
-      </div>`;
+      // track popup so we can remove it on clear
+      popupLayers.push(popup);
+      
 
       // تحديث الحدود
       if(!allBounds) allBounds = L.latLngBounds(latlngs);
@@ -660,13 +664,6 @@ window.addEventListener('resize', fixMapSize);
     document.getElementById('res-count').innerText = String(ptsInput.length);
     document.getElementById('res-area').innerText = fmt(totalArea, 3);
     document.getElementById('res-perimeter').innerText = fmt(totalPerimeter, 3);
-
-    // إضافة تفاصيل كل قطعة
-    const resultsContainer = document.getElementById('areaResults');
-    const detailsDiv = document.createElement('div');
-    detailsDiv.id = 'polygon-details';
-    detailsDiv.innerHTML = resultHTML;
-    resultsContainer.appendChild(detailsDiv);
 
     elResults.style.display = 'grid';
 
