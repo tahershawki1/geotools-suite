@@ -354,6 +354,20 @@
     <!-- Batch Conversion -->
     <div id="section-batch" class="tool-section">
       <div style="margin-bottom:14px;">
+        <label style="display:block; font-weight:900; margin-bottom:8px;">اختر نوع التحويل الجماعي:</label>
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="radio" name="batch-direction" value="dltm-to-wgs" checked onchange="switchBatchDirection('dltm-to-wgs')">
+            DLTM → WGS84
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+            <input type="radio" name="batch-direction" value="wgs-to-dltm" onchange="switchBatchDirection('wgs-to-dltm')">
+            WGS84 → DLTM
+          </label>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:14px;">
         <label style="display:block; font-weight:900; margin-bottom:8px;">لصق الإحداثيات (بدل رفع ملف)</label>
         <textarea id="batchPaste" rows="8"
           placeholder="مثال:
@@ -553,6 +567,15 @@
     document.querySelectorAll(".tool-section").forEach((s) => s.classList.remove("active"));
     el.classList.add("active");
     document.getElementById("section-" + tab).classList.add("active");
+  };
+
+  window.switchBatchDirection = function(dir) {
+    const textarea = document.getElementById('batchPaste');
+    if(dir === 'wgs-to-dltm') {
+      textarea.placeholder = 'WGS84 مثال:\n55.123456,25.123456\n55.234567,25.234567\nأو بفواصل/مسافات/Tab';
+    } else {
+      textarea.placeholder = 'DLTM مثال:\n489817.908,2768047.013\n489790.938,2768033.067\nأو بفواصل/مسافات/Tab';
+    }
   };
 
   // ----------------------------
@@ -851,6 +874,7 @@
   window.handleBatchFile = function (input) {
     const file = input.files[0];
     if (!file) return;
+    const direction = document.querySelector("input[name='batch-direction']:checked")?.value || 'dltm-to-wgs';
 
     const reader = new FileReader();
     reader.onload = function (ev) {
@@ -859,41 +883,37 @@
       const rows = [];
 
       lines.forEach((line, i) => {
-        // skip header if it contains letters
         if (i === 0 && /[a-zA-Z]/.test(line)) return;
-
         const parts = line.split(/[,\t;]+/).map((p) => p.trim()).filter(Boolean);
         if (parts.length < 2) return;
-
-        const east = parseFloat(parts[0]);
-        const north = parseFloat(parts[1]);
+        const val1 = parseFloat(parts[0]);
+        const val2 = parseFloat(parts[1]);
         const pId = parts.length >= 3 ? parts[2] : "";
         const code = parts.length >= 4 ? parts[3] : "";
-
-        if (!isNaN(east) && !isNaN(north)) rows.push([east, north, pId, code]);
+        if (!isNaN(val1) && !isNaN(val2)) rows.push([val1, val2, pId, code]);
       });
 
       if (!rows.length) return alert("لم يتم العثور على بيانات صالحة");
-
       safeShowLoader(true);
 
-      // Local batch compute
-      const results = rows.map((r) => {
-        const [east, north, pId, code] = r;
-        const conv = convertDLTMtoWGS84(east, north);
-        if (!conv.success) return { pId, code, easting: east, northing: north, error: conv.error };
-        return {
-          pId,
-          code,
-          easting: east,
-          northing: north,
-          latitude: conv.latitude,
-          longitude: conv.longitude,
-          utmE: conv.utm.easting,
-          utmN: conv.utm.northing,
-          utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),
-        };
-      });
+      let results;
+      if(direction === 'wgs-to-dltm') {
+        results = rows.map((r) => {
+          const [lon, lat, pId, code] = r;
+          const conv = convertWGS84toDLTM(lat, lon);
+          if (!conv.success) return { pId, code, longitude: lon, latitude: lat, error: conv.error };
+          const utm = latLonToUTM(lat, lon);
+          return { pId, code, easting: conv.easting, northing: conv.northing, latitude: lat, longitude: lon, utmE: utm.easting, utmN: utm.northing, utmZone: String(utm.zone) + String(utm.hemisphere), };
+        });
+      } else {
+        results = rows.map((r) => {
+          const [east, north, pId, code] = r;
+          const v = validateAndMaybeSwap(east, north);
+          const conv = convertDLTMtoWGS84(v.E, v.N);
+          if (!conv.success) return { pId, code, easting: east, northing: north, error: conv.error };
+          return { pId, code, easting: east, northing: north, latitude: conv.latitude, longitude: conv.longitude, utmE: conv.utm.easting, utmN: conv.utm.northing, utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere), };
+        });
+      }
 
       safeShowLoader(false);
       batchData = results;
@@ -935,8 +955,10 @@
 
   window.downloadBatchCsv = function () {
     if (!batchData.length) return;
-
+    const direction = document.querySelector("input[name='batch-direction']:checked")?.value || 'dltm-to-wgs';
     let csv = "PointID,Code,E_DLTM,N_DLTM,Latitude,Longitude,UTM_Zone,UTM_E,UTM_N\n";
+    let filename = (direction === 'wgs-to-dltm') ? "WGS84_to_DLTM.csv" : "DLTM_to_WGS84.csv";
+    
     batchData.forEach((r) => {
       if (r.error) return;
       csv += `${safeCsv(r.pId)},${safeCsv(r.code)},${r.easting},${r.northing},${r.latitude},${r.longitude},${r.utmZone},${r.utmE},${r.utmN}\n`;
@@ -946,7 +968,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "DLTM_Converted.csv";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -954,25 +976,39 @@
   window.runBatchFromPaste = function(){
     const text = (document.getElementById("batchPaste").value || "").trim();
     if(!text) return alert("الصق الإحداثيات أولاً");
+    const direction = document.querySelector("input[name='batch-direction']:checked")?.value || 'dltm-to-wgs';
+    
     const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
     const rows = [];
     for(const line of lines){
       const parts = line.split(/[,\t; ]+/).map(p=>p.trim()).filter(Boolean);
       if(parts.length < 2) continue;
-      const east = parseFloat(parts[0]);
-      const north = parseFloat(parts[1]);
+      const val1 = parseFloat(parts[0]);
+      const val2 = parseFloat(parts[1]);
       const pId = parts.length >= 3 ? parts[2] : "";
       const code = parts.length >= 4 ? parts[3] : "";
-      if(Number.isFinite(east) && Number.isFinite(north)) rows.push([east, north, pId, code]);
+      if(Number.isFinite(val1) && Number.isFinite(val2)) rows.push([val1, val2, pId, code]);
     }
     if(!rows.length) return alert("لم يتم العثور على صفوف صالحة");
     safeShowLoader(true);
-    const results = rows.map(([east, north, pId, code])=>{
-      const v = validateAndMaybeSwap(east, north);
-      const conv = convertDLTMtoWGS84(v.E, v.N);
-      if(!conv.success) return { pId, code, easting:east, northing:north, error: conv.error };
-      return {pId, code, easting:east, northing:north, latitude: conv.latitude, longitude: conv.longitude, utmE: conv.utm.easting, utmN: conv.utm.northing, utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),};
-    });
+    
+    let results;
+    if(direction === 'wgs-to-dltm') {
+      results = rows.map(([lon, lat, pId, code])=>{
+        const conv = convertWGS84toDLTM(lat, lon);
+        if(!conv.success) return { pId, code, longitude:lon, latitude:lat, error: conv.error };
+        const utm = latLonToUTM(lat, lon);
+        return {pId, code, easting: conv.easting, northing: conv.northing, latitude: lat, longitude: lon, utmE: utm.easting, utmN: utm.northing, utmZone: String(utm.zone) + String(utm.hemisphere),};
+      });
+    } else {
+      results = rows.map(([east, north, pId, code])=>{
+        const v = validateAndMaybeSwap(east, north);
+        const conv = convertDLTMtoWGS84(v.E, v.N);
+        if(!conv.success) return { pId, code, easting:east, northing:north, error: conv.error };
+        return {pId, code, easting:east, northing:north, latitude: conv.latitude, longitude: conv.longitude, utmE: conv.utm.easting, utmN: conv.utm.northing, utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),};
+      });
+    }
+    
     safeShowLoader(false);
     batchData = results;
     renderBatchResults(results);
@@ -988,6 +1024,8 @@
   function downloadBatchKml(){
     const ok = batchData.filter(r=>!r.error);
     if(!ok.length) return alert("لا توجد بيانات للتصدير");
+    const direction = document.querySelector("input[name='batch-direction']:checked")?.value || 'dltm-to-wgs';
+    const filename = (direction === 'wgs-to-dltm') ? "WGS84_to_DLTM.kml" : "DLTM_to_WGS84.kml";
     const placemarks = ok.map((r,i)=>`
   <Placemark>
     <name>${(r.pId||("P"+(i+1)))}</name>
@@ -1003,7 +1041,7 @@
     const u = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = u;
-    a.download = "DLTM_batch.kml";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(u);
   }
@@ -1011,6 +1049,8 @@
   function downloadBatchGeoJson(){
     const ok = batchData.filter(r=>!r.error);
     if(!ok.length) return alert("لا توجد بيانات للتصدير");
+    const direction = document.querySelector("input[name='batch-direction']:checked")?.value || 'dltm-to-wgs';
+    const filename = (direction === 'wgs-to-dltm') ? "WGS84_to_DLTM.geojson" : "DLTM_to_WGS84.geojson";
     const geo = {
       type:"FeatureCollection",
       features: ok.map((r,i)=>({
@@ -1031,7 +1071,7 @@
     const u = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = u;
-    a.download = "DLTM_batch.geojson";
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(u);
   }
