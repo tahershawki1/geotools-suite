@@ -232,7 +232,8 @@ N E
     <div class="row" style="gap: 8px; align-items: center; background: #f5f5f5; padding: 8px; border-radius: 4px; font-size: 12px;">
       <label style="margin: 0;">🔍 طريقة الفصل بين المضلعات:</label>
       <select id="splitMethod" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-        <option value="auto">تلقائي (نقاط متطابقة أو فجوات)</option>
+        <option value="auto">تلقائي (الذكي - يفضل ID تلقائياً)</option>
+        <option value="id">حسب ID (استخدم هذا للبيانات مع أرقام ID)</option>
         <option value="duplicates">نقاط متطابقة فقط</option>
         <option value="gaps">فجوات كبيرة فقط (&gt;1000م)</option>
       </select>
@@ -343,16 +344,18 @@ N E
     const lines = String(text || '').split(/\r?\n/);
     const pts = [];
     const bad = [];
+    let lastId = null;
 
     for(let i=0;i<lines.length;i++){
       const nums = extractNumbers(lines[i]);
       if(nums.length === 0) continue;
 
-      let N, E;
+      let N, E, id = null;
       if(nums.length === 2){
         [N, E] = nums;
       } else if(nums.length >= 3){
-        // ignore id/extra columns => take last two as N,E
+        // يوجد عمود ID في البداية => id, N, E
+        id = nums[0];
         N = nums[nums.length - 2];
         E = nums[nums.length - 1];
       } else {
@@ -364,7 +367,8 @@ N E
         bad.push(i+1);
         continue;
       }
-      pts.push({ N, E });
+      pts.push({ N, E, id });
+      lastId = id;
     }
 
     return { pts, badLines: bad };
@@ -626,7 +630,14 @@ window.addEventListener('resize', fixMapSize);
       return splitByDuplicates(pts);
     } else if(method === 'gaps'){
       return splitByGaps(pts);
+    } else if(method === 'id'){
+      return splitByIdReset(pts);
     } else {
+      // تجربة الفصل حسب ID أولاً، وإذا لم يعطِ نتائج، استخدم الطريقة التلقائية
+      const idResult = splitByIdReset(pts);
+      if(idResult.length > 1){
+        return idResult;
+      }
       return splitByAuto(pts);
     }
   }
@@ -718,6 +729,40 @@ window.addEventListener('resize', fixMapSize);
         const hasGap = distance > gapThreshold && currentPolygon.length >= 2;
         
         if(isDuplicate || hasGap){
+          polygons.push(currentPolygon);
+          currentPolygon = [currentPt];
+        } else {
+          currentPolygon.push(currentPt);
+        }
+      }
+    }
+
+    if(currentPolygon.length >= 2){
+      polygons.push(currentPolygon);
+    }
+
+    return polygons.length > 0 ? polygons : [pts];
+  }
+
+  function splitByIdReset(pts){
+    // الفصل حسب عمود ID: عندما ينخفض ID من قيمة أعلى للقيمة 1، يكون هناك مضلع جديد
+    const polygons = [];
+    let currentPolygon = [];
+
+    for(let i = 0; i < pts.length; i++){
+      const currentPt = pts[i];
+      
+      if(currentPolygon.length === 0){
+        currentPolygon.push(currentPt);
+      } else {
+        const prevPt = currentPolygon[currentPolygon.length - 1];
+        
+        // التحقق من انخفاض ID (إشارة لبداية مضلع جديد)
+        const prevId = prevPt.id !== undefined ? prevPt.id : 1;
+        const currId = currentPt.id !== undefined ? currentPt.id : 1;
+        
+        // إذا كان ID أقل من السابق بكثير أو انخفض للـ 1 أو 2، فهو مضلع جديد
+        if(currId < prevId * 0.5 || (currId <= 2 && prevId > 5)){
           polygons.push(currentPolygon);
           currentPolygon = [currentPt];
         } else {
