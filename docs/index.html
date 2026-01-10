@@ -8,6 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
   <!-- Proj4js - Global for all tools -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     :root {
       --primary: #4f46e5;
@@ -190,67 +193,76 @@
       document.getElementById('loader').style.display = show ? 'flex' : 'none';
     }
 
-    function loadPage(pageName) {
+    // حفظ محتوى الداشبورد الأصلي عند أول تحميل
+    let DASHBOARD_HTML = "";
+    window.addEventListener("DOMContentLoaded", () => {
+      const contentDiv = document.getElementById('view-content');
+      DASHBOARD_HTML = contentDiv.innerHTML;
+    });
+
+    async function loadPage(pageName) {
+      const contentDiv = document.getElementById('view-content');
+
+      // الرئيسية: ارجع للداشبورد بدون reload
       if (!pageName) {
-        // Reload dashboard (resetting to manual HTML is safer than server call for speed)
-        location.reload(); // Or we could fetch it, but usually the dashboard is the base.
+        contentDiv.innerHTML = DASHBOARD_HTML;
+        document.getElementById('app-container').style.opacity = '1';
+        showLoader(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
       showLoader(true);
       document.getElementById('app-container').style.opacity = '0.5';
 
-      google.script.run
-        .withSuccessHandler(function(html) {
-          const contentDiv = document.getElementById('view-content');
-          contentDiv.innerHTML = html;
-          
-          // Enhanced script runner for SPA
-          const scripts = Array.from(contentDiv.querySelectorAll('script'));
-          let index = 0;
+      try {
+        // على GitHub Pages الملفات موجودة جنب index.html داخل /docs
+        const url = `./${pageName}.html`;
+        const res = await fetch(url, { cache: "no-cache" });
+        if (!res.ok) throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
 
-          function next() {
-            if (index >= scripts.length) {
-              document.getElementById('app-container').style.opacity = '1';
-              showLoader(false);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              return;
-            }
+        const html = await res.text();
+        contentDiv.innerHTML = html;
 
-            const oldScript = scripts[index++];
-            const newScript = document.createElement('script');
-            
-            if (oldScript.src) {
-              newScript.src = oldScript.src;
-              newScript.onload = next;
-              newScript.onerror = next;
-              document.head.appendChild(newScript);
-            } else {
-              try {
-                // Use indirect eval for global scope
-                (0, eval)(oldScript.textContent || oldScript.text);
-              } catch (e) {
-                console.error("Script error:", e);
-              }
-              next();
-            }
-            if (oldScript.parentNode) oldScript.parentNode.removeChild(oldScript);
+        // تشغيل سكربتات الصفحة بنفس أسلوبك الحالي (لكن بدون google.script.run)
+        const scripts = Array.from(contentDiv.querySelectorAll('script'));
+        let index = 0;
+
+        function next() {
+          if (index >= scripts.length) {
+            document.getElementById('app-container').style.opacity = '1';
+            showLoader(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
           }
 
-          next();
-        })
-        .withFailureHandler(function(err) {
-          alert('Error loading page: ' + err);
-          showLoader(false);
-          document.getElementById('app-container').style.opacity = '1';
-        })
-        .getPageContent(pageName);
-    }
+          const oldScript = scripts[index++];
+          const newScript = document.createElement('script');
 
-    // Handle initial state if needed (e.g. from URL parameters)
-    window.onload = function() {
-      // Logic for initial page if we want to support direct links (optional for now)
-    };
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+            newScript.onload = next;
+            newScript.onerror = next;
+            document.head.appendChild(newScript);
+          } else {
+            try {
+              (0, eval)(oldScript.textContent || oldScript.text);
+            } catch (e) {
+              console.error("Script error:", e);
+            }
+            next();
+          }
+
+          if (oldScript.parentNode) oldScript.parentNode.removeChild(oldScript);
+        }
+
+        next();
+      } catch (err) {
+        alert('Error loading page: ' + err.message);
+        showLoader(false);
+        document.getElementById('app-container').style.opacity = '1';
+      }
+    }
   </script>
 </body>
 </html>
