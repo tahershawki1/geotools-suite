@@ -303,7 +303,7 @@
 
       <div id="mapBox" style="margin-top:14px; display:none;">
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-          <button class="btn-nav-top" onclick="copyGoogleMapsLink()">Copy Google Maps Link</button>
+          <button class="btn-nav-top" onclick="openGoogleMapsLink()">🌍 Open in Google Maps</button>
           <button class="btn-nav-top" onclick="downloadSingleKml()">Save KML</button>
         </div>
         <div id="map" style="height:320px; border:1px solid var(--border); border-radius:16px; overflow:hidden;"></div>
@@ -1057,11 +1057,10 @@
     });
   }
 
-  window.copyGoogleMapsLink = async function(){
+  window.openGoogleMapsLink = function(){
     if(!_lastLatLon) return alert("لا توجد نقطة للعرض");
     const url = `https://www.google.com/maps?q=${_lastLatLon.lat},${_lastLatLon.lon}`;
-    const ok = await copyTextSmart(url);
-    alert(ok ? "تم نسخ الرابط ✅" : "تعذر النسخ ❌");
+    window.open(url, '_blank');
   }
 
   window.downloadSingleKml = function(){
