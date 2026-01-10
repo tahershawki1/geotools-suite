@@ -193,6 +193,7 @@ N E
       <button id="btnImport" type="button" class="secondary">استيراد CSV/TXT</button>
       <button id="btnClear" type="button" class="danger">مسح</button>
       <input id="fileInput" type="file" accept=".csv,.txt" />
+      <button id="btnSwap" type="button" class="secondary">عكس N/E</button>
     </div>
 
     <div class="hint">
@@ -365,6 +366,11 @@ N E
 
   // --- Leaflet map (planar / CRS.Simple) ---
   const map = L.map('map', { crs: L.CRS.Simple, minZoom: -10, zoomSnap: 0.25 });
+  const fixMapSize = () => map.invalidateSize(true);
+setTimeout(fixMapSize, 0);
+setTimeout(fixMapSize, 250);
+window.addEventListener('resize', fixMapSize);
+
 
   // force Leaflet to compute sizes after layout
   setTimeout(() => map.invalidateSize(), 0);
@@ -383,13 +389,10 @@ N E
   }
 
   function buildGrid(bounds, step){
-    const yMin = bounds.getSouth();
-    const yMax = bounds.getNorth();
-    const xMin = bounds.getWest();
-    const xMax = bounds.getEast();
+    const yMin = bounds.getSouth(), yMax = bounds.getNorth();
+    const xMin = bounds.getWest(),  xMax = bounds.getEast();
 
     const lines = [];
-
     for(let x = Math.floor(xMin/step)*step; x <= xMax; x += step){
       lines.push([[yMin, x],[yMax, x]]);
     }
@@ -397,7 +400,7 @@ N E
       lines.push([[y, xMin],[y, xMax]]);
     }
 
-    return L.polyline(lines, { weight: 1, opacity: 0.25 });
+    return L.polyline(lines, { weight: 1, opacity: 0.35 }); // كانت 0.25
   }
 
   function setGridToBounds(bounds){
