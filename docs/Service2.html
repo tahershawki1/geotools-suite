@@ -158,7 +158,42 @@
       min-height: 520px;
       border-radius: 12px;
       border: 1px solid var(--border);
-      background: #fff;
+      background: #ffffff;
+      width: 100%;
+    }
+
+    /* Leaflet customization */
+    #map .leaflet-container {
+      background: #ffffff !important;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .leaflet-control {
+      background: #fff !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+    }
+
+    .leaflet-control-zoom-in,
+    .leaflet-control-zoom-out {
+      background-color: #fff !important;
+      color: #333 !important;
+      border-bottom: 1px solid var(--border) !important;
+    }
+
+    .leaflet-control-zoom-in:hover,
+    .leaflet-control-zoom-out:hover {
+      background-color: #f0f0f0 !important;
+    }
+
+    .measure-label {
+      background: #fff !important;
+      border: 1px solid #e74c3c !important;
+      border-radius: 4px !important;
+      padding: 2px 6px !important;
+      font-size: 11px !important;
+      color: #e74c3c !important;
+      font-weight: bold !important;
     }
 
     input[type="file"]{ display:none; }
@@ -365,8 +400,60 @@ N E
   }
 
   // --- Leaflet map (planar / CRS.Simple) ---
-  const map = L.map('map', { crs: L.CRS.Simple, minZoom: -10, zoomSnap: 0.25 });
-  const fixMapSize = () => map.invalidateSize(true);
+  let map = null;
+  
+  function initializeMap(){
+    if(map) return;
+    
+    const mapEl = document.getElementById("map");
+    if(!mapEl) return;
+    
+    // تنظيف أي معرفات قديمة
+    if(mapEl._leaflet_id) {
+      try { delete mapEl._leaflet_id; } catch {}
+    }
+    
+    map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -10,
+      zoomSnap: 0.25,
+      zoomDelta: 0.25,
+      attributionControl: false,
+      zoomControl: true
+    });
+    
+    // إعادة حساب الحجم
+    setTimeout(() => {
+      try {
+        map.invalidateSize(true);
+      } catch (e) {
+        console.log('Error sizing map:', e);
+      }
+    }, 50);
+    
+    // مستمع resize
+    if(!window._service2MapResizeListener) {
+      window._service2MapResizeListener = true;
+      window.addEventListener('resize', () => {
+        if(map) {
+          try {
+            map.invalidateSize(false);
+          } catch (e) {
+            console.log('Error on resize:', e);
+          }
+        }
+      });
+    }
+  }
+  
+  initializeMap();
+  const fixMapSize = () => {
+    if(map) {
+      try {
+        map.invalidateSize(true);
+      } catch (e) {}
+    }
+  };
 setTimeout(fixMapSize, 0);
 setTimeout(fixMapSize, 250);
 window.addEventListener('resize', fixMapSize);
