@@ -175,6 +175,7 @@
   <div class="dltm-tabs">
     <div class="dltm-tab active" onclick="switchDltmTab(this, 'single')">تحويل فردي</div>
     <div class="dltm-tab" onclick="switchDltmTab(this, 'batch')">تحويل جماعي (CSV)</div>
+    <div class="dltm-tab" onclick="switchDltmTab(this, 'reverse')">WGS84 → DLTM</div>
   </div>
 
   <div class="content-dltm">
@@ -188,6 +189,25 @@
         <div class="input-group">
           <label>Northing (Y)</label>
           <input type="number" id="inp-n" placeholder="2768000.00">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+        <div class="input-group" style="flex:1; min-width:220px;">
+          <label>Output Format</label>
+          <select id="out-format" style="width:100%; padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+            <option value="dms">DMS (D°M'S")</option>
+            <option value="dd">Decimal Degrees</option>
+            <option value="ddm">DDM (D°MM.mmm')</option>
+          </select>
+        </div>
+        <div class="input-group" style="flex:1; min-width:220px;">
+          <label>Precision</label>
+          <select id="out-prec" style="width:100%; padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+            <option value="8">Decimal: 8</option>
+            <option value="6">Decimal: 6</option>
+            <option value="4">Decimal: 4</option>
+          </select>
         </div>
       </div>
       <button class="btn-calc" id="btn-convert-single" onclick="runSingleDltm()">تحويل الآن ✨</button>
@@ -255,10 +275,41 @@
 
         <div class="result-note" id="res-note"></div>
       </div>
+
+      <div id="mapBox" style="margin-top:14px; display:none;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+          <button class="btn-nav-top" onclick="copyGoogleMapsLink()">Copy Google Maps Link</button>
+          <button class="btn-nav-top" onclick="downloadSingleKml()">Save KML</button>
+        </div>
+        <div id="map" style="height:320px; border:1px solid var(--border); border-radius:16px; overflow:hidden;"></div>
+      </div>
     </div>
 
     <!-- Batch Conversion -->
     <div id="section-batch" class="tool-section">
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-weight:900; margin-bottom:8px;">لصق الإحداثيات (بدل رفع ملف)</label>
+        <textarea id="batchPaste" rows="8"
+          placeholder="مثال:
+489817.908,2768047.013
+489790.938,2768033.067
+أو بفواصل/مسافات/Tab"
+          style="width:100%; padding:12px; border-radius:14px; border:1px solid var(--border); font-family:monospace;"></textarea>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn-nav-top" onclick="runBatchFromPaste()">تحويل اللصق</button>
+          <button class="btn-nav-top" onclick="document.getElementById('batchPaste').value=''">مسح</button>
+
+          <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+            <label style="font-weight:900; color:var(--text-muted);">Export:</label>
+            <select id="batchExportType" style="padding:10px 12px; border-radius:12px; border:1px solid var(--border);">
+              <option value="csv">CSV</option>
+              <option value="kml">KML</option>
+              <option value="geojson">GeoJSON</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="batch-dropzone" onclick="document.getElementById('batchFile').click()">
         <span style="font-size: 40px;">📄</span>
         <h3 style="margin: 10px 0;">اضغط لرفع ملف CSV</h3>
@@ -269,7 +320,7 @@
       <div class="results-table-wrap" id="batchResultsWrap">
         <div style="padding: 15px; background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
           <strong id="batchCount">0 نقاط تم تحويلها</strong>
-          <button class="btn-nav-top" onclick="downloadBatchCsv()">تحميل CSV 💾</button>
+          <button class="btn-nav-top" onclick="downloadBatch()">تحميل 💾</button>
         </div>
         <div style="max-height: 400px; overflow-y: auto;">
           <table id="batchTable">
@@ -289,6 +340,51 @@
             <tbody></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- Reverse Conversion (WGS84 → DLTM) -->
+    <div id="section-reverse" class="tool-section">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Longitude</label>
+          <input type="number" id="inp-lon" placeholder="55.123456">
+        </div>
+        <div class="input-group">
+          <label>Latitude</label>
+          <input type="number" id="inp-lat" placeholder="25.123456">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn-calc" style="flex:1;" onclick="runReverseDltm()">تحويل الآن ✨</button>
+        <button class="btn-nav-top" onclick="showOnMapFromWgs()">عرض على الخريطة</button>
+      </div>
+
+      <div id="reverse-box" class="result-card">
+        <div class="result-head">
+          <div>
+            <div class="result-title">DLTM Output</div>
+            <div class="result-sub">TM (Dubai Local) – meters</div>
+          </div>
+          <div class="result-actions">
+            <button class="btn-mini" onclick="copyReverse('dltm')">نسخ DLTM</button>
+            <button class="btn-mini" onclick="copyReverse('wgs')">نسخ WGS84</button>
+          </div>
+        </div>
+
+        <div class="result-grid-2">
+          <div class="result-field">
+            <div class="field-label">Easting (DLTM)</div>
+            <div class="field-line"><span class="field-name">E:</span><span class="field-value" id="res-dltm-e">-</span></div>
+          </div>
+          <div class="result-field">
+            <div class="field-label">Northing (DLTM)</div>
+            <div class="field-line"><span class="field-name">N:</span><span class="field-value" id="res-dltm-n">-</span></div>
+          </div>
+        </div>
+
+        <div class="result-note" id="reverse-note"></div>
       </div>
     </div>
   </div>
@@ -500,6 +596,65 @@
     return `${deg}°${String(min).padStart(2, "0")}'${secStr}"`;
   }
 
+  function toDDM(value, isLon){
+    const dir = isLon ? (value >= 0 ? "E" : "W") : (value >= 0 ? "N" : "S");
+    const abs = Math.abs(value);
+    const deg = Math.floor(abs);
+    const minutes = (abs - deg) * 60;
+    return `${deg}°${minutes.toFixed(3).padStart(6,"0")}' ${dir}`;
+  }
+
+  function formatCoord(value, isLon){
+    const fmt = document.getElementById("out-format")?.value || "dms";
+    const prec = Number(document.getElementById("out-prec")?.value || 8);
+    if(fmt === "dd") return `${value.toFixed(prec)} ${isLon ? (value>=0?"E":"W") : (value>=0?"N":"S")}`;
+    if(fmt === "ddm") return toDDM(value, isLon);
+    return toDMS(value, isLon);
+  }
+
+  function validateAndMaybeSwap(E, N){
+    const E_ok = (E > 200000 && E < 900000);
+    const N_ok = (N > 2000000 && N < 4000000);
+    const swapLikely = (!E_ok && !N_ok) && (N > 200000 && N < 900000) && (E > 2000000 && E < 4000000);
+    if(swapLikely) return {E:N, N:E, swapped:true, warn:"يبدو أن East/North مقلوبين، تم التبديل تلقائيًا."};
+    const warn = (!E_ok || !N_ok) ? "تحذير: الإحداثيات خارج النطاق المتوقع. تأكد من النظام/القيم." : "";
+    return {E, N, swapped:false, warn};
+  }
+
+  function convertWGS84toDLTM(latDeg, lonDeg){
+    try{
+      const lat = Number(latDeg), lon = Number(lonDeg);
+      if(!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Invalid input");
+      const a = 6378137.0;
+      const invF = 298.257223563;
+      const f = 1/invF;
+      const b = a*(1-f);
+      const e2 = (a*a - b*b)/(a*a);
+      const ep2 = (a*a - b*b)/(b*b);
+      const k0 = 1.0;
+      const lon0 = degToRad(55 + 20/60);
+      const lat0 = 0.0;
+      const E0 = 500000.0;
+      const N0 = 0.0;
+      const phi = degToRad(lat);
+      const lam = degToRad(lon);
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
+      const tanPhi = Math.tan(phi);
+      const N = a/Math.sqrt(1 - e2*sinPhi*sinPhi);
+      const T = tanPhi*tanPhi;
+      const C = ep2*cosPhi*cosPhi;
+      const A = (lam - lon0)*cosPhi;
+      const M = calculateMeridionalArc(phi, a, e2);
+      const M0 = calculateMeridionalArc(lat0, a, e2);
+      const East = E0 + k0 * N * (A + (1 - T + C)*Math.pow(A,3)/6 + (5 - 18*T + T*T + 72*C - 58*ep2)*Math.pow(A,5)/120);
+      const North = N0 + k0 * ((M - M0) + N*tanPhi*(Math.pow(A,2)/2 + (5 - T + 9*C + 4*C*C)*Math.pow(A,4)/24 + (61 - 58*T + T*T + 600*C - 330*ep2)*Math.pow(A,6)/720));
+      return {success:true, easting:East, northing:North};
+    }catch(err){
+      return {success:false, error:String(err?.message||err)};
+    }
+  }
+
   // ----------------------------
   // Single Conversion
   // ----------------------------
@@ -513,16 +668,17 @@
     btn.innerText = "جاري التحويل...";
 
     // Local compute (no backend)
-    const res = convertDLTMtoWGS84(e, n);
+    const v = validateAndMaybeSwap(e, n);
+    const res = convertDLTMtoWGS84(v.E, v.N);
 
     btn.disabled = false;
     btn.innerText = "تحويل الآن ✨";
 
     if (!res.success) return alert("خطأ: " + res.error);
 
-    // Longitude/Latitude (DMS + Decimal)
-    document.getElementById("res-lon-dms").innerText = toDMS(res.longitude, true);
-    document.getElementById("res-lat-dms").innerText = toDMS(res.latitude, false);
+    // Longitude/Latitude (formatCoord changes based on selection)
+    document.getElementById("res-lon-dms").innerText = formatCoord(res.longitude, true);
+    document.getElementById("res-lat-dms").innerText = formatCoord(res.latitude, false);
 
     document.getElementById("res-lon-dd").innerText = res.longitude.toFixed(8);
     document.getElementById("res-lat-dd").innerText = res.latitude.toFixed(8);
@@ -532,7 +688,13 @@
     document.getElementById("res-utm-e").innerText = Number(res.utm.easting).toFixed(3);
     document.getElementById("res-utm-n").innerText = Number(res.utm.northing).toFixed(3);
 
+    if(v.warn){
+      const note = document.getElementById("res-note");
+      if(note){ note.style.display="block"; note.innerText = v.warn; }
+    }
+
     document.getElementById("res-box-single").style.display = "block";
+    showPointOnMap(res.latitude, res.longitude);
   };
 
   // ----------------------------
@@ -638,6 +800,168 @@
     a.download = "DLTM_Converted.csv";
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  window.runBatchFromPaste = function(){
+    const text = (document.getElementById("batchPaste").value || "").trim();
+    if(!text) return alert("الصق الإحداثيات أولاً");
+    const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const rows = [];
+    for(const line of lines){
+      const parts = line.split(/[,\t; ]+/).map(p=>p.trim()).filter(Boolean);
+      if(parts.length < 2) continue;
+      const east = parseFloat(parts[0]);
+      const north = parseFloat(parts[1]);
+      const pId = parts.length >= 3 ? parts[2] : "";
+      const code = parts.length >= 4 ? parts[3] : "";
+      if(Number.isFinite(east) && Number.isFinite(north)) rows.push([east, north, pId, code]);
+    }
+    if(!rows.length) return alert("لم يتم العثور على صفوف صالحة");
+    safeShowLoader(true);
+    const results = rows.map(([east, north, pId, code])=>{
+      const v = validateAndMaybeSwap(east, north);
+      const conv = convertDLTMtoWGS84(v.E, v.N);
+      if(!conv.success) return { pId, code, easting:east, northing:north, error: conv.error };
+      return {pId, code, easting:east, northing:north, latitude: conv.latitude, longitude: conv.longitude, utmE: conv.utm.easting, utmN: conv.utm.northing, utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),};
+    });
+    safeShowLoader(false);
+    batchData = results;
+    renderBatchResults(results);
+  };
+
+  window.downloadBatch = function(){
+    const t = document.getElementById("batchExportType")?.value || "csv";
+    if(t === "kml") return downloadBatchKml();
+    if(t === "geojson") return downloadBatchGeoJson();
+    return downloadBatchCsv();
+  };
+
+  function downloadBatchKml(){
+    const ok = batchData.filter(r=>!r.error);
+    if(!ok.length) return alert("لا توجد بيانات للتصدير");
+    const placemarks = ok.map((r,i)=>`
+  <Placemark>
+    <name>${(r.pId||("P"+(i+1)))}</name>
+    <description>${(r.code||"")}</description>
+    <Point><coordinates>${r.longitude},${r.latitude},0</coordinates></Point>
+  </Placemark>`).join("\n");
+    const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>${placemarks}
+</Document>
+</kml>`;
+    const blob = new Blob([kml], {type:"application/vnd.google-earth.kml+xml;charset=utf-8"});
+    const u = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = u;
+    a.download = "DLTM_batch.kml";
+    a.click();
+    URL.revokeObjectURL(u);
+  }
+
+  function downloadBatchGeoJson(){
+    const ok = batchData.filter(r=>!r.error);
+    if(!ok.length) return alert("لا توجد بيانات للتصدير");
+    const geo = {
+      type:"FeatureCollection",
+      features: ok.map((r,i)=>({
+        type:"Feature",
+        properties:{
+          point: r.pId || ("P"+(i+1)),
+          code: r.code || "",
+          e_dltm: r.easting,
+          n_dltm: r.northing,
+          utm_zone: r.utmZone,
+          utm_e: r.utmE,
+          utm_n: r.utmN,
+        },
+        geometry:{ type:"Point", coordinates:[r.longitude, r.latitude] }
+      }))
+    };
+    const blob = new Blob([JSON.stringify(geo,null,2)], {type:"application/geo+json;charset=utf-8"});
+    const u = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = u;
+    a.download = "DLTM_batch.geojson";
+    a.click();
+    URL.revokeObjectURL(u);
+  }
+
+  let _map, _marker, _lastLatLon = null;
+
+  function ensureMap(){
+    if(_map) return;
+    _map = L.map("map").setView([25.2, 55.3], 10);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(_map);
+  }
+
+  function showPointOnMap(lat, lon){
+    ensureMap();
+    _lastLatLon = {lat, lon};
+    const box = document.getElementById("mapBox");
+    box.style.display = "block";
+    _map.setView([lat, lon], 17);
+    if(_marker) _marker.remove();
+    _marker = L.marker([lat, lon]).addTo(_map);
+  }
+
+  window.copyGoogleMapsLink = async function(){
+    if(!_lastLatLon) return alert("لا توجد نقطة للعرض");
+    const url = `https://www.google.com/maps?q=${_lastLatLon.lat},${_lastLatLon.lon}`;
+    const ok = await copyTextSmart(url);
+    alert(ok ? "تم نسخ الرابط ✅" : "تعذر النسخ ❌");
+  }
+
+  window.downloadSingleKml = function(){
+    if(!_lastLatLon) return alert("لا توجد نقطة للتصدير");
+    const {lat, lon} = _lastLatLon;
+    const kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Placemark>
+    <name>DLTM Convert</name>
+    <Point><coordinates>${lon},${lat},0</coordinates></Point>
+  </Placemark>
+</kml>`;
+    const blob = new Blob([kml], {type:"application/vnd.google-earth.kml+xml;charset=utf-8"});
+    const u = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = u;
+    a.download = "point.kml";
+    a.click();
+    URL.revokeObjectURL(u);
+  }
+
+  window.runReverseDltm = function(){
+    const lon = parseFloat(document.getElementById("inp-lon").value);
+    const lat = parseFloat(document.getElementById("inp-lat").value);
+    if(isNaN(lat) || isNaN(lon)) return alert("أدخل Latitude/Longitude صحيحين");
+    const r = convertWGS84toDLTM(lat, lon);
+    if(!r.success) return alert("خطأ: " + r.error);
+    document.getElementById("res-dltm-e").innerText = r.easting.toFixed(3);
+    document.getElementById("res-dltm-n").innerText = r.northing.toFixed(3);
+    const note = document.getElementById("reverse-note");
+    if(note){
+      note.style.display="block";
+      note.innerText = "تم التحويل باستخدام باراميترات DLTM (lon0=55°20′, FE=500000, k0=1.0).";
+    }
+    document.getElementById("reverse-box").style.display = "block";
+  };
+
+  window.copyReverse = async function(mode){
+    const e = document.getElementById("res-dltm-e")?.innerText || "";
+    const n = document.getElementById("res-dltm-n")?.innerText || "";
+    const lon = document.getElementById("inp-lon")?.value || "";
+    const lat = document.getElementById("inp-lat")?.value || "";
+    const text = (mode==="dltm") ? `Easting: ${e}\nNorthing: ${n}` : `Longitude: ${lon}\nLatitude: ${lat}`;
+    const ok = await copyTextSmart(text);
+    alert(ok ? "تم النسخ ✅" : "تعذر النسخ ❌");
+  };
+
+  window.showOnMapFromWgs = function(){
+    const lon = parseFloat(document.getElementById("inp-lon").value);
+    const lat = parseFloat(document.getElementById("inp-lat").value);
+    if(isNaN(lat) || isNaN(lon)) return alert("أدخل Latitude/Longitude صحيحين");
+    showPointOnMap(lat, lon);
   };
 
   function escapeHtml(s) {
