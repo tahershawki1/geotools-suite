@@ -224,11 +224,9 @@ N E
 
     <div class="row">
       <button id="btnDraw" type="button">رسم وحساب</button>
-      <button id="btnClose" type="button" class="secondary">إغلاق المضلع</button>
       <button id="btnImport" type="button" class="secondary">استيراد CSV/TXT</button>
       <button id="btnClear" type="button" class="danger">مسح</button>
       <input id="fileInput" type="file" accept=".csv,.txt" />
-      <button id="btnSwap" type="button" class="secondary">عكس N/E</button>
     </div>
 
     <div class="hint">
@@ -286,7 +284,6 @@ N E
   const elResults = document.getElementById('areaResults');
 
   const btnDraw   = document.getElementById('btnDraw');
-  const btnClose  = document.getElementById('btnClose');
   const btnImport = document.getElementById('btnImport');
   const btnClear  = document.getElementById('btnClear');
   const fileInput = document.getElementById('fileInput');
@@ -366,6 +363,10 @@ N E
 
   function pointsEqual(a,b, eps=1e-9){
     return Math.abs(a.N - b.N) < eps && Math.abs(a.E - b.E) < eps;
+  }
+
+  function pointsEqual(p1, p2, tolerance){
+    return Math.abs(p1.N - p2.N) < tolerance && Math.abs(p1.E - p2.E) < tolerance;
   }
 
   function normalizeClosedDuplicate(pts){
@@ -521,84 +522,119 @@ window.addEventListener('resize', fixMapSize);
     hideMsg();
     clearDraw();
 
-    const pts = normalizeClosedDuplicate(ptsInput);
-
-    if(pts.length < 2){
+    // تقسيم النقاط إلى مضلعات متعددة
+    const polygons = splitPolygonsAtClosingPoint(ptsInput);
+    
+    if(polygons.length === 0 || ptsInput.length < 2){
       elResults.style.display = 'none';
       showMsg('أدخل نقطتين على الأقل للرسم.', 'warn');
       return;
     }
 
-    const latlngs = toLatLngs(pts);
-
-    // markers
+    // عرض كل مضلع بلون مختلف
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
     pointsLayer = L.layerGroup();
-    latlngs.forEach((ll, idx) => {
-      const m = L.circleMarker(ll, { radius: 6, weight: 2, fillOpacity: 0.85 });
-      m.bindTooltip(
-        `P${idx+1}<br/>N=${fmt(pts[idx].N,3)}<br/>E=${fmt(pts[idx].E,3)}`,
-        { sticky: true }
-      );
-      m.addTo(pointsLayer);
+    let allBounds = null;
+    let totalArea = 0;
+    let totalPerimeter = 0;
+    let resultHTML = '';
+
+    polygons.forEach((polyPts, polyIdx) => {
+      if(polyPts.length < 2) return;
+      
+      const latlngs = toLatLngs(polyPts);
+      const color = colors[polyIdx % colors.length];
+
+      // الماركرات
+      latlngs.forEach((ll, idx) => {
+        const m = L.circleMarker(ll, { radius: 6, weight: 2, fillOpacity: 0.85, color: color });
+        m.bindTooltip(
+          `P${idx+1}<br/>N=${fmt(polyPts[idx].N,3)}<br/>E=${fmt(polyPts[idx].E,3)}`,
+          { sticky: true }
+        );
+        m.addTo(pointsLayer);
+      });
+
+      // الخط المغلق
+      const closed = latlngs.slice();
+      closed.push(latlngs[0]);
+      L.polyline(closed, { weight: 3, opacity: 0.95, color: color }).addTo(pointsLayer);
+
+      // المضلع (مساحة)
+      if(polyPts.length >= 3){
+        L.polygon(latlngs, { weight: 2, fillOpacity: 0.20, color: color }).addTo(pointsLayer);
+      }
+
+      // حساب الإحصائيات
+      const stats = computeAreaPerimeter(polyPts);
+      totalArea += stats.area;
+      totalPerimeter += stats.perimeter;
+
+      resultHTML += `<div style="margin-bottom: 12px; padding: 12px; background: ${color}22; border-left: 3px solid ${color}; border-radius: 8px;">
+        <div style="font-weight: 800; margin-bottom: 6px; color: ${color};">القطعة ${polyIdx + 1}</div>
+        <div style="font-size: 12px;">النقاط: ${polyPts.length}</div>
+        <div style="font-size: 12px;">المساحة: ${fmt(stats.area, 3)} م²</div>
+        <div style="font-size: 12px;">المحيط: ${fmt(stats.perimeter, 3)} م</div>
+      </div>`;
+
+      // تحديث الحدود
+      if(!allBounds) allBounds = L.latLngBounds(latlngs);
+      else allBounds.extend(latlngs);
     });
+
     pointsLayer.addTo(map);
 
-    // closed polyline
-    const closed = latlngs.slice();
-    closed.push(latlngs[0]);
-    lineLayer = L.polyline(closed, { weight: 3, opacity: 0.95 }).addTo(map);
-
-    // polygon if >=3
-    if(pts.length >= 3){
-      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.20 }).addTo(map);
+    // عرض النتائج
+    if(allBounds){
+      map.fitBounds(allBounds.pad(0.2));
+      setGridToBounds(allBounds.pad(0.2));
     }
 
-    // Fit to points (this is the key fix: no fixed [-1000..1000])
-    const b = L.latLngBounds(latlngs);
-    map.fitBounds(b.pad(0.2));
-    setGridToBounds(b.pad(0.2));
+    // إظهار الإجمالي والتفاصيل
+    document.getElementById('res-count').innerText = String(ptsInput.length);
+    document.getElementById('res-area').innerText = fmt(totalArea, 3);
+    document.getElementById('res-perimeter').innerText = fmt(totalPerimeter, 3);
 
-    // Stats
-    const stats = computeAreaPerimeter(pts);
-
-    document.getElementById('res-count').innerText = String(pts.length);
-    document.getElementById('res-area').innerText = fmt(stats.area, 3);
-    document.getElementById('res-perimeter').innerText = fmt(stats.perimeter, 3);
+    // إضافة تفاصيل كل قطعة
+    const resultsContainer = document.getElementById('areaResults');
+    const detailsDiv = document.createElement('div');
+    detailsDiv.id = 'polygon-details';
+    detailsDiv.innerHTML = resultHTML;
+    resultsContainer.appendChild(detailsDiv);
 
     elResults.style.display = 'grid';
 
-    if(pts.length < 3){
+    if(polygons.length > 1){
+      showMsg(`تم التعرف على ${polygons.length} قطع. تم حساب المساحة والمحيط لكل قطعة.`, '');
+    } else if(ptsInput.length < 3){
       showMsg('تم الرسم. حساب المساحة يحتاج 3 نقاط على الأقل.', 'warn');
     } else {
       showMsg('تم الرسم والحساب بنجاح.', '');
     }
   }
 
-  function closePolygon(){
-    const { pts, badLines } = parsePoints(elInput.value);
-    if(badLines.length){
-      showMsg(`أسطر غير مفهومة: ${badLines.join(', ')}. صححها ثم أعد المحاولة.`, 'err');
-      return;
+  // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
+  function splitPolygonsAtClosingPoint(pts, tolerance = 0.0001){
+    const polygons = [];
+    let currentPolygon = [];
+
+    for(let i = 0; i < pts.length; i++){
+      currentPolygon.push(pts[i]);
+
+      // التحقق إذا كانت النقطة الحالية قريبة جداً من النقطة الأولى
+      if(i > 2 && pointsEqual(pts[i], currentPolygon[0], tolerance)){
+        // إغلاق المضلع الحالي (بدون إضافة النقطة الأخيرة لأنها نسخة من الأولى)
+        polygons.push(currentPolygon.slice(0, -1));
+        currentPolygon = [];
+      }
     }
-    if(pts.length < 3){
-      showMsg('لا يمكن إغلاق المضلع: تحتاج 3 نقاط على الأقل.', 'warn');
-      return;
+
+    // إضافة أي نقاط متبقية
+    if(currentPolygon.length >= 2){
+      polygons.push(currentPolygon);
     }
-    const alreadyClosed = (pts.length >= 2 && pointsEqual(pts[0], pts[pts.length-1]));
-    if(alreadyClosed){
-      showMsg('المضلع مغلق بالفعل (آخر نقطة = الأولى).', '');
-      return;
-    }
-    const first = pts[0];
-    let text = elInput.value;
-    if(text.trim().length === 0){
-      showMsg('لا يوجد إدخال لإغلاقه.', 'warn');
-      return;
-    }
-    if(!text.endsWith('\n')) text += '\n';
-    text += `${first.N}, ${first.E}\n`;
-    elInput.value = text;
-    showMsg('تمت إضافة أول نقطة في نهاية الإدخال لإغلاق المضلع.', '');
+
+    return polygons.length > 0 ? polygons : [pts];
   }
 
   function importFromFile(file){
@@ -636,8 +672,6 @@ window.addEventListener('resize', fixMapSize);
     }
     render(pts);
   });
-
-  btnClose.addEventListener('click', closePolygon);
 
   btnImport.addEventListener('click', () => {
     fileInput.value = '';
