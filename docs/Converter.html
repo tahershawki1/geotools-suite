@@ -155,6 +155,30 @@
 </div>
 
 <script>
+const API_BASE = "https://worker.geotools.workers.dev";
+
+async function apiCsvToSdr(content, format) {
+  const res = await fetch(`${API_BASE}/api/csv-to-sdr`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content, format })
+  });
+
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      const j = await res.json();
+      msg = j?.error || msg;
+    } catch {
+      const t = await res.text();
+      if (t) msg = t;
+    }
+    throw new Error(msg);
+  }
+
+  return await res.text();
+}
+
 (function() {
     let map = null;
     let pointsLayer = null;
@@ -353,11 +377,16 @@
           hideStatus();
         } else {
           drawPointsFromCsv(normalizeLines(content), format);
-          setStatus('Generating SDR...', 'loading');
-          google.script.run
-            .withSuccessHandler(s => { sdrResult = s; hideStatus(); })
-            .withFailureHandler(e => setStatus('SDR generation failed: ' + e.message, 'error'))
-            .processCSV(content, format);
+          setStatus("Generating SDR...", "loading");
+
+          apiCsvToSdr(content, format)
+            .then((sdr) => {
+              sdrResult = sdr;
+              hideStatus();
+            })
+            .catch((err) => {
+              setStatus("SDR generation failed: " + err.message, "error");
+            });
         }
         setTimeout(() => map.invalidateSize(), 100);
       };
