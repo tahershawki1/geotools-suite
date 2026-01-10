@@ -5,81 +5,184 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>حساب المساحات</title>
 
+  <!-- Local Leaflet (no Google, no external scripts) -->
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
 
   <style>
-    /* Light theme */
-    body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #111827; }
-    header { padding: 14px 18px; background: #ffffff; border-bottom: 1px solid rgba(0,0,0,.10); }
-    header h1 { margin: 0; font-size: 18px; font-weight: 800; }
-
-    .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 14px; padding: 14px; }
-    .card { background: #ffffff; border: 1px solid rgba(0,0,0,.10); border-radius: 12px; padding: 12px; }
-
-    .card h2 { margin: 0 0 10px; font-size: 15px; }
-    textarea {
-      width: 100%; min-height: 220px; resize: vertical;
-      background: #ffffff; color: #111827;
-      border: 1px solid rgba(0,0,0,.18); border-radius: 10px;
-      padding: 10px; line-height: 1.5;
+    :root{
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #374151;
+      --border: rgba(0,0,0,.12);
+      --soft: #f9fafb;
+      --primary: #2563eb;
+      --secondary: #475569;
+      --danger: #dc2626;
+      --warn: #f59e0b;
     }
 
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    *{ box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header{
+      padding: 14px 18px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    header h1{
+      margin:0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .wrap{
+      height: calc(100% - 56px);
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display:flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .card h2{
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    textarea{
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid rgba(0,0,0,.18);
+      border-radius: 10px;
+      padding: 10px;
+      line-height: 1.55;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+    }
+
+    .row{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
 
     button{
-      background: #2563eb; color: #fff; border: 0; border-radius: 10px;
-      padding: 9px 12px; font-weight: 800; cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-weight: 800;
+      cursor: pointer;
     }
-    button.secondary { background: #475569; }
-    button.danger { background: #dc2626; }
+    button.secondary{ background: var(--secondary); }
+    button.danger{ background: var(--danger); }
 
-    .hint { font-size: 12px; opacity: .95; margin-top: 8px; line-height: 1.6; }
-    .msg {
-      margin-top: 10px; font-size: 13px; padding: 10px; border-radius: 10px;
-      background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.25);
+    .hint{
+      margin-top: 10px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
     }
-    .msg.warn { background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.25); }
-    .msg.err  { background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.25); }
 
-    .results { margin-top: 10px; display: grid; gap: 8px; }
-    .result-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px; border-radius: 10px;
-      background: #f9fafb; border: 1px solid rgba(0,0,0,.10);
+    .msg{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(37,99,235,.25);
+      background: rgba(37,99,235,.08);
+      font-size: 13px;
+      display:none;
     }
-    .result-val { font-weight: 900; direction: ltr; }
+    .msg.warn{
+      border-color: rgba(245,158,11,.35);
+      background: rgba(245,158,11,.12);
+    }
+    .msg.err{
+      border-color: rgba(220,38,38,.35);
+      background: rgba(220,38,38,.12);
+    }
 
-    #map { height: calc(100vh - 86px); border-radius: 12px; border: 1px solid rgba(0,0,0,.10); background: #ffffff; }
-    input[type="file"] { display: none; }
+    .results{
+      margin-top: 10px;
+      display:none;
+      gap: 8px;
+    }
+    .result-item{
+      display:flex;
+      justify-content: space-between;
+      align-items:center;
+      padding: 10px;
+      border-radius: 10px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+    }
+    .result-val{
+      font-weight: 900;
+      direction:ltr;
+    }
 
-    .small { font-size: 12px; opacity: .95; }
-    .modebox { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: #f9fafb; border: 1px solid rgba(0,0,0,.10); }
-    .modebox label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; font-weight: 700; }
+    .map-card{
+      padding: 12px;
+    }
+    #map{
+      flex: 1;
+      min-height: 520px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+
+    input[type="file"]{ display:none; }
+
+    /* Leaflet tweaks for better visibility in light theme */
+    .leaflet-container { background: #ffffff; }
   </style>
 </head>
 
 <body>
 <header>
-  <h1>حساب المساحات (N, E)</h1>
+  <h1>حساب المساحات (N, E) — وضع مستوي (UTM/محلي)</h1>
 </header>
 
 <div class="wrap">
   <div class="card">
     <h2>إدخال النقاط</h2>
 
-    <textarea id="coordsInput" placeholder="أدخل نقاطك هنا، كل سطر نقطة واحدة.
-الصيغ المقبولة:
+    <textarea id="coordsInput" placeholder="كل سطر = نقطة واحدة
+
+أمثلة مقبولة:
 N, E
 N E
-Point, N, E
-Point N E
-يدعم , أو ; أو مسافات أو Tab"></textarea>
+1, N, E
+1 N E
 
-    <div class="modebox">
-      <span style="font-weight:900;">وضع الخريطة:</span>
-      <label><input type="radio" name="mapmode" value="planar" checked /> مستوي (UTM/محلي بالمتر)</label>
-      <label><input type="radio" name="mapmode" value="latlng" /> Lat/Lng (خريطة OSM)</label>
-    </div>
+يدعم: , أو ; أو مسافات أو Tab"></textarea>
 
     <div class="row">
       <button id="btnDraw" type="button">رسم وحساب</button>
@@ -90,19 +193,21 @@ Point N E
     </div>
 
     <div class="hint">
-      <div>• في وضع (UTM/محلي): النقاط تُفهم كـ N,E بوحدة المتر، وتظهر فوق شبكة.</div>
-      <div>• في وضع (Lat/Lng): النقاط تُفهم كـ Lat,Lng (أي N=Latitude و E=Longitude) وتظهر على خريطة OpenStreetMap.</div>
-      <div class="small">مثال (UTM):</div>
-      <div class="small" style="direction:ltr;">
-        1, 3000.00, 5000.00<br/>
-        2, 3050.00, 5080.00<br/>
-        3, 2980.00, 5120.00
+      <div>• هذه الصفحة تعمل دون إنترنت (لا Tiles). تظهر شبكة للمساعدة في القراءة.</div>
+      <div>• اعتبر الإحداثيات (N,E) بوحدة المتر أو أي وحدة خطية، فتكون المساحة (وحدة²).</div>
+      <div>• إذا كانت النقاط لا تظهر: غالبًا Leaflet لم يُحمّل (مسار vendor/leaflet) أو أن الصفحة ليست داخل docs.</div>
+      <div style="direction:ltr; margin-top:8px;">
+        مثال سريع للاختبار:<br/>
+        3000, 5000<br/>
+        3050, 5080<br/>
+        2980, 5120<br/>
+        2950, 5030
       </div>
     </div>
 
-    <div id="message" class="msg" style="display:none;"></div>
+    <div id="message" class="msg"></div>
 
-    <div class="results" id="areaResults" style="display:none;">
+    <div class="results" id="areaResults">
       <div class="result-item">
         <span>عدد النقاط:</span>
         <span class="result-val"><span id="res-count">0</span></span>
@@ -118,32 +223,34 @@ Point N E
     </div>
   </div>
 
-  <div class="card" style="padding:12px;">
+  <div class="card map-card">
     <div id="map"></div>
   </div>
 </div>
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script>
-  // التحقق من تحميل Leaflet
+(function(){
+  // --- Hard stop if Leaflet not loaded ---
   if (typeof L === 'undefined') {
-    alert('❌ خطأ: Leaflet لم يتم تحميله!\nتأكد من أن المسارات صحيحة:\nvendor/leaflet/leaflet.css\nvendor/leaflet/leaflet.js');
+    const el = document.getElementById('message');
+    el.className = 'msg err';
+    el.style.display = 'block';
+    el.textContent =
+      'Leaflet لم يتم تحميله. تأكد أن الملف Service2.html داخل مجلد docs وأن المسار docs/vendor/leaflet/leaflet.js موجود.';
+    return;
   }
 
-(function(){
-  // ---------- UI refs ----------
+  // --- UI elements ---
   const elInput   = document.getElementById('coordsInput');
   const elMsg     = document.getElementById('message');
   const elResults = document.getElementById('areaResults');
+
   const btnDraw   = document.getElementById('btnDraw');
   const btnClose  = document.getElementById('btnClose');
   const btnImport = document.getElementById('btnImport');
   const btnClear  = document.getElementById('btnClear');
   const fileInput = document.getElementById('fileInput');
-
-  const modeRadios = Array.from(document.querySelectorAll('input[name="mapmode"]'));
-
-  function getMode(){ return (modeRadios.find(r => r.checked)?.value) || 'planar'; }
 
   function showMsg(text, kind){
     elMsg.style.display = 'block';
@@ -158,9 +265,9 @@ Point N E
     return Number(num).toLocaleString(undefined, { maximumFractionDigits: maxFrac ?? 3 });
   }
 
-  // ---------- Parsing ----------
-  function normalizeLineToNumbers(line){
-    const cleaned = line.trim();
+  // --- Robust parsing (supports: N,E | N E | id,N,E | id N E | extra cols -> last two) ---
+  function extractNumbers(line){
+    const cleaned = (line || '').trim();
     if(!cleaned) return [];
 
     const tokens = cleaned
@@ -170,55 +277,58 @@ Point N E
       .filter(Boolean);
 
     const nums = [];
-    for(const t of tokens){
-      let x = t.trim();
-      if(!/[0-9]/.test(x)) continue;
+    for(const raw of tokens){
+      let t = raw.trim();
+      if(!/[0-9]/.test(t)) continue;
 
-      if(x.includes(',') && !x.includes('.')){
-        const cCount = (x.match(/,/g)||[]).length;
-        if(cCount === 1) x = x.replace(',', '.');
+      // allow decimal comma in isolated token, convert to dot
+      if(t.includes(',') && !t.includes('.')){
+        const c = (t.match(/,/g)||[]).length;
+        if(c === 1) t = t.replace(',', '.');
       }
 
-      x = x.replace(/[^\d.+-]/g, '');
-      const v = Number.parseFloat(x);
+      t = t.replace(/[^\d.+-]/g, '');
+      const v = Number.parseFloat(t);
       if(Number.isFinite(v)) nums.push(v);
     }
     return nums;
   }
 
   function parsePoints(text){
-    const lines = text.split(/\r?\n/);
+    const lines = String(text || '').split(/\r?\n/);
     const pts = [];
-    const badLines = [];
+    const bad = [];
 
     for(let i=0;i<lines.length;i++){
-      const nums = normalizeLineToNumbers(lines[i]);
+      const nums = extractNumbers(lines[i]);
       if(nums.length === 0) continue;
 
       let N, E;
       if(nums.length === 2){
         [N, E] = nums;
       } else if(nums.length >= 3){
+        // ignore id/extra columns => take last two as N,E
         N = nums[nums.length - 2];
         E = nums[nums.length - 1];
       } else {
-        badLines.push(i+1);
+        bad.push(i+1);
         continue;
       }
 
       if(!Number.isFinite(N) || !Number.isFinite(E)){
-        badLines.push(i+1);
+        bad.push(i+1);
         continue;
       }
       pts.push({ N, E });
     }
 
-    return { pts, badLines };
+    return { pts, badLines: bad };
   }
 
   function pointsEqual(a,b, eps=1e-9){
     return Math.abs(a.N - b.N) < eps && Math.abs(a.E - b.E) < eps;
   }
+
   function normalizeClosedDuplicate(pts){
     if(pts.length >= 2 && pointsEqual(pts[0], pts[pts.length - 1])){
       return pts.slice(0, -1);
@@ -226,167 +336,100 @@ Point N E
     return pts;
   }
 
-  // ---------- Geometry ----------
-  function computeAreaPerimeter(ptsNE){
-    const n = ptsNE.length;
-    if(n < 3) return { area: 0, perimeter: 0 };
+  // --- Math (Shoelace with x=E, y=N) ---
+  function computeAreaPerimeter(pts){
+    const n = pts.length;
+    if(n < 2) return { area: 0, perimeter: 0 };
 
     let sum = 0;
     let per = 0;
 
     for(let i=0;i<n;i++){
-      const a = ptsNE[i];
-      const b = ptsNE[(i+1) % n];
+      const a = pts[i];
+      const b = pts[(i+1) % n];
 
-      // Shoelace with x=E, y=N
-      sum += (a.E * b.N) - (b.E * a.N);
+      // perimeter always computed for closed loop intent
+      per += Math.hypot((b.E - a.E), (b.N - a.N));
 
-      const dE = b.E - a.E;
-      const dN = b.N - a.N;
-      per += Math.hypot(dE, dN);
+      if(n >= 3){
+        sum += (a.E * b.N) - (b.E * a.N);
+      }
     }
 
-    return { area: Math.abs(sum)/2, perimeter: per };
+    const area = (n >= 3) ? (Math.abs(sum) / 2) : 0;
+    return { area, perimeter: per };
   }
 
-  // ---------- Map management ----------
-  let map = null;
-  let baseLayer = null;
+  // --- Leaflet map (planar / CRS.Simple) ---
+  const map = L.map('map', { crs: L.CRS.Simple, minZoom: -10, zoomSnap: 0.25 });
+
+  // force Leaflet to compute sizes after layout
+  setTimeout(() => map.invalidateSize(), 0);
+  window.addEventListener('resize', () => map.invalidateSize());
+
+  // Layers
   let gridLayer = null;
-
-  let polyLayer = null;
-  let lineLayer = null;
   let pointsLayer = null;
+  let lineLayer = null;
+  let polyLayer = null;
 
-  function clearDrawLayers(){
-    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
-    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
+  function clearDraw(){
     if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
-  }
-
-  function removeOptionalLayers(){
-    if(baseLayer){ map.removeLayer(baseLayer); baseLayer = null; }
-    if(gridLayer){ map.removeLayer(gridLayer); gridLayer = null; }
+    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
+    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
   }
 
   function buildGrid(bounds, step){
-    // Draw simple grid in CRS.Simple (planar)
-    const lines = [];
     const yMin = bounds.getSouth();
     const yMax = bounds.getNorth();
     const xMin = bounds.getWest();
     const xMax = bounds.getEast();
 
-    // Vertical lines (x constant)
+    const lines = [];
+
     for(let x = Math.floor(xMin/step)*step; x <= xMax; x += step){
-      lines.push([[yMin, x], [yMax, x]]);
+      lines.push([[yMin, x],[yMax, x]]);
     }
-    // Horizontal lines (y constant)
     for(let y = Math.floor(yMin/step)*step; y <= yMax; y += step){
-      lines.push([[y, xMin], [y, xMax]]);
+      lines.push([[y, xMin],[y, xMax]]);
     }
 
     return L.polyline(lines, { weight: 1, opacity: 0.25 });
   }
 
-  function initMap(mode){
-    if(map){
-      map.off();
-      map.remove();
-      map = null;
-    }
-
-    if(mode === 'latlng'){
-      map = L.map('map', { crs: L.CRS.EPSG3857 });
-      
-      // إعادة حساب حجم الخريطة
-      setTimeout(() => {
-        map.invalidateSize(true);
-      }, 0);
-      
-      baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 20,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      map.setView([30, 31], 6); // default view (adjust later on fitBounds)
-      showMsg('وضع Lat/Lng مفعل. تأكد أن N=Latitude و E=Longitude.', '');
-    } else {
-      map = L.map('map', { crs: L.CRS.Simple, minZoom: -10 });
-
-      // إعادة حساب حجم الخريطة
-      setTimeout(() => {
-        map.invalidateSize(true);
-      }, 0);
-
-      // Start with a neutral small view; we will fit to points on draw
-      const b = L.latLngBounds([[0,0],[1000,1000]]);
-      map.fitBounds(b);
-
-      // Add a faint grid background so map is never "empty"
-      gridLayer = buildGrid(b, 100).addTo(map);
-
-      showMsg('وضع مستوي (UTM/محلي) مفعل. N,E بالمتر. سيتم عمل Zoom تلقائي على النقاط عند الرسم.', '');
-    }
-
-    clearDrawLayers();
-    
-    // إضافة مستمع resize لإعادة حساب الخريطة عند تغيير حجم النافذة
-    if (!window._mapResizeListener) {
-      window._mapResizeListener = true;
-      window.addEventListener('resize', () => {
-        if (map) {
-          try {
-            map.invalidateSize(false);
-          } catch (e) {
-            console.log('Error resizing map:', e);
-          }
-        }
-      });
-    }
-  }
-
-  // Initialize default
-  initMap(getMode());
-
-  modeRadios.forEach(r => r.addEventListener('change', () => initMap(getMode())));
-
-  function toLatLngs(pts){
-    // In planar mode: [N,E] maps to [y,x] => [lat,lng]
-    // In latlng mode: same mapping but now interpreted as actual lat/lng
-    return pts.map(p => [p.N, p.E]);
-  }
-
-  function fitToPoints(latlngs){
-    const b = L.latLngBounds(latlngs);
-    map.fitBounds(b.pad(0.2));
-    return b;
-  }
-
-  function ensureGridForBounds(bounds){
-    if(getMode() !== 'planar') return;
+  function setGridToBounds(bounds){
     if(gridLayer){ map.removeLayer(gridLayer); gridLayer = null; }
 
-    // Step based on extent
     const width  = Math.abs(bounds.getEast() - bounds.getWest());
     const height = Math.abs(bounds.getNorth() - bounds.getSouth());
     const span = Math.max(width, height);
 
-    // choose a reasonable step (rough)
     let step = 100;
     if(span > 50000) step = 5000;
     else if(span > 10000) step = 1000;
-    else if(span > 2000) step = 200;
-    else if(span > 500) step = 50;
+    else if(span > 2000)  step = 200;
+    else if(span > 500)   step = 50;
+    else if(span > 100)   step = 10;
 
     gridLayer = buildGrid(bounds, step).addTo(map);
   }
 
-  function render(ptsNE){
-    hideMsg();
-    clearDrawLayers();
+  // initial neutral view + grid
+  const initBounds = L.latLngBounds([[0,0],[1000,1000]]);
+  map.fitBounds(initBounds);
+  setGridToBounds(initBounds);
 
-    const pts = normalizeClosedDuplicate(ptsNE);
+  function toLatLngs(pts){
+    // CRS.Simple expects [y, x] -> [N, E]
+    return pts.map(p => [p.N, p.E]);
+  }
+
+  function render(ptsInput){
+    hideMsg();
+    clearDraw();
+
+    const pts = normalizeClosedDuplicate(ptsInput);
+
     if(pts.length < 2){
       elResults.style.display = 'none';
       showMsg('أدخل نقطتين على الأقل للرسم.', 'warn');
@@ -395,28 +438,34 @@ Point N E
 
     const latlngs = toLatLngs(pts);
 
-    // Markers
+    // markers
     pointsLayer = L.layerGroup();
     latlngs.forEach((ll, idx) => {
-      const m = L.circleMarker(ll, { radius: 6, weight: 2, opacity: 1, fillOpacity: 0.9 });
-      m.bindTooltip(`P${idx+1}<br/>N=${fmt(pts[idx].N,3)}<br/>E=${fmt(pts[idx].E,3)}`, { sticky: true });
+      const m = L.circleMarker(ll, { radius: 6, weight: 2, fillOpacity: 0.85 });
+      m.bindTooltip(
+        `P${idx+1}<br/>N=${fmt(pts[idx].N,3)}<br/>E=${fmt(pts[idx].E,3)}`,
+        { sticky: true }
+      );
       m.addTo(pointsLayer);
     });
     pointsLayer.addTo(map);
 
-    // Closed polyline for visual closure
+    // closed polyline
     const closed = latlngs.slice();
-    if(latlngs.length >= 2) closed.push(latlngs[0]);
+    closed.push(latlngs[0]);
     lineLayer = L.polyline(closed, { weight: 3, opacity: 0.95 }).addTo(map);
 
-    // Polygon if >=3
+    // polygon if >=3
     if(pts.length >= 3){
-      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.25 }).addTo(map);
+      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.20 }).addTo(map);
     }
 
-    const bounds = fitToPoints(latlngs);
-    ensureGridForBounds(bounds);
+    // Fit to points (this is the key fix: no fixed [-1000..1000])
+    const b = L.latLngBounds(latlngs);
+    map.fitBounds(b.pad(0.2));
+    setGridToBounds(b.pad(0.2));
 
+    // Stats
     const stats = computeAreaPerimeter(pts);
 
     document.getElementById('res-count').innerText = String(pts.length);
@@ -426,16 +475,16 @@ Point N E
     elResults.style.display = 'grid';
 
     if(pts.length < 3){
-      showMsg('تم الرسم، لكن حساب المساحة يحتاج 3 نقاط على الأقل.', 'warn');
+      showMsg('تم الرسم. حساب المساحة يحتاج 3 نقاط على الأقل.', 'warn');
     } else {
       showMsg('تم الرسم والحساب بنجاح.', '');
     }
   }
 
-  function closePolygonInTextarea(){
+  function closePolygon(){
     const { pts, badLines } = parsePoints(elInput.value);
     if(badLines.length){
-      showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. أصلحها أولًا ثم أعد المحاولة.`, 'err');
+      showMsg(`أسطر غير مفهومة: ${badLines.join(', ')}. صححها ثم أعد المحاولة.`, 'err');
       return;
     }
     if(pts.length < 3){
@@ -444,11 +493,15 @@ Point N E
     }
     const alreadyClosed = (pts.length >= 2 && pointsEqual(pts[0], pts[pts.length-1]));
     if(alreadyClosed){
-      showMsg('المضلع مغلق بالفعل (آخر نقطة مساوية للأولى).', '');
+      showMsg('المضلع مغلق بالفعل (آخر نقطة = الأولى).', '');
       return;
     }
     const first = pts[0];
     let text = elInput.value;
+    if(text.trim().length === 0){
+      showMsg('لا يوجد إدخال لإغلاقه.', 'warn');
+      return;
+    }
     if(!text.endsWith('\n')) text += '\n';
     text += `${first.N}, ${first.E}\n`;
     elInput.value = text;
@@ -466,7 +519,7 @@ Point N E
         return;
       }
       if(badLines.length){
-        showMsg(`تم استيراد نقاط، لكن توجد أسطر غير مفهومة في الملف: ${badLines.join(', ')}. (تم تجاهلها)`, 'warn');
+        showMsg(`تم الاستيراد مع تجاهل أسطر غير مفهومة: ${badLines.join(', ')}.`, 'warn');
       } else {
         showMsg('تم استيراد النقاط بنجاح.', '');
       }
@@ -477,24 +530,21 @@ Point N E
     reader.readAsText(file);
   }
 
-  // ---------- Events ----------
+  // --- Events ---
   btnDraw.addEventListener('click', () => {
     const { pts, badLines } = parsePoints(elInput.value);
     if(badLines.length){
-      showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. تأكد من أن كل سطر يحتوي N و E.`, 'err');
+      showMsg(`أسطر غير مفهومة: ${badLines.join(', ')}. كل سطر يجب أن يحتوي N و E.`, 'err');
       return;
     }
     if(!pts.length){
       showMsg('أدخل نقاطًا أولًا.', 'warn');
       return;
     }
-
-    // Important: This is the fix that ensures points are ALWAYS visible:
-    // we fit map to bounds of points, not a fixed [-1000..1000] box.
     render(pts);
   });
 
-  btnClose.addEventListener('click', closePolygonInTextarea);
+  btnClose.addEventListener('click', closePolygon);
 
   btnImport.addEventListener('click', () => {
     fileInput.value = '';
@@ -502,19 +552,19 @@ Point N E
   });
 
   fileInput.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if(file) importFromFile(file);
+    const f = e.target.files && e.target.files[0];
+    if(f) importFromFile(f);
   });
 
   btnClear.addEventListener('click', () => {
     elInput.value = '';
     elResults.style.display = 'none';
-    clearDrawLayers();
+    clearDraw();
     hideMsg();
     showMsg('تم مسح الإدخال والرسم.', '');
   });
 
-  showMsg('أدخل النقاط ثم اضغط "رسم وحساب". غيّر وضع الخريطة حسب نوع الإحداثيات لديك.', '');
+  showMsg('جاهز. أدخل نقاطك ثم اضغط "رسم وحساب".', '');
 })();
 </script>
 </body>
