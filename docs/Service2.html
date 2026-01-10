@@ -229,6 +229,15 @@ N E
       <input id="fileInput" type="file" accept=".csv,.txt" />
     </div>
 
+    <div class="row" style="gap: 8px; align-items: center; background: #f5f5f5; padding: 8px; border-radius: 4px; font-size: 12px;">
+      <label style="margin: 0;">🔍 طريقة الفصل بين المضلعات:</label>
+      <select id="splitMethod" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
+        <option value="auto">تلقائي (نقاط متطابقة أو فجوات)</option>
+        <option value="duplicates">نقاط متطابقة فقط</option>
+        <option value="gaps">فجوات كبيرة فقط (&gt;1000م)</option>
+      </select>
+    </div>
+
     <div class="hint">
       <div>• هذه الصفحة تعمل دون إنترنت (لا Tiles). تظهر شبكة للمساعدة في القراءة.</div>
       <div>• اعتبر الإحداثيات (N,E) بوحدة المتر أو أي وحدة خطية، فتكون المساحة (وحدة²).</div>
@@ -361,12 +370,8 @@ N E
     return { pts, badLines: bad };
   }
 
-  function pointsEqual(a,b, eps=1e-9){
-    return Math.abs(a.N - b.N) < eps && Math.abs(a.E - b.E) < eps;
-  }
-
-  function pointsEqual(p1, p2, tolerance){
-    return Math.abs(p1.N - p2.N) < tolerance && Math.abs(p1.E - p2.E) < tolerance;
+  function pointsEqual(a, b, tolerance = 1e-9){
+    return Math.abs(a.N - b.N) < tolerance && Math.abs(a.E - b.E) < tolerance;
   }
 
   function normalizeClosedDuplicate(pts){
@@ -614,22 +619,113 @@ window.addEventListener('resize', fixMapSize);
   }
 
   // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
-  function splitPolygonsAtClosingPoint(pts, tolerance = 0.0001){
+  function splitPolygonsAtClosingPoint(pts){
+    const method = document.getElementById('splitMethod')?.value || 'auto';
+    
+    if(method === 'duplicates'){
+      return splitByDuplicates(pts);
+    } else if(method === 'gaps'){
+      return splitByGaps(pts);
+    } else {
+      return splitByAuto(pts);
+    }
+  }
+
+  function splitByDuplicates(pts){
     const polygons = [];
     let currentPolygon = [];
 
     for(let i = 0; i < pts.length; i++){
-      currentPolygon.push(pts[i]);
-
-      // التحقق إذا كانت النقطة الحالية قريبة جداً من النقطة الأولى
-      if(i > 2 && pointsEqual(pts[i], currentPolygon[0], tolerance)){
-        // إغلاق المضلع الحالي (بدون إضافة النقطة الأخيرة لأنها نسخة من الأولى)
-        polygons.push(currentPolygon.slice(0, -1));
-        currentPolygon = [];
+      const currentPt = pts[i];
+      
+      if(currentPolygon.length === 0){
+        currentPolygon.push(currentPt);
+      } else {
+        const firstPt = currentPolygon[0];
+        
+        // البحث عن نقطة متطابقة مع البداية
+        if(pointsEqual(currentPt, firstPt, 0.01) && currentPolygon.length > 2){
+          // حفظ المضلع بدون النقطة الأخيرة (المكررة)
+          polygons.push(currentPolygon);
+          currentPolygon = [currentPt];
+        } else {
+          currentPolygon.push(currentPt);
+        }
       }
     }
 
-    // إضافة أي نقاط متبقية
+    if(currentPolygon.length >= 2){
+      polygons.push(currentPolygon);
+    }
+
+    return polygons.length > 0 ? polygons : [pts];
+  }
+
+  function splitByGaps(pts){
+    const polygons = [];
+    let currentPolygon = [];
+    const gapThreshold = 1000; // متر
+
+    for(let i = 0; i < pts.length; i++){
+      const currentPt = pts[i];
+      
+      if(currentPolygon.length === 0){
+        currentPolygon.push(currentPt);
+      } else {
+        const prevPt = currentPolygon[currentPolygon.length - 1];
+        const distN = Math.abs(currentPt.N - prevPt.N);
+        const distE = Math.abs(currentPt.E - prevPt.E);
+        const distance = Math.sqrt(distN * distN + distE * distE);
+        
+        // إذا كانت الفجوة كبيرة جداً
+        if(distance > gapThreshold && currentPolygon.length >= 2){
+          polygons.push(currentPolygon);
+          currentPolygon = [currentPt];
+        } else {
+          currentPolygon.push(currentPt);
+        }
+      }
+    }
+
+    if(currentPolygon.length >= 2){
+      polygons.push(currentPolygon);
+    }
+
+    return polygons.length > 0 ? polygons : [pts];
+  }
+
+  function splitByAuto(pts){
+    const polygons = [];
+    let currentPolygon = [];
+    const gapThreshold = 1000; // متر
+
+    for(let i = 0; i < pts.length; i++){
+      const currentPt = pts[i];
+      
+      if(currentPolygon.length === 0){
+        currentPolygon.push(currentPt);
+      } else {
+        const firstPt = currentPolygon[0];
+        const prevPt = currentPolygon[currentPolygon.length - 1];
+        
+        // الحالة 1: نقطة متطابقة مع البداية
+        const isDuplicate = pointsEqual(currentPt, firstPt, 0.01) && currentPolygon.length > 2;
+        
+        // الحالة 2: فجوة كبيرة
+        const distN = Math.abs(currentPt.N - prevPt.N);
+        const distE = Math.abs(currentPt.E - prevPt.E);
+        const distance = Math.sqrt(distN * distN + distE * distE);
+        const hasGap = distance > gapThreshold && currentPolygon.length >= 2;
+        
+        if(isDuplicate || hasGap){
+          polygons.push(currentPolygon);
+          currentPolygon = [currentPt];
+        } else {
+          currentPolygon.push(currentPt);
+        }
+      }
+    }
+
     if(currentPolygon.length >= 2){
       polygons.push(currentPolygon);
     }
