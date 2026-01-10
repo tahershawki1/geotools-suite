@@ -36,9 +36,110 @@
   .btn-calc { width:100%; padding: 14px; border:none; border-radius: 12px; background:var(--primary); color:#fff; font-weight:700; font-size:16px; cursor:pointer; }
   .btn-calc:hover { background: var(--primary-hover); }
 
-  #res-box-single { margin-top: 25px; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid var(--border); display: none; }
-  .res-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; }
-  .res-val { color: var(--primary); font-family: monospace; }
+  /* Results - New Layout */
+  .result-card{
+    margin-top: 25px;
+    background: #fff;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+
+  .result-head{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+
+  .result-title{ font-weight: 900; color: var(--text-main); }
+  .result-sub{ font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .result-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .btn-mini{
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text-main);
+    transition: all 0.2s;
+  }
+  .btn-mini:hover{
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .result-grid-2{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .result-grid-3{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .result-field{
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .field-label{
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .field-value{
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1.2;
+  }
+
+  .field-hint{
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .result-note{
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display:none;
+  }
+
+  @media (max-width: 720px){
+    .result-grid-2{ grid-template-columns: 1fr; }
+    .result-grid-3{ grid-template-columns: 1fr; }
+  }
 </style>
 
 <div class="container-dltm">
@@ -70,12 +171,52 @@
       </div>
       <button class="btn-calc" id="btn-convert-single" onclick="runSingleDltm()">تحويل الآن ✨</button>
 
-      <div id="res-box-single">
-         <div class="res-row"><span>Latitude (N):</span> <span class="res-val" id="res-lat">-</span></div>
-         <div class="res-row"><span>Longitude (E):</span> <span class="res-val" id="res-lon">-</span></div>
-         <div class="res-row"><span>UTM Zone:</span> <span class="res-val" id="res-utm-z">-</span></div>
-         <div class="res-row"><span>UTM E:</span> <span class="res-val" id="res-utm-e">-</span></div>
-         <div class="res-row"><span>UTM N:</span> <span class="res-val" id="res-utm-n">-</span></div>
+      <div id="res-box-single" class="result-card">
+        <div class="result-head">
+          <div>
+            <div class="result-title">Output coordinates</div>
+            <div class="result-sub">Format: D°M'S"</div>
+          </div>
+
+          <div class="result-actions">
+            <button class="btn-mini" onclick="copySingle('dms')">نسخ DMS</button>
+            <button class="btn-mini" onclick="copySingle('dd')">نسخ Decimal</button>
+            <button class="btn-mini" onclick="copySingle('utm')">نسخ UTM</button>
+          </div>
+        </div>
+
+        <div class="result-grid-2">
+          <div class="result-field">
+            <div class="field-label">Longitude</div>
+            <div class="field-value" id="res-lon">-</div>
+            <div class="field-hint" id="res-lon-dd">-</div>
+          </div>
+
+          <div class="result-field">
+            <div class="field-label">Latitude</div>
+            <div class="field-value" id="res-lat">-</div>
+            <div class="field-hint" id="res-lat-dd">-</div>
+          </div>
+        </div>
+
+        <div class="result-grid-3">
+          <div class="result-field">
+            <div class="field-label">UTM Zone</div>
+            <div class="field-value" id="res-utm-z">-</div>
+          </div>
+
+          <div class="result-field">
+            <div class="field-label">UTM Easting</div>
+            <div class="field-value" id="res-utm-e">-</div>
+          </div>
+
+          <div class="result-field">
+            <div class="field-label">UTM Northing</div>
+            <div class="field-value" id="res-utm-n">-</div>
+          </div>
+        </div>
+
+        <div class="result-note" id="res-note"></div>
       </div>
     </div>
 
@@ -343,11 +484,21 @@
     if (!res.success) return alert("خطأ: " + res.error);
 
     // DMS output like screenshot
-    document.getElementById("res-lon").innerText = toDMS(res.longitude, true);  // Longitude
-    document.getElementById("res-lat").innerText = toDMS(res.latitude, false);  // Latitude
+    document.getElementById("res-lon").innerText = toDMS(res.longitude, true);
+    document.getElementById("res-lat").innerText = toDMS(res.latitude, false);
+
+    // Decimal degrees (hint under each)
+    document.getElementById("res-lon-dd").innerText = `Decimal: ${res.longitude.toFixed(8)}`;
+    document.getElementById("res-lat-dd").innerText = `Decimal: ${res.latitude.toFixed(8)}`;
+
     document.getElementById("res-utm-z").innerText = String(res.utm.zone) + String(res.utm.hemisphere);
     document.getElementById("res-utm-e").innerText = Number(res.utm.easting).toFixed(3);
     document.getElementById("res-utm-n").innerText = Number(res.utm.northing).toFixed(3);
+
+    const note = document.getElementById("res-note");
+    note.style.display = "block";
+    note.innerText = "Tip: يمكنك نسخ الإحداثيات بصيغة DMS أو Decimal أو UTM من أزرار النسخ.";
+
     document.getElementById("res-box-single").style.display = "block";
   };
 
@@ -470,5 +621,27 @@
     if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
     return v;
   }
-})();
+
+  window.copySingle = async function(mode){
+    try{
+      const lonDms = document.getElementById("res-lon").innerText;
+      const latDms = document.getElementById("res-lat").innerText;
+      const lonDd  = document.getElementById("res-lon-dd").innerText.replace("Decimal: ","");
+      const latDd  = document.getElementById("res-lat-dd").innerText.replace("Decimal: ","");
+      const utmZ = document.getElementById("res-utm-z").innerText;
+      const utmE = document.getElementById("res-utm-e").innerText;
+      const utmN = document.getElementById("res-utm-n").innerText;
+
+      let text = "";
+      if(mode === "dms") text = `Lon: ${lonDms}\nLat: ${latDms}`;
+      else if(mode === "dd") text = `Lon: ${lonDd}\nLat: ${latDd}`;
+      else text = `UTM: ${utmZ}\nE: ${utmE}\nN: ${utmN}`;
+
+      await navigator.clipboard.writeText(text);
+      alert("تم النسخ ✅");
+    }catch(e){
+      alert("تعذر النسخ. جرّب من المتصفح السماح بالClipboard.");
+    }
+  }
+});
 </script>
