@@ -16,7 +16,7 @@
   .dltm-tabs { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; }
   .dltm-tab { padding: 15px 30px; cursor: pointer; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; }
   .dltm-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; }
-  
+
   .content-dltm { padding: 30px; }
   .tool-section { display: none; }
   .tool-section.active { display: block; }
@@ -27,12 +27,12 @@
 
   .batch-dropzone { border: 2px dashed var(--border); border-radius: 16px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc; }
   .batch-dropzone:hover { border-color: var(--primary); background: var(--primary-light); }
-  
+
   .results-table-wrap { margin-top: 30px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: none; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { background: #f1f5f9; padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
   td { padding: 12px; border-bottom: 1px solid var(--border); }
-  
+
   .btn-calc { width:100%; padding: 14px; border:none; border-radius: 12px; background:var(--primary); color:#fff; font-weight:700; font-size:16px; cursor:pointer; }
   .btn-calc:hover { background: var(--primary-hover); }
 
@@ -68,7 +68,7 @@
           <input type="number" id="inp-n" placeholder="2768000.00">
         </div>
       </div>
-      <button class="btn-calc" id="btn-convert-single" onclick="window.runSingleDltm()">تحويل الآن ✨</button>
+      <button class="btn-calc" id="btn-convert-single" onclick="runSingleDltm()">تحويل الآن ✨</button>
 
       <div id="res-box-single">
          <div class="res-row"><span>Latitude (N):</span> <span class="res-val" id="res-lat">-</span></div>
@@ -84,7 +84,7 @@
       <div class="batch-dropzone" onclick="document.getElementById('batchFile').click()">
         <span style="font-size: 40px;">📄</span>
         <h3 style="margin: 10px 0;">اضغط لرفع ملف CSV</h3>
-        <p style="font-size: 13px; color: var(--text-muted);">يجب أن يحتوي الملف على أعمدة (E, N)</p>
+        <p style="font-size: 13px; color: var(--text-muted);">يجب أن يحتوي الملف على أعمدة (E, N) ويمكن إضافة (PointID, Code) اختياريًا</p>
         <input type="file" id="batchFile" style="display: none;" accept=".csv,.txt" onchange="handleBatchFile(this)">
       </div>
 
@@ -97,10 +97,13 @@
           <table id="batchTable">
             <thead>
               <tr>
+                <th>Point</th>
+                <th>Code</th>
                 <th>E (DLTM)</th>
                 <th>N (DLTM)</th>
                 <th>Lat</th>
                 <th>Lon</th>
+                <th>UTM Zone</th>
                 <th>UTM E</th>
                 <th>UTM N</th>
               </tr>
@@ -114,184 +117,329 @@
 </div>
 
 <script>
-(function(){
+(function () {
+  // ----------------------------
+  // Minimal Loader Fallback
+  // (Index.html عندك فيه showLoader بالفعل)
+  // ----------------------------
+  function safeShowLoader(show) {
+    try {
+      if (typeof showLoader === "function") return showLoader(show);
+    } catch {}
+    // fallback: no-op
+  }
+
+  // ----------------------------
+  // Tabs
+  // ----------------------------
+  window.switchDltmTab = function (el, tab) {
+    document.querySelectorAll(".dltm-tab").forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".tool-section").forEach((s) => s.classList.remove("active"));
+    el.classList.add("active");
+    document.getElementById("section-" + tab).classList.add("active");
+  };
+
+  // ----------------------------
+  // Core Math (Ported from DLTM_Utils.gs)
+  // Parameters from your screenshot:
+  // - WGS84 ellipsoid
+  // - TM: lon0 = 55°20'00"E, k0=1.0, FE=500000, FN=0
+  // ----------------------------
+  function degToRad(deg) { return (deg * Math.PI) / 180; }
+  function radToDeg(rad) { return (rad * 180) / Math.PI; }
+
+  function calculateMeridionalArc(phi, a, e2) {
+    return (
+      a *
+      ((1 - e2 / 4 - (3 * e2 * e2) / 64 - (5 * Math.pow(e2, 3)) / 256) * phi -
+        ((3 * e2) / 8 + (3 * e2 * e2) / 32 + (45 * Math.pow(e2, 3)) / 1024) * Math.sin(2 * phi) +
+        ((15 * e2 * e2) / 256 + (45 * Math.pow(e2, 3)) / 1024) * Math.sin(4 * phi) -
+        ((35 * Math.pow(e2, 3)) / 3072) * Math.sin(6 * phi))
+    );
+  }
+
+  function latLonToUTM(latDeg, lonDeg) {
+    // WGS84
+    const a = 6378137.0;
+    const invF = 298.257223563;
+    const f = 1 / invF;
+    const b = a * (1 - f);
+
+    const e2 = (a * a - b * b) / (a * a);
+    const ep2 = (a * a - b * b) / (b * b);
+
+    const lat = degToRad(latDeg);
+    const lon = degToRad(lonDeg);
+
+    let zone = Math.floor((lonDeg + 180) / 6) + 1;
+    if (zone < 1) zone = 1;
+    if (zone > 60) zone = 60;
+
+    const hemisphere = latDeg >= 0 ? "N" : "S";
+    const lon0Deg = (zone - 1) * 6 - 180 + 3;
+    const lon0 = degToRad(lon0Deg);
+
+    const k0 = 0.9996;
+    const E0 = 500000.0;
+    const N0 = hemisphere === "S" ? 10000000.0 : 0.0;
+
+    const sinLat = Math.sin(lat);
+    const cosLat = Math.cos(lat);
+    const tanLat = Math.tan(lat);
+
+    const N = a / Math.sqrt(1 - e2 * sinLat * sinLat);
+    const T = tanLat * tanLat;
+    const C = ep2 * cosLat * cosLat;
+    const A = (lon - lon0) * cosLat;
+
+    const M = calculateMeridionalArc(lat, a, e2);
+
+    const easting =
+      E0 +
+      k0 *
+        N *
+        (A +
+          ((1 - T + C) * Math.pow(A, 3)) / 6 +
+          ((5 - 18 * T + T * T + 72 * C - 58 * ep2) * Math.pow(A, 5)) / 120);
+
+    const northing =
+      N0 +
+      k0 *
+        (M +
+          N *
+            tanLat *
+            (Math.pow(A, 2) / 2 +
+              ((5 - T + 9 * C + 4 * C * C) * Math.pow(A, 4)) / 24 +
+              ((61 - 58 * T + T * T + 600 * C - 330 * ep2) * Math.pow(A, 6)) / 720));
+
+    return { zone, hemisphere, easting, northing };
+  }
+
+  function convertDLTMtoWGS84(easting, northing) {
+    try {
+      const E = Number(easting);
+      const N = Number(northing);
+      if (!Number.isFinite(E) || !Number.isFinite(N)) throw new Error("Invalid input");
+
+      // WGS84
+      const a = 6378137.0;
+      const invF = 298.257223563;
+      const f = 1 / invF;
+      const b = a * (1 - f);
+
+      const e2 = (a * a - b * b) / (a * a);
+      const ep2 = (a * a - b * b) / (b * b);
+
+      // DLTM params
+      const k0 = 1.0;
+      const lon0 = degToRad(55 + 20 / 60); // 55°20'
+      const lat0 = 0.0;
+      const E0 = 500000.0;
+      const N0 = 0.0;
+
+      const dx = E - E0;
+      const dy = N - N0;
+
+      const M0 = calculateMeridionalArc(lat0, a, e2);
+      const M = M0 + dy / k0;
+
+      const mu =
+        M / (a * (1 - e2 / 4 - (3 * e2 * e2) / 64 - (5 * Math.pow(e2, 3)) / 256));
+
+      const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+
+      const phi1 =
+        mu +
+        ((3 * e1) / 2 - (27 * Math.pow(e1, 3)) / 32) * Math.sin(2 * mu) +
+        ((21 * e1 * e1) / 16 - (55 * Math.pow(e1, 4)) / 32) * Math.sin(4 * mu) +
+        ((151 * Math.pow(e1, 3)) / 96) * Math.sin(6 * mu) +
+        ((1097 * Math.pow(e1, 4)) / 512) * Math.sin(8 * mu);
+
+      const sin1 = Math.sin(phi1);
+      const cos1 = Math.cos(phi1);
+      const tan1 = Math.tan(phi1);
+
+      const T1 = tan1 * tan1;
+      const C1 = ep2 * cos1 * cos1;
+
+      const N1 = a / Math.sqrt(1 - e2 * sin1 * sin1);
+      const R1 = (a * (1 - e2)) / Math.pow(1 - e2 * sin1 * sin1, 1.5);
+
+      const D = dx / (N1 * k0);
+
+      const latRad =
+        phi1 -
+        ((N1 * tan1) / R1) *
+          ((D * D) / 2 -
+            ((5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * Math.pow(D, 4)) / 24 +
+            ((61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 3 * C1 * C1 - 252 * ep2) *
+              Math.pow(D, 6)) /
+              720);
+
+      const lonRad =
+        lon0 +
+        (D -
+          ((1 + 2 * T1 + C1) * Math.pow(D, 3)) / 6 +
+          ((5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * Math.pow(D, 5)) /
+            120) /
+          cos1;
+
+      const lat = radToDeg(latRad);
+      const lon = radToDeg(lonRad);
+      const utm = latLonToUTM(lat, lon);
+
+      return { success: true, latitude: lat, longitude: lon, utm };
+    } catch (err) {
+      return { success: false, error: String(err?.message || err) };
+    }
+  }
+
+  // ----------------------------
+  // Single Conversion
+  // ----------------------------
+  window.runSingleDltm = function () {
+    const e = parseFloat(document.getElementById("inp-e").value);
+    const n = parseFloat(document.getElementById("inp-n").value);
+    if (isNaN(e) || isNaN(n)) return alert("أدخل إحداثيات صحيحة");
+
+    const btn = document.getElementById("btn-convert-single");
+    btn.disabled = true;
+    btn.innerText = "جاري التحويل...";
+
+    // Local compute (no backend)
+    const res = convertDLTMtoWGS84(e, n);
+
+    btn.disabled = false;
+    btn.innerText = "تحويل الآن ✨";
+
+    if (!res.success) return alert("خطأ: " + res.error);
+
+    document.getElementById("res-lat").innerText = res.latitude.toFixed(8);
+    document.getElementById("res-lon").innerText = res.longitude.toFixed(8);
+    document.getElementById("res-utm-z").innerText = String(res.utm.zone) + String(res.utm.hemisphere);
+    document.getElementById("res-utm-e").innerText = Number(res.utm.easting).toFixed(3);
+    document.getElementById("res-utm-n").innerText = Number(res.utm.northing).toFixed(3);
+    document.getElementById("res-box-single").style.display = "block";
+  };
+
+  // ----------------------------
+  // Batch Conversion (CSV/TXT)
+  // Supports:
+  // [E, N] or [E, N, PointID, Code]
+  // ----------------------------
   let batchData = [];
 
-  window.switchDltmTab = function(el, tab) {
-    document.querySelectorAll('.dltm-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('section-' + tab).classList.add('active');
-  };
-
-  window.runSingleDltm = function() {
-    const e = parseFloat(document.getElementById('inp-e').value);
-    const n = parseFloat(document.getElementById('inp-n').value);
-    if(isNaN(e) || isNaN(n)) return alert('أدخل إحداثيات صحيحة');
-
-    const btn = document.getElementById('btn-convert-single');
-    btn.disabled = true; btn.innerText = 'جاري التحويل...';
-
-    google.script.run
-      .withSuccessHandler(res => {
-        btn.disabled = false; btn.innerText = 'تحويل الآن ✨';
-        if(res.success) {
-          document.getElementById('res-lat').innerText = res.latitude.toFixed(8);
-          document.getElementById('res-lon').innerText = res.longitude.toFixed(8);
-          document.getElementById('res-utm-z').innerText = res.utm.zone + res.utm.hemisphere;
-          document.getElementById('res-utm-e').innerText = res.utm.easting.toFixed(3);
-          document.getElementById('res-utm-n').innerText = res.utm.northing.toFixed(3);
-          document.getElementById('res-box-single').style.display = 'block';
-        } else alert('خطأ: ' + res.error);
-      })
-      .convertDLTMtoWGS84(e, n);
-  };
-
-  window.handleBatchFile = function(input) {
+  window.handleBatchFile = function (input) {
     const file = input.files[0];
-    if(!file) return;
-    
+    if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const content = e.target.result;
-      const lines = content.split(/\r?\n/).filter(l => l.trim());
+    reader.onload = function (ev) {
+      const content = String(ev.target.result || "");
+      const lines = content.split(/\r?\n/).filter((l) => l.trim());
       const rows = [];
-      
+
       lines.forEach((line, i) => {
-        if(i === 0 && /[a-zA-Z]/.test(line)) return; // Skip header
-        const parts = line.split(/[,\t;]+/).map(p => p.trim());
-        if(parts.length >= 2) {
-          const east = parseFloat(parts[0]);
-          const north = parseFloat(parts[1]);
-          if(!isNaN(east) && !isNaN(north)) rows.push([east, north]);
-        }
+        // skip header if it contains letters
+        if (i === 0 && /[a-zA-Z]/.test(line)) return;
+
+        const parts = line.split(/[,\t;]+/).map((p) => p.trim()).filter(Boolean);
+        if (parts.length < 2) return;
+
+        const east = parseFloat(parts[0]);
+        const north = parseFloat(parts[1]);
+        const pId = parts.length >= 3 ? parts[2] : "";
+        const code = parts.length >= 4 ? parts[3] : "";
+
+        if (!isNaN(east) && !isNaN(north)) rows.push([east, north, pId, code]);
       });
 
-      if(rows.length === 0) return alert('لم يتم العثور على بيانات صالحة');
-      
-      showLoader(true);
-      google.script.run
-        .withSuccessHandler(results => {
-          showLoader(false);
-          batchData = results;
-          renderBatchResults(results);
-        })
-        .convertDLTMtoWGS84Batch(rows);
+      if (!rows.length) return alert("لم يتم العثور على بيانات صالحة");
+
+      safeShowLoader(true);
+
+      // Local batch compute
+      const results = rows.map((r) => {
+        const [east, north, pId, code] = r;
+        const conv = convertDLTMtoWGS84(east, north);
+        if (!conv.success) return { pId, code, easting: east, northing: north, error: conv.error };
+        return {
+          pId,
+          code,
+          easting: east,
+          northing: north,
+          latitude: conv.latitude,
+          longitude: conv.longitude,
+          utmE: conv.utm.easting,
+          utmN: conv.utm.northing,
+          utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),
+        };
+      });
+
+      safeShowLoader(false);
+      batchData = results;
+      renderBatchResults(results);
     };
+
     reader.readAsText(file);
   };
 
   function renderBatchResults(results) {
-    const tbody = document.querySelector('#batchTable tbody');
-    tbody.innerHTML = '';
-    results.forEach(r => {
-      if(r.error) return;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.easting.toFixed(2)}</td><td>${r.northing.toFixed(2)}</td><td>${r.latitude.toFixed(7)}</td><td>${r.longitude.toFixed(7)}</td><td>${r.utmE.toFixed(2)}</td><td>${r.utmN.toFixed(2)}</td>`;
+    const tbody = document.querySelector("#batchTable tbody");
+    tbody.innerHTML = "";
+
+    results.forEach((r) => {
+      if (r.error) return;
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        `<td>${escapeHtml(r.pId || "")}</td>` +
+        `<td>${escapeHtml(r.code || "")}</td>` +
+        `<td>${Number(r.easting).toFixed(2)}</td>` +
+        `<td>${Number(r.northing).toFixed(2)}</td>` +
+        `<td>${Number(r.latitude).toFixed(7)}</td>` +
+        `<td>${Number(r.longitude).toFixed(7)}</td>` +
+        `<td>${escapeHtml(r.utmZone)}</td>` +
+        `<td>${Number(r.utmE).toFixed(2)}</td>` +
+        `<td>${Number(r.utmN).toFixed(2)}</td>`;
       tbody.appendChild(tr);
     });
-    document.getElementById('batchCount').innerText = results.filter(r => !r.error).length + ' نقاط تم تحويلها';
-    document.getElementById('batchResultsWrap').style.display = 'block';
+
+    const okCount = results.filter((r) => !r.error).length;
+    document.getElementById("batchCount").innerText = okCount + " نقاط تم تحويلها";
+    document.getElementById("batchResultsWrap").style.display = "block";
   }
 
-  window.downloadBatchCsv = function() {
-    if(!batchData.length) return;
-    let csv = 'E_DLTM,N_DLTM,Latitude,Longitude,UTM_E,UTM_N,UTM_Zone\n';
-    batchData.forEach(r => {
-      if(!r.error) csv += `${r.easting},${r.northing},${r.latitude},${r.longitude},${r.utmE},${r.utmN},${r.utmZone}\n`;
+  window.downloadBatchCsv = function () {
+    if (!batchData.length) return;
+
+    let csv = "PointID,Code,E_DLTM,N_DLTM,Latitude,Longitude,UTM_Zone,UTM_E,UTM_N\n";
+    batchData.forEach((r) => {
+      if (r.error) return;
+      csv += `${safeCsv(r.pId)},${safeCsv(r.code)},${r.easting},${r.northing},${r.latitude},${r.longitude},${r.utmZone},${r.utmE},${r.utmN}\n`;
     });
-    const blob = new Blob([csv], { type: 'text/csv' });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'DLTM_Converted.csv'; a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "DLTM_Converted.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   };
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function safeCsv(s) {
+    const v = String(s ?? "");
+    if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
+    return v;
+  }
 })();
-</script>
-
-
-<script>
-  // Defining globally to ensure access via onclick in SPA
-  window.runConversion = function() {
-    console.log("Starting conversion...");
-    const e = parseFloat(document.getElementById('inp-e').value);
-    const n = parseFloat(document.getElementById('inp-n').value);
-    const btn = document.getElementById('btn-convert');
-
-    if (isNaN(e) || isNaN(n)) {
-      alert('يرجى إدخال قيم صحيحة للإحداثيات');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerText = 'جاري التحويل...';
-
-    google.script.run
-      .withSuccessHandler(function(res) {
-        btn.disabled = false;
-        btn.innerText = 'تحويل الإحداثيات ✨';
-        
-        if (res.success) {
-          document.getElementById('val-lat').innerText = res.latitude.toFixed(8);
-          document.getElementById('val-lon').innerText = res.longitude.toFixed(8);
-
-          if (res.utm) {
-            document.getElementById('val-utm-zone').innerText =
-              String(res.utm.zone) + String(res.utm.hemisphere);
-            document.getElementById('val-utm-e').innerText =
-              Number(res.utm.easting).toFixed(3);
-            document.getElementById('val-utm-n').innerText =
-              Number(res.utm.northing).toFixed(3);
-          } else {
-            document.getElementById('val-utm-zone').innerText = '-';
-            document.getElementById('val-utm-e').innerText = '-';
-            document.getElementById('val-utm-n').innerText = '-';
-          }
-
-          document.getElementById('res-box').style.display = 'block';
-        } else {
-          alert('خطأ في الحساب: ' + res.error);
-        }
-      })
-      .withFailureHandler(function(err) {
-        btn.disabled = false;
-        btn.innerText = 'تحويل الإحداثيات ✨';
-        alert('فشل الاتصال بالخادم: ' + err.message);
-      })
-      .convertDLTMtoWGS84(e, n);
-  };
-
-  // Copy a single value by element id
-  window.copyValue = function(elementId) {
-    const el = document.getElementById(elementId);
-    const val = (el && el.innerText) ? el.innerText.trim() : '';
-    if (!val || val === '-') {
-      alert('لا توجد قيمة لنسخها');
-      return;
-    }
-    navigator.clipboard.writeText(val).then(() => alert('تم النسخ!'));
-  };
-
-  // Main copy button: user chooses which single coordinate to copy (no “copy all”)
-  window.copyRes = function() {
-    const choice = prompt(
-      'اختر ما تريد نسخه:\n1) Latitude\n2) Longitude\n3) UTM Zone\n4) UTM Easting\n5) UTM Northing',
-      '1'
-    );
-    const map = {
-      '1': 'val-lat',
-      '2': 'val-lon',
-      '3': 'val-utm-zone',
-      '4': 'val-utm-e',
-      '5': 'val-utm-n'
-    };
-    const id = map[String(choice).trim()];
-    if (!id) return;
-    window.copyValue(id);
-  };
-
-  window.openMaps = function() {
-    const lat = document.getElementById('val-lat').innerText;
-    const lon = document.getElementById('val-lon').innerText;
-    window.open('https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lon, '_blank');
-  };
 </script>
