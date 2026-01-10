@@ -69,6 +69,10 @@
       font-weight: 800;
     }
 
+    /* Disable lift-on-hover effect for cards on this page */
+    .card, .map-card { transition: none !important; }
+    .card:hover, .map-card:hover { transform: none !important; box-shadow: none !important; }
+
     textarea{
       width: 100%;
       min-height: 220px;
