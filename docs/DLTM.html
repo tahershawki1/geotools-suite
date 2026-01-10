@@ -177,13 +177,41 @@
     width: 100% !important;
     height: 320px !important;
     z-index: 1;
+    background: #ffffff !important;
   }
 
   .leaflet-container {
     font-family: 'Cairo', sans-serif;
-    background: #f0f0f0;
+    background: #ffffff !important;
     width: 100% !important;
     height: 100% !important;
+  }
+
+  /* تحسين الماركر والنقاط */
+  .leaflet-marker-icon {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .leaflet-marker-shadow {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  /* تحسين أدوات الخريطة */
+  .leaflet-control {
+    background: #fff !important;
+    border-radius: 8px;
+  }
+
+  .leaflet-control-zoom-in,
+  .leaflet-control-zoom-out {
+    background-color: #fff !important;
+    color: #333 !important;
+    border: 1px solid #ccc !important;
+  }
+
+  .leaflet-control-zoom-in:hover,
+  .leaflet-control-zoom-out:hover {
+    background-color: #f0f0f0 !important;
   }
 </style>
 
@@ -1048,7 +1076,21 @@
       _map.setView([lat, lon], 17);
 
       if (_marker) _map.removeLayer(_marker);
-      _marker = L.marker([lat, lon]).addTo(_map);
+      
+      // استخدام ماركر محسّن مع ألوان واضحة وأحمر
+      _marker = L.marker([lat, lon], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(_map).bindPopup(`<b style="color:#333;">النقطة</b><br/>Lat: ${lat.toFixed(6)}<br/>Lon: ${lon.toFixed(6)}`);
+      
+      // فتح البوب أب للماركر تلقائياً
+      _marker.openPopup();
 
       // الأهم: اجبار Leaflet يعيد حساب المقاسات
       setTimeout(() => {
