@@ -607,8 +607,7 @@ window.addEventListener('resize', fixMapSize);
 
       // حساب مركز المضلع لعرض البطاقة
       const centroid = computePolygonCentroid(polyPts);
-      const centroidLatLng = L.CRS.Simple.latLngToPoint(centroid, map.getZoom());
-      
+
       // إنشاء بطاقة HTML
       const cardHTML = `
         <div style="
@@ -631,9 +630,9 @@ window.addEventListener('resize', fixMapSize);
         </div>
       `;
       
-      // إضافة البطاقة على الخريطة
-      L.popup({ closeButton: false, autoClose: false })
-        .setLatLng(centroid)
+      // إضافة البطاقة على الخريطة كـ popup ثابت عند إحداثيات المركز
+      L.popup({ closeButton: false, autoClose: false, className: 'polygon-card-popup' })
+        .setLatLng([centroid.N, centroid.E])
         .setContent(cardHTML)
         .addTo(map);
 
