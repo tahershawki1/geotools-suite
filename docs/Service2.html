@@ -1,159 +1,445 @@
-<style>
-  .container-service2 {
-    max-width: 1000px;
-    width: 100%;
-    margin: 0 auto;
-    background: #ffffff;
-    border-radius: 24px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    box-shadow: var(--shadow-lg);
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-  .area-header { padding: 25px; border-bottom: 1px solid var(--border); background: #fff; display: flex; justify-content: space-between; align-items: center; }
-  .area-content { padding: 25px; display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
-  
-  .side-panel { display: flex; flex-direction: column; gap: 20px; }
-  .input-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-  .input-card h3 { font-size: 16px; margin-bottom: 15px; color: var(--text-main); }
-  
-  .coords-textarea { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--border); padding: 12px; font-family: monospace; font-size: 14px; resize: none; margin-bottom: 15px; }
-  
-  .btn-calc-area { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-  .btn-calc-area:hover { background: var(--primary-hover); }
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>حساب المساحات</title>
 
-  .results-card { background: var(--primary-light); border: 1px solid var(--primary); border-radius: 16px; padding: 20px; color: var(--primary-hover); }
-  .result-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; }
-  .result-val { font-size: 18px; }
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
 
-  #area-map { height: 500px; border-radius: 16px; border: 1px solid var(--border); background: #eee; }
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #0f172a; color: #e5e7eb; }
+    header { padding: 14px 18px; background: #111827; border-bottom: 1px solid rgba(255,255,255,.08); }
+    header h1 { margin: 0; font-size: 18px; font-weight: 700; }
+    .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 14px; padding: 14px; }
+    .card { background: #111827; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px; }
+    .card h2 { margin: 0 0 10px; font-size: 15px; }
+    textarea { width: 100%; min-height: 220px; resize: vertical; background: #0b1220; color: #e5e7eb; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 10px; line-height: 1.5; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    button {
+      background: #2563eb; color: white; border: 0; border-radius: 10px;
+      padding: 9px 12px; font-weight: 700; cursor: pointer;
+    }
+    button.secondary { background: #334155; }
+    button.danger { background: #ef4444; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .hint { font-size: 12px; opacity: .9; margin-top: 8px; line-height: 1.6; }
+    .msg { margin-top: 10px; font-size: 13px; padding: 10px; border-radius: 10px; background: rgba(37,99,235,.12); border: 1px solid rgba(37,99,235,.25); }
+    .msg.warn { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.25); }
+    .msg.err { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
+    .results { margin-top: 10px; display: grid; gap: 8px; }
+    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 10px; background: #0b1220; border: 1px solid rgba(255,255,255,.10); }
+    .result-val { font-weight: 800; direction: ltr; }
+    #map { height: calc(100vh - 86px); border-radius: 12px; border: 1px solid rgba(255,255,255,.08); }
+    input[type="file"] { display: none; }
+    .small { font-size: 12px; opacity: .9; }
+  </style>
+</head>
 
-  @media (max-width: 850px) {
-    .area-content { grid-template-columns: 1fr; }
-    #area-map { height: 350px; }
-  }
-</style>
+<body>
+<header>
+  <h1>حساب المساحات (N, E)</h1>
+</header>
 
-<div class="container-service2">
-  <div class="area-header">
-    <div style="text-align: right;">
-      <h2 style="font-size:20px; font-weight:900; color:var(--primary); margin:0;">📐 حساب المساحات</h2>
-      <p style="font-size:13px; color:var(--text-muted); margin:0;">احسب المساحة والمحيط من الإحداثيات</p>
+<div class="wrap">
+  <div class="card">
+    <h2>إدخال النقاط</h2>
+
+    <textarea id="coordsInput" placeholder="أدخل نقاطك هنا، كل سطر نقطة واحدة.
+الصيغ المقبولة:
+N, E
+N E
+Point, N, E
+Point N E
+يدعم , أو ; أو مسافات أو Tab"></textarea>
+
+    <div class="row">
+      <button id="btnDraw" type="button">رسم وحساب</button>
+      <button id="btnClose" type="button" class="secondary">إغلاق المضلع</button>
+      <button id="btnImport" type="button" class="secondary">استيراد CSV/TXT</button>
+      <button id="btnClear" type="button" class="danger">مسح</button>
+      <input id="fileInput" type="file" accept=".csv,.txt" />
     </div>
-    <button class="btn-nav-top" onclick="loadPage('')">🏠 الرئيسية</button>
+
+    <div class="hint">
+      <div>• المخرجات تعتمد على أن الإحداثيات بوحدة المتر (أو أي وحدة خطية)، وستكون المساحة بوحدة (الوحدة²).</div>
+      <div>• يمكنك كتابة رقم النقطة في أول السطر وسيتم تجاهله تلقائيًا.</div>
+      <div class="small">مثال:</div>
+      <div class="small" style="direction:ltr; opacity:.95;">
+        1, 3000.00, 5000.00<br/>
+        2, 3050.00, 5080.00<br/>
+        3, 2980.00, 5120.00
+      </div>
+    </div>
+
+    <div id="message" class="msg" style="display:none;"></div>
+
+    <div class="results" id="areaResults" style="display:none;">
+      <div class="result-item">
+        <span>عدد النقاط:</span>
+        <span class="result-val"><span id="res-count">0</span></span>
+      </div>
+      <div class="result-item">
+        <span>المساحة:</span>
+        <span class="result-val"><span id="res-area">0</span></span>
+      </div>
+      <div class="result-item">
+        <span>المحيط:</span>
+        <span class="result-val"><span id="res-perimeter">0</span></span>
+      </div>
+    </div>
   </div>
 
-  <div class="area-content">
-    <div class="side-panel">
-      <div class="input-card">
-        <h3>أدخل الإحداثيات (N, E)</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">أدخل كل نقطة في سطر (مثال: 2768400, 500200)</p>
-        <textarea id="coordsInput" class="coords-textarea" placeholder="2768400, 500200&#10;2768450, 500250&#10;2768400, 500300"></textarea>
-        <button class="btn-calc-area" onclick="window.calculateAreaFromInput()">احسب وارسِم 📐</button>
-      </div>
-
-      <div class="results-card" id="areaResults" style="display: none;">
-        <div class="result-item">
-          <span>المساحة:</span>
-          <span class="result-val"><span id="res-area">0</span> م²</span>
-        </div>
-        <div class="result-item">
-          <span>المحيط:</span>
-          <span class="result-val"><span id="res-perimeter">0</span> م</span>
-        </div>
-        <div class="result-item" style="font-size: 12px; border-top: 1px solid var(--primary); padding-top: 8px; margin-top: 8px;">
-          <span>عدد النقاط:</span>
-          <span id="res-points">0</span>
-        </div>
-      </div>
-    </div>
-
-    <div id="area-map"></div>
+  <div class="card" style="padding:12px;">
+    <div id="map"></div>
   </div>
 </div>
 
+<script src="vendor/leaflet/leaflet.js"></script>
 <script>
-(function() {
-  let areaMap = null;
-  let polyLayer = null;
-  let markersLayer = null;
+/**
+ * Service2.html (حساب المساحات)
+ * - يتوقع إدخال N,E (Northing, Easting)
+ * - لحساب المساحة نستخدم x=E و y=N (Shoelace)
+ */
 
-  function initAreaMap() {
-    if (areaMap) return;
-    areaMap = L.map('area-map', {
-      crs: L.CRS.Simple,
-      minZoom: -10,
-      zoomSnap: 0.25,
-      zoomControl: true,
-      attributionControl: false
-    });
-    polyLayer = L.layerGroup().addTo(areaMap);
-    markersLayer = L.layerGroup().addTo(areaMap);
+(function(){
+  // Map setup (Simple CRS for planar coordinates)
+  const map = L.map('map', { crs: L.CRS.Simple, minZoom: -10 });
+  const bounds = [[-1000, -1000],[1000, 1000]];
+  L.rectangle(bounds, { weight: 1 }).addTo(map);
+  map.fitBounds(bounds);
+
+  let polyLayer = null;
+  let lineLayer = null;
+  let pointsLayer = null;
+
+  const elInput = document.getElementById('coordsInput');
+  const elMsg = document.getElementById('message');
+  const elResults = document.getElementById('areaResults');
+
+  const btnDraw = document.getElementById('btnDraw');
+  const btnClose = document.getElementById('btnClose');
+  const btnImport = document.getElementById('btnImport');
+  const btnClear = document.getElementById('btnClear');
+  const fileInput = document.getElementById('fileInput');
+
+  function showMsg(text, kind){
+    elMsg.style.display = 'block';
+    elMsg.className = 'msg' + (kind ? (' ' + kind) : '');
+    elMsg.textContent = text;
+  }
+  function hideMsg(){
+    elMsg.style.display = 'none';
+    elMsg.textContent = '';
   }
 
-  window.calculateAreaFromInput = function() {
-    initAreaMap();
-    const text = document.getElementById('coordsInput').value;
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    const points = [];
+  function clearMapLayers(){
+    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
+    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
+    if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
+  }
 
-    lines.forEach(line => {
-      const parts = line.split(/[,\s\t]+/).map(p => parseFloat(p));
-      if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-        points.push([parts[0], parts[1]]); // [N, E]
+  function fmt(num, maxFrac){
+    return Number(num).toLocaleString(undefined, { maximumFractionDigits: maxFrac ?? 3 });
+  }
+
+  // -------------------------
+  // Robust parsing
+  // -------------------------
+  function normalizeLineToNumbers(line){
+    // Remove comments
+    const cleaned = line.trim();
+    if(!cleaned) return [];
+
+    // Replace ; with , then split by comma or whitespace/tabs
+    // Also handle lines like: "1, 3000.0, 5000.0" or "1 3000.0 5000.0"
+    const tokens = cleaned
+      .replace(/;/g, ',')
+      .replace(/\t/g, ' ')
+      .split(/[, ]+/)
+      .filter(Boolean);
+
+    // Convert tokens to numbers (support decimal comma like 123,45 by converting to 123.45 if safe)
+    const nums = [];
+    for(const t of tokens){
+      // Keep only tokens that look numeric (allow leading +/- and decimal)
+      // If token contains both comma and dot, leave as-is and attempt parseFloat after stripping non numeric ends.
+      let x = t.trim();
+
+      // If it's something like "P1" ignore.
+      // We only accept tokens that contain at least a digit.
+      if(!/[0-9]/.test(x)) continue;
+
+      // Handle decimal comma: "123,45" (but careful: we already split by comma)
+      // If user used decimal comma with spaces separator: "123,45 678,90"
+      // It would be split into "123,45" as a token (because we split by space as well),
+      // but earlier split includes commas; so token won't contain comma unless user had it without splitting.
+      // As a safe step: if token has exactly one comma and no dot, convert comma to dot.
+      if(x.includes(',') && !x.includes('.')){
+        const cCount = (x.match(/,/g)||[]).length;
+        if(cCount === 1) x = x.replace(',', '.');
       }
-    });
 
-    if (points.length < 3) {
-      alert('الرجاء إدخال 3 نقاط على الأقل لحساب المساحة.');
+      // Strip trailing non-numeric characters
+      x = x.replace(/[^\d.+-]/g, '');
+
+      const v = Number.parseFloat(x);
+      if(Number.isFinite(v)) nums.push(v);
+    }
+    return nums;
+  }
+
+  function parsePointsFromTextarea(text){
+    const lines = text.split(/\r?\n/);
+    const pts = [];
+    const badLines = [];
+
+    for(let i=0;i<lines.length;i++){
+      const ln = lines[i];
+      const nums = normalizeLineToNumbers(ln);
+
+      if(nums.length === 0) continue;
+
+      // Accept either:
+      // - [N, E]
+      // - [PointNo, N, E]
+      // - [something, something, N, E] (rare) -> take last two
+      let N, E;
+      if(nums.length === 2){
+        [N, E] = nums;
+      } else if(nums.length >= 3){
+        // take last two numbers as N,E (this safely ignores point numbers and extra columns)
+        N = nums[nums.length - 2];
+        E = nums[nums.length - 1];
+      } else {
+        badLines.push(i+1);
+        continue;
+      }
+
+      if(!Number.isFinite(N) || !Number.isFinite(E)){
+        badLines.push(i+1);
+        continue;
+      }
+
+      pts.push({ N, E });
+    }
+
+    return { pts, badLines };
+  }
+
+  function pointsEqual(a,b, eps=1e-9){
+    return Math.abs(a.N - b.N) < eps && Math.abs(a.E - b.E) < eps;
+  }
+
+  // If last point equals first point, remove the last one for consistent math/renders
+  function normalizeClosedDuplicate(pts){
+    if(pts.length >= 2 && pointsEqual(pts[0], pts[pts.length - 1])){
+      return pts.slice(0, -1);
+    }
+    return pts;
+  }
+
+  // -------------------------
+  // Geometry
+  // -------------------------
+  function computeAreaPerimeter(ptsNE){
+    // ptsNE: array of {N,E} with NO duplicated closing point
+    const n = ptsNE.length;
+    if(n < 3) return { area: 0, perimeter: 0 };
+
+    let sum = 0;
+    let per = 0;
+
+    for(let i=0;i<n;i++){
+      const a = ptsNE[i];
+      const b = ptsNE[(i+1) % n];
+
+      // Shoelace with x=E, y=N
+      sum += (a.E * b.N) - (b.E * a.N);
+
+      const dE = b.E - a.E;
+      const dN = b.N - a.N;
+      per += Math.hypot(dE, dN);
+    }
+
+    const area = Math.abs(sum) / 2;
+    return { area, perimeter: per };
+  }
+
+  function toLatLng(ptsNE){
+    // CRS.Simple uses [y, x] convention: [lat, lng] but in planar space
+    // We'll map N to y(lat) and E to x(lng)
+    return ptsNE.map(p => [p.N, p.E]);
+  }
+
+  function fitToPoints(latlngs){
+    if(!latlngs || latlngs.length === 0) return;
+    const b = L.latLngBounds(latlngs);
+    map.fitBounds(b.pad(0.2));
+  }
+
+  // -------------------------
+  // Actions
+  // -------------------------
+  function render(ptsNE){
+    clearMapLayers();
+    hideMsg();
+
+    const pts = normalizeClosedDuplicate(ptsNE);
+    if(pts.length < 2){
+      showMsg('أدخل نقطتين على الأقل للرسم.', 'warn');
+      elResults.style.display = 'none';
       return;
     }
 
-    drawPolygon(points);
-    const stats = computeStats(points);
-    
-    document.getElementById('res-area').innerText = stats.area.toLocaleString(undefined, {maximumFractionDigits: 2});
-    document.getElementById('res-perimeter').innerText = stats.perimeter.toLocaleString(undefined, {maximumFractionDigits: 2});
-    document.getElementById('res-points').innerText = points.length;
-    document.getElementById('areaResults').style.display = 'block';
-  };
+    const latlngs = toLatLng(pts);
 
-  function drawPolygon(points) {
-    polyLayer.clearLayers();
-    markersLayer.clearLayers();
-
-    const poly = L.polygon(points, { color: '#4f46e5', fillOpacity: 0.2 }).addTo(polyLayer);
-    
-    points.forEach((p, i) => {
-      L.circleMarker(p, { radius: 4, color: '#4f46e5', fillOpacity: 1 }).addTo(markersLayer)
-        .bindTooltip((i + 1).toString(), { permanent: true, direction: 'right' });
+    // points markers
+    pointsLayer = L.layerGroup();
+    latlngs.forEach((ll, idx) => {
+      const m = L.circleMarker(ll, { radius: 5, weight: 2 });
+      m.bindTooltip(`P${idx+1}<br/>N=${fmt(pts[idx].N,3)}<br/>E=${fmt(pts[idx].E,3)}`, { sticky: true });
+      m.addTo(pointsLayer);
     });
+    pointsLayer.addTo(map);
 
-    areaMap.fitBounds(poly.getBounds().pad(0.1));
-  }
-
-  // Surveyor's Formula (Shoelace)
-  function computeStats(pts) {
-    let area = 0;
-    let perimeter = 0;
-    for (let i = 0; i < pts.length; i++) {
-        let j = (i + 1) % pts.length;
-        area += pts[i][1] * pts[j][0];
-        area -= pts[j][1] * pts[i][0];
-        
-        let dx = pts[j][1] - pts[i][1];
-        let dy = pts[j][0] - pts[i][0];
-        perimeter += Math.sqrt(dx * dx + dy * dy);
+    // Polyline (explicitly closed visually)
+    const closedLatLngs = latlngs.slice();
+    if(latlngs.length >= 2){
+      closedLatLngs.push(latlngs[0]);
     }
-    area = Math.abs(area) / 2;
-    return { area, perimeter };
+    lineLayer = L.polyline(closedLatLngs, { weight: 3 }).addTo(map);
+
+    // Polygon only if >=3
+    if(pts.length >= 3){
+      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.2 }).addTo(map);
+    }
+
+    fitToPoints(latlngs);
+
+    // Stats
+    const stats = computeAreaPerimeter(pts);
+
+    document.getElementById('res-count').innerText = String(pts.length);
+    document.getElementById('res-area').innerText = fmt(stats.area, 3);
+    document.getElementById('res-perimeter').innerText = fmt(stats.perimeter, 3);
+
+    elResults.style.display = (pts.length >= 3) ? 'grid' : 'grid';
+
+    if(pts.length < 3){
+      showMsg('تم الرسم، لكن حساب المساحة يحتاج 3 نقاط على الأقل.', 'warn');
+    } else {
+      showMsg('تم الرسم والحساب بنجاح. إذا كانت النقاط لا تُظهر الشكل المتوقع، راجع ترتيب النقاط (يجب أن تكون متتابعة حول المضلع).', '');
+    }
   }
 
-  // Ensure map resizes correctly if container was hidden
-  setTimeout(() => { if(areaMap) areaMap.invalidateSize(); }, 200);
+  function closePolygonInTextarea(){
+    const { pts, badLines } = parsePointsFromTextarea(elInput.value);
+    if(badLines.length){
+      showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. أصلحها أولًا ثم أعد المحاولة.`, 'err');
+      return;
+    }
+
+    if(pts.length < 3){
+      showMsg('لا يمكن إغلاق المضلع: تحتاج 3 نقاط على الأقل.', 'warn');
+      return;
+    }
+
+    const norm = normalizeClosedDuplicate(pts);
+    // Check if already closed in textarea (i.e., last equals first)
+    const alreadyClosed = (pts.length >= 2 && pointsEqual(pts[0], pts[pts.length-1]));
+    if(alreadyClosed){
+      showMsg('المضلع مغلق بالفعل (آخر نقطة مساوية للأولى).', '');
+      return;
+    }
+
+    // Append first point as last line in same N, E format
+    const first = norm[0];
+    const line = `${first.N}, ${first.E}`;
+
+    // Ensure textarea ends with newline
+    let text = elInput.value;
+    if(text.trim().length === 0){
+      showMsg('لا يوجد إدخال لإغلاقه.', 'warn');
+      return;
+    }
+    if(!text.endsWith('\n')) text += '\n';
+    text += line + '\n';
+    elInput.value = text;
+
+    showMsg('تمت إضافة أول نقطة في نهاية الإدخال لإغلاق المضلع.', '');
+  }
+
+  function importFromFile(file){
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = String(reader.result || '');
+      const { pts, badLines } = parsePointsFromTextarea(content);
+
+      if(!pts.length){
+        showMsg('لم يتم العثور على نقاط صالحة داخل الملف.', 'err');
+        return;
+      }
+      if(badLines.length){
+        showMsg(`تم استيراد نقاط، لكن توجد أسطر غير مفهومة في الملف: ${badLines.join(', ')}. (تم تجاهلها)`, 'warn');
+      } else {
+        showMsg('تم استيراد النقاط بنجاح.', '');
+      }
+
+      // Write normalized points into textarea as "N, E"
+      const lines = pts.map(p => `${p.N}, ${p.E}`);
+      elInput.value = lines.join('\n') + '\n';
+    };
+    reader.onerror = () => showMsg('تعذر قراءة الملف.', 'err');
+    reader.readAsText(file);
+  }
+
+  // -------------------------
+  // Events
+  // -------------------------
+  btnDraw.addEventListener('click', () => {
+    const { pts, badLines } = parsePointsFromTextarea(elInput.value);
+    if(badLines.length){
+      showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. تأكد من أن كل سطر يحتوي N و E.`, 'err');
+      return;
+    }
+    if(pts.length === 0){
+      showMsg('أدخل نقاطًا أولًا.', 'warn');
+      return;
+    }
+
+    // Normalize closing duplicate for consistent calc/draw
+    const norm = normalizeClosedDuplicate(pts);
+    render(norm);
+  });
+
+  btnClose.addEventListener('click', () => {
+    closePolygonInTextarea();
+  });
+
+  btnImport.addEventListener('click', () => {
+    fileInput.value = '';
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    importFromFile(file);
+  });
+
+  btnClear.addEventListener('click', () => {
+    elInput.value = '';
+    elResults.style.display = 'none';
+    clearMapLayers();
+    hideMsg();
+    showMsg('تم مسح الإدخال والخريطة.', '');
+  });
+
+  // Initial message
+  showMsg('أدخل النقاط ثم اضغط "رسم وحساب". يمكنك استيراد CSV/TXT أو استخدام زر إغلاق المضلع.', '');
 })();
 </script>
-
-
+</body>
+</html>
