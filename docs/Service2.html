@@ -542,6 +542,17 @@ window.addEventListener('resize', fixMapSize);
     return pts.map(p => [p.N, p.E]);
   }
 
+  function computePolygonCentroid(pts){
+    // حساب مركز المضلع الهندسي
+    let cx = 0, cy = 0;
+    const n = pts.length;
+    for(let i = 0; i < n; i++){
+      cx += pts[i].N;
+      cy += pts[i].E;
+    }
+    return { N: cx / n, E: cy / n };
+  }
+
   function render(ptsInput){
     hideMsg();
     clearDraw();
@@ -593,6 +604,38 @@ window.addEventListener('resize', fixMapSize);
       const stats = computeAreaPerimeter(polyPts);
       totalArea += stats.area;
       totalPerimeter += stats.perimeter;
+
+      // حساب مركز المضلع لعرض البطاقة
+      const centroid = computePolygonCentroid(polyPts);
+      const centroidLatLng = L.CRS.Simple.latLngToPoint(centroid, map.getZoom());
+      
+      // إنشاء بطاقة HTML
+      const cardHTML = `
+        <div style="
+          background: ${color}dd;
+          border: 2px solid ${color};
+          border-radius: 8px;
+          padding: 10px;
+          min-width: 150px;
+          font-size: 12px;
+          color: white;
+          font-weight: bold;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          text-align: center;
+          font-family: monospace;
+        ">
+          <div style="font-size: 13px; margin-bottom: 6px; text-decoration: underline;">Polygon ${polyIdx + 1}</div>
+          <div style="font-size: 11px; margin: 3px 0;">Points: ${polyPts.length}</div>
+          <div style="font-size: 11px; margin: 3px 0;">Area: ${fmt(stats.area, 2)} m²</div>
+          <div style="font-size: 11px; margin: 3px 0;">Perimeter: ${fmt(stats.perimeter, 2)} m</div>
+        </div>
+      `;
+      
+      // إضافة البطاقة على الخريطة
+      L.popup({ closeButton: false, autoClose: false })
+        .setLatLng(centroid)
+        .setContent(cardHTML)
+        .addTo(map);
 
       resultHTML += `<div style="margin-bottom: 12px; padding: 12px; background: ${color}22; border-left: 3px solid ${color}; border-radius: 8px;">
         <div style="font-weight: 800; margin-bottom: 6px; color: ${color};">Polygon ${polyIdx + 1}</div>
