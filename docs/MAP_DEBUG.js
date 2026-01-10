@@ -39,3 +39,13 @@ console.log("\n=== للبدء بالاختبار ===");
 console.log("1. أدخل إحداثيات وقم بالتحويل");
 console.log("2. تحقق من ظهور الخريطة");
 console.log("3. اضغط على صف من الجدول الجماعي لعرض النقطة");
+const btnSwap = document.getElementById('btnSwap');
+btnSwap.addEventListener('click', () => {
+  const { pts, badLines } = parsePoints(elInput.value);
+  if (badLines.length || !pts.length) return;
+
+  // swap
+  const swapped = pts.map(p => ({ N: p.E, E: p.N }));
+  elInput.value = swapped.map(p => `${p.N}, ${p.E}`).join('\n') + '\n';
+  showMsg('تم عكس N/E. اضغط "رسم وحساب" مرة أخرى.', '');
+});
