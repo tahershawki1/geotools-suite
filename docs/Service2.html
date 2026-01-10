@@ -8,31 +8,53 @@
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
 
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #0f172a; color: #e5e7eb; }
-    header { padding: 14px 18px; background: #111827; border-bottom: 1px solid rgba(255,255,255,.08); }
-    header h1 { margin: 0; font-size: 18px; font-weight: 700; }
+    /* Light theme */
+    body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #111827; }
+    header { padding: 14px 18px; background: #ffffff; border-bottom: 1px solid rgba(0,0,0,.10); }
+    header h1 { margin: 0; font-size: 18px; font-weight: 800; }
+
     .wrap { display: grid; grid-template-columns: 420px 1fr; gap: 14px; padding: 14px; }
-    .card { background: #111827; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px; }
+    .card { background: #ffffff; border: 1px solid rgba(0,0,0,.10); border-radius: 12px; padding: 12px; }
+
     .card h2 { margin: 0 0 10px; font-size: 15px; }
-    textarea { width: 100%; min-height: 220px; resize: vertical; background: #0b1220; color: #e5e7eb; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; padding: 10px; line-height: 1.5; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    button {
-      background: #2563eb; color: white; border: 0; border-radius: 10px;
-      padding: 9px 12px; font-weight: 700; cursor: pointer;
+    textarea {
+      width: 100%; min-height: 220px; resize: vertical;
+      background: #ffffff; color: #111827;
+      border: 1px solid rgba(0,0,0,.18); border-radius: 10px;
+      padding: 10px; line-height: 1.5;
     }
-    button.secondary { background: #334155; }
-    button.danger { background: #ef4444; }
-    button:disabled { opacity: .6; cursor: not-allowed; }
-    .hint { font-size: 12px; opacity: .9; margin-top: 8px; line-height: 1.6; }
-    .msg { margin-top: 10px; font-size: 13px; padding: 10px; border-radius: 10px; background: rgba(37,99,235,.12); border: 1px solid rgba(37,99,235,.25); }
-    .msg.warn { background: rgba(245,158,11,.12); border-color: rgba(245,158,11,.25); }
-    .msg.err { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.25); }
+
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+    button{
+      background: #2563eb; color: #fff; border: 0; border-radius: 10px;
+      padding: 9px 12px; font-weight: 800; cursor: pointer;
+    }
+    button.secondary { background: #475569; }
+    button.danger { background: #dc2626; }
+
+    .hint { font-size: 12px; opacity: .95; margin-top: 8px; line-height: 1.6; }
+    .msg {
+      margin-top: 10px; font-size: 13px; padding: 10px; border-radius: 10px;
+      background: rgba(37,99,235,.08); border: 1px solid rgba(37,99,235,.25);
+    }
+    .msg.warn { background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.25); }
+    .msg.err  { background: rgba(239,68,68,.10); border-color: rgba(239,68,68,.25); }
+
     .results { margin-top: 10px; display: grid; gap: 8px; }
-    .result-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 10px; background: #0b1220; border: 1px solid rgba(255,255,255,.10); }
-    .result-val { font-weight: 800; direction: ltr; }
-    #map { height: calc(100vh - 86px); border-radius: 12px; border: 1px solid rgba(255,255,255,.08); }
+    .result-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px; border-radius: 10px;
+      background: #f9fafb; border: 1px solid rgba(0,0,0,.10);
+    }
+    .result-val { font-weight: 900; direction: ltr; }
+
+    #map { height: calc(100vh - 86px); border-radius: 12px; border: 1px solid rgba(0,0,0,.10); background: #ffffff; }
     input[type="file"] { display: none; }
-    .small { font-size: 12px; opacity: .9; }
+
+    .small { font-size: 12px; opacity: .95; }
+    .modebox { display: flex; gap: 10px; align-items: center; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: #f9fafb; border: 1px solid rgba(0,0,0,.10); }
+    .modebox label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; font-weight: 700; }
   </style>
 </head>
 
@@ -53,6 +75,12 @@ Point, N, E
 Point N E
 يدعم , أو ; أو مسافات أو Tab"></textarea>
 
+    <div class="modebox">
+      <span style="font-weight:900;">وضع الخريطة:</span>
+      <label><input type="radio" name="mapmode" value="planar" checked /> مستوي (UTM/محلي بالمتر)</label>
+      <label><input type="radio" name="mapmode" value="latlng" /> Lat/Lng (خريطة OSM)</label>
+    </div>
+
     <div class="row">
       <button id="btnDraw" type="button">رسم وحساب</button>
       <button id="btnClose" type="button" class="secondary">إغلاق المضلع</button>
@@ -62,10 +90,10 @@ Point N E
     </div>
 
     <div class="hint">
-      <div>• المخرجات تعتمد على أن الإحداثيات بوحدة المتر (أو أي وحدة خطية)، وستكون المساحة بوحدة (الوحدة²).</div>
-      <div>• يمكنك كتابة رقم النقطة في أول السطر وسيتم تجاهله تلقائيًا.</div>
-      <div class="small">مثال:</div>
-      <div class="small" style="direction:ltr; opacity:.95;">
+      <div>• في وضع (UTM/محلي): النقاط تُفهم كـ N,E بوحدة المتر، وتظهر فوق شبكة.</div>
+      <div>• في وضع (Lat/Lng): النقاط تُفهم كـ Lat,Lng (أي N=Latitude و E=Longitude) وتظهر على خريطة OpenStreetMap.</div>
+      <div class="small">مثال (UTM):</div>
+      <div class="small" style="direction:ltr;">
         1, 3000.00, 5000.00<br/>
         2, 3050.00, 5080.00<br/>
         3, 2980.00, 5120.00
@@ -97,32 +125,20 @@ Point N E
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script>
-/**
- * Service2.html (حساب المساحات)
- * - يتوقع إدخال N,E (Northing, Easting)
- * - لحساب المساحة نستخدم x=E و y=N (Shoelace)
- */
-
 (function(){
-  // Map setup (Simple CRS for planar coordinates)
-  const map = L.map('map', { crs: L.CRS.Simple, minZoom: -10 });
-  const bounds = [[-1000, -1000],[1000, 1000]];
-  L.rectangle(bounds, { weight: 1 }).addTo(map);
-  map.fitBounds(bounds);
-
-  let polyLayer = null;
-  let lineLayer = null;
-  let pointsLayer = null;
-
-  const elInput = document.getElementById('coordsInput');
-  const elMsg = document.getElementById('message');
+  // ---------- UI refs ----------
+  const elInput   = document.getElementById('coordsInput');
+  const elMsg     = document.getElementById('message');
   const elResults = document.getElementById('areaResults');
-
-  const btnDraw = document.getElementById('btnDraw');
-  const btnClose = document.getElementById('btnClose');
+  const btnDraw   = document.getElementById('btnDraw');
+  const btnClose  = document.getElementById('btnClose');
   const btnImport = document.getElementById('btnImport');
-  const btnClear = document.getElementById('btnClear');
+  const btnClear  = document.getElementById('btnClear');
   const fileInput = document.getElementById('fileInput');
+
+  const modeRadios = Array.from(document.querySelectorAll('input[name="mapmode"]'));
+
+  function getMode(){ return (modeRadios.find(r => r.checked)?.value) || 'planar'; }
 
   function showMsg(text, kind){
     elMsg.style.display = 'block';
@@ -133,83 +149,51 @@ Point N E
     elMsg.style.display = 'none';
     elMsg.textContent = '';
   }
-
-  function clearMapLayers(){
-    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
-    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
-    if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
-  }
-
   function fmt(num, maxFrac){
     return Number(num).toLocaleString(undefined, { maximumFractionDigits: maxFrac ?? 3 });
   }
 
-  // -------------------------
-  // Robust parsing
-  // -------------------------
+  // ---------- Parsing ----------
   function normalizeLineToNumbers(line){
-    // Remove comments
     const cleaned = line.trim();
     if(!cleaned) return [];
 
-    // Replace ; with , then split by comma or whitespace/tabs
-    // Also handle lines like: "1, 3000.0, 5000.0" or "1 3000.0 5000.0"
     const tokens = cleaned
       .replace(/;/g, ',')
       .replace(/\t/g, ' ')
       .split(/[, ]+/)
       .filter(Boolean);
 
-    // Convert tokens to numbers (support decimal comma like 123,45 by converting to 123.45 if safe)
     const nums = [];
     for(const t of tokens){
-      // Keep only tokens that look numeric (allow leading +/- and decimal)
-      // If token contains both comma and dot, leave as-is and attempt parseFloat after stripping non numeric ends.
       let x = t.trim();
-
-      // If it's something like "P1" ignore.
-      // We only accept tokens that contain at least a digit.
       if(!/[0-9]/.test(x)) continue;
 
-      // Handle decimal comma: "123,45" (but careful: we already split by comma)
-      // If user used decimal comma with spaces separator: "123,45 678,90"
-      // It would be split into "123,45" as a token (because we split by space as well),
-      // but earlier split includes commas; so token won't contain comma unless user had it without splitting.
-      // As a safe step: if token has exactly one comma and no dot, convert comma to dot.
       if(x.includes(',') && !x.includes('.')){
         const cCount = (x.match(/,/g)||[]).length;
         if(cCount === 1) x = x.replace(',', '.');
       }
 
-      // Strip trailing non-numeric characters
       x = x.replace(/[^\d.+-]/g, '');
-
       const v = Number.parseFloat(x);
       if(Number.isFinite(v)) nums.push(v);
     }
     return nums;
   }
 
-  function parsePointsFromTextarea(text){
+  function parsePoints(text){
     const lines = text.split(/\r?\n/);
     const pts = [];
     const badLines = [];
 
     for(let i=0;i<lines.length;i++){
-      const ln = lines[i];
-      const nums = normalizeLineToNumbers(ln);
-
+      const nums = normalizeLineToNumbers(lines[i]);
       if(nums.length === 0) continue;
 
-      // Accept either:
-      // - [N, E]
-      // - [PointNo, N, E]
-      // - [something, something, N, E] (rare) -> take last two
       let N, E;
       if(nums.length === 2){
         [N, E] = nums;
       } else if(nums.length >= 3){
-        // take last two numbers as N,E (this safely ignores point numbers and extra columns)
         N = nums[nums.length - 2];
         E = nums[nums.length - 1];
       } else {
@@ -221,7 +205,6 @@ Point N E
         badLines.push(i+1);
         continue;
       }
-
       pts.push({ N, E });
     }
 
@@ -231,8 +214,6 @@ Point N E
   function pointsEqual(a,b, eps=1e-9){
     return Math.abs(a.N - b.N) < eps && Math.abs(a.E - b.E) < eps;
   }
-
-  // If last point equals first point, remove the last one for consistent math/renders
   function normalizeClosedDuplicate(pts){
     if(pts.length >= 2 && pointsEqual(pts[0], pts[pts.length - 1])){
       return pts.slice(0, -1);
@@ -240,11 +221,8 @@ Point N E
     return pts;
   }
 
-  // -------------------------
-  // Geometry
-  // -------------------------
+  // ---------- Geometry ----------
   function computeAreaPerimeter(ptsNE){
-    // ptsNE: array of {N,E} with NO duplicated closing point
     const n = ptsNE.length;
     if(n < 3) return { area: 0, perimeter: 0 };
 
@@ -263,111 +241,187 @@ Point N E
       per += Math.hypot(dE, dN);
     }
 
-    const area = Math.abs(sum) / 2;
-    return { area, perimeter: per };
+    return { area: Math.abs(sum)/2, perimeter: per };
   }
 
-  function toLatLng(ptsNE){
-    // CRS.Simple uses [y, x] convention: [lat, lng] but in planar space
-    // We'll map N to y(lat) and E to x(lng)
-    return ptsNE.map(p => [p.N, p.E]);
+  // ---------- Map management ----------
+  let map = null;
+  let baseLayer = null;
+  let gridLayer = null;
+
+  let polyLayer = null;
+  let lineLayer = null;
+  let pointsLayer = null;
+
+  function clearDrawLayers(){
+    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
+    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
+    if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
+  }
+
+  function removeOptionalLayers(){
+    if(baseLayer){ map.removeLayer(baseLayer); baseLayer = null; }
+    if(gridLayer){ map.removeLayer(gridLayer); gridLayer = null; }
+  }
+
+  function buildGrid(bounds, step){
+    // Draw simple grid in CRS.Simple (planar)
+    const lines = [];
+    const yMin = bounds.getSouth();
+    const yMax = bounds.getNorth();
+    const xMin = bounds.getWest();
+    const xMax = bounds.getEast();
+
+    // Vertical lines (x constant)
+    for(let x = Math.floor(xMin/step)*step; x <= xMax; x += step){
+      lines.push([[yMin, x], [yMax, x]]);
+    }
+    // Horizontal lines (y constant)
+    for(let y = Math.floor(yMin/step)*step; y <= yMax; y += step){
+      lines.push([[y, xMin], [y, xMax]]);
+    }
+
+    return L.polyline(lines, { weight: 1, opacity: 0.25 });
+  }
+
+  function initMap(mode){
+    if(map){
+      map.off();
+      map.remove();
+      map = null;
+    }
+
+    if(mode === 'latlng'){
+      map = L.map('map', { crs: L.CRS.EPSG3857 });
+      baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      map.setView([30, 31], 6); // default view (adjust later on fitBounds)
+      showMsg('وضع Lat/Lng مفعل. تأكد أن N=Latitude و E=Longitude.', '');
+    } else {
+      map = L.map('map', { crs: L.CRS.Simple, minZoom: -10 });
+
+      // Start with a neutral small view; we will fit to points on draw
+      const b = L.latLngBounds([[0,0],[1000,1000]]);
+      map.fitBounds(b);
+
+      // Add a faint grid background so map is never "empty"
+      gridLayer = buildGrid(b, 100).addTo(map);
+
+      showMsg('وضع مستوي (UTM/محلي) مفعل. N,E بالمتر. سيتم عمل Zoom تلقائي على النقاط عند الرسم.', '');
+    }
+
+    clearDrawLayers();
+  }
+
+  // Initialize default
+  initMap(getMode());
+
+  modeRadios.forEach(r => r.addEventListener('change', () => initMap(getMode())));
+
+  function toLatLngs(pts){
+    // In planar mode: [N,E] maps to [y,x] => [lat,lng]
+    // In latlng mode: same mapping but now interpreted as actual lat/lng
+    return pts.map(p => [p.N, p.E]);
   }
 
   function fitToPoints(latlngs){
-    if(!latlngs || latlngs.length === 0) return;
     const b = L.latLngBounds(latlngs);
     map.fitBounds(b.pad(0.2));
+    return b;
   }
 
-  // -------------------------
-  // Actions
-  // -------------------------
+  function ensureGridForBounds(bounds){
+    if(getMode() !== 'planar') return;
+    if(gridLayer){ map.removeLayer(gridLayer); gridLayer = null; }
+
+    // Step based on extent
+    const width  = Math.abs(bounds.getEast() - bounds.getWest());
+    const height = Math.abs(bounds.getNorth() - bounds.getSouth());
+    const span = Math.max(width, height);
+
+    // choose a reasonable step (rough)
+    let step = 100;
+    if(span > 50000) step = 5000;
+    else if(span > 10000) step = 1000;
+    else if(span > 2000) step = 200;
+    else if(span > 500) step = 50;
+
+    gridLayer = buildGrid(bounds, step).addTo(map);
+  }
+
   function render(ptsNE){
-    clearMapLayers();
     hideMsg();
+    clearDrawLayers();
 
     const pts = normalizeClosedDuplicate(ptsNE);
     if(pts.length < 2){
-      showMsg('أدخل نقطتين على الأقل للرسم.', 'warn');
       elResults.style.display = 'none';
+      showMsg('أدخل نقطتين على الأقل للرسم.', 'warn');
       return;
     }
 
-    const latlngs = toLatLng(pts);
+    const latlngs = toLatLngs(pts);
 
-    // points markers
+    // Markers
     pointsLayer = L.layerGroup();
     latlngs.forEach((ll, idx) => {
-      const m = L.circleMarker(ll, { radius: 5, weight: 2 });
+      const m = L.circleMarker(ll, { radius: 6, weight: 2, opacity: 1, fillOpacity: 0.9 });
       m.bindTooltip(`P${idx+1}<br/>N=${fmt(pts[idx].N,3)}<br/>E=${fmt(pts[idx].E,3)}`, { sticky: true });
       m.addTo(pointsLayer);
     });
     pointsLayer.addTo(map);
 
-    // Polyline (explicitly closed visually)
-    const closedLatLngs = latlngs.slice();
-    if(latlngs.length >= 2){
-      closedLatLngs.push(latlngs[0]);
-    }
-    lineLayer = L.polyline(closedLatLngs, { weight: 3 }).addTo(map);
+    // Closed polyline for visual closure
+    const closed = latlngs.slice();
+    if(latlngs.length >= 2) closed.push(latlngs[0]);
+    lineLayer = L.polyline(closed, { weight: 3, opacity: 0.95 }).addTo(map);
 
-    // Polygon only if >=3
+    // Polygon if >=3
     if(pts.length >= 3){
-      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.2 }).addTo(map);
+      polyLayer = L.polygon(latlngs, { weight: 2, fillOpacity: 0.25 }).addTo(map);
     }
 
-    fitToPoints(latlngs);
+    const bounds = fitToPoints(latlngs);
+    ensureGridForBounds(bounds);
 
-    // Stats
     const stats = computeAreaPerimeter(pts);
 
     document.getElementById('res-count').innerText = String(pts.length);
     document.getElementById('res-area').innerText = fmt(stats.area, 3);
     document.getElementById('res-perimeter').innerText = fmt(stats.perimeter, 3);
 
-    elResults.style.display = (pts.length >= 3) ? 'grid' : 'grid';
+    elResults.style.display = 'grid';
 
     if(pts.length < 3){
       showMsg('تم الرسم، لكن حساب المساحة يحتاج 3 نقاط على الأقل.', 'warn');
     } else {
-      showMsg('تم الرسم والحساب بنجاح. إذا كانت النقاط لا تُظهر الشكل المتوقع، راجع ترتيب النقاط (يجب أن تكون متتابعة حول المضلع).', '');
+      showMsg('تم الرسم والحساب بنجاح.', '');
     }
   }
 
   function closePolygonInTextarea(){
-    const { pts, badLines } = parsePointsFromTextarea(elInput.value);
+    const { pts, badLines } = parsePoints(elInput.value);
     if(badLines.length){
       showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. أصلحها أولًا ثم أعد المحاولة.`, 'err');
       return;
     }
-
     if(pts.length < 3){
       showMsg('لا يمكن إغلاق المضلع: تحتاج 3 نقاط على الأقل.', 'warn');
       return;
     }
-
-    const norm = normalizeClosedDuplicate(pts);
-    // Check if already closed in textarea (i.e., last equals first)
     const alreadyClosed = (pts.length >= 2 && pointsEqual(pts[0], pts[pts.length-1]));
     if(alreadyClosed){
       showMsg('المضلع مغلق بالفعل (آخر نقطة مساوية للأولى).', '');
       return;
     }
-
-    // Append first point as last line in same N, E format
-    const first = norm[0];
-    const line = `${first.N}, ${first.E}`;
-
-    // Ensure textarea ends with newline
+    const first = pts[0];
     let text = elInput.value;
-    if(text.trim().length === 0){
-      showMsg('لا يوجد إدخال لإغلاقه.', 'warn');
-      return;
-    }
     if(!text.endsWith('\n')) text += '\n';
-    text += line + '\n';
+    text += `${first.N}, ${first.E}\n`;
     elInput.value = text;
-
     showMsg('تمت إضافة أول نقطة في نهاية الإدخال لإغلاق المضلع.', '');
   }
 
@@ -375,7 +429,7 @@ Point N E
     const reader = new FileReader();
     reader.onload = () => {
       const content = String(reader.result || '');
-      const { pts, badLines } = parsePointsFromTextarea(content);
+      const { pts, badLines } = parsePoints(content);
 
       if(!pts.length){
         showMsg('لم يتم العثور على نقاط صالحة داخل الملف.', 'err');
@@ -387,36 +441,30 @@ Point N E
         showMsg('تم استيراد النقاط بنجاح.', '');
       }
 
-      // Write normalized points into textarea as "N, E"
-      const lines = pts.map(p => `${p.N}, ${p.E}`);
-      elInput.value = lines.join('\n') + '\n';
+      elInput.value = pts.map(p => `${p.N}, ${p.E}`).join('\n') + '\n';
     };
     reader.onerror = () => showMsg('تعذر قراءة الملف.', 'err');
     reader.readAsText(file);
   }
 
-  // -------------------------
-  // Events
-  // -------------------------
+  // ---------- Events ----------
   btnDraw.addEventListener('click', () => {
-    const { pts, badLines } = parsePointsFromTextarea(elInput.value);
+    const { pts, badLines } = parsePoints(elInput.value);
     if(badLines.length){
       showMsg(`يوجد أسطر غير مفهومة: ${badLines.join(', ')}. تأكد من أن كل سطر يحتوي N و E.`, 'err');
       return;
     }
-    if(pts.length === 0){
+    if(!pts.length){
       showMsg('أدخل نقاطًا أولًا.', 'warn');
       return;
     }
 
-    // Normalize closing duplicate for consistent calc/draw
-    const norm = normalizeClosedDuplicate(pts);
-    render(norm);
+    // Important: This is the fix that ensures points are ALWAYS visible:
+    // we fit map to bounds of points, not a fixed [-1000..1000] box.
+    render(pts);
   });
 
-  btnClose.addEventListener('click', () => {
-    closePolygonInTextarea();
-  });
+  btnClose.addEventListener('click', closePolygonInTextarea);
 
   btnImport.addEventListener('click', () => {
     fileInput.value = '';
@@ -425,20 +473,18 @@ Point N E
 
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    importFromFile(file);
+    if(file) importFromFile(file);
   });
 
   btnClear.addEventListener('click', () => {
     elInput.value = '';
     elResults.style.display = 'none';
-    clearMapLayers();
+    clearDrawLayers();
     hideMsg();
-    showMsg('تم مسح الإدخال والخريطة.', '');
+    showMsg('تم مسح الإدخال والرسم.', '');
   });
 
-  // Initial message
-  showMsg('أدخل النقاط ثم اضغط "رسم وحساب". يمكنك استيراد CSV/TXT أو استخدام زر إغلاق المضلع.', '');
+  showMsg('أدخل النقاط ثم اضغط "رسم وحساب". غيّر وضع الخريطة حسب نوع الإحداثيات لديك.', '');
 })();
 </script>
 </body>
