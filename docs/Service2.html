@@ -73,6 +73,11 @@
     .card, .map-card { transition: none !important; }
     .card:hover, .map-card:hover { transform: none !important; box-shadow: none !important; }
 
+    /* Polygon card styling (fixed pixel size, no scaling with zoom) */
+    .polygon-card-popup { pointer-events: auto; }
+    .polygon-card { max-width: 220px; overflow: hidden; white-space: normal; }
+    .leaflet-marker-icon .polygon-card { transform: none !important; }
+
     textarea{
       width: 100%;
       min-height: 220px;
@@ -556,14 +561,30 @@ window.addEventListener('resize', fixMapSize);
   }
 
   function computePolygonCentroid(pts){
-    // حساب مركز المضلع الهندسي
-    let cx = 0, cy = 0;
+    // Area-weighted centroid (uses shoelace formula)
+    // pts: array of {N, E} where N=lat(Y), E=lng(X)
+    let A = 0, Cx = 0, Cy = 0;
     const n = pts.length;
     for(let i = 0; i < n; i++){
-      cx += pts[i].N;
-      cy += pts[i].E;
+      const a = pts[i];
+      const b = pts[(i+1) % n];
+      const x0 = a.E, y0 = a.N;
+      const x1 = b.E, y1 = b.N;
+      const cross = (x0 * y1) - (x1 * y0);
+      A += cross;
+      Cx += (x0 + x1) * cross;
+      Cy += (y0 + y1) * cross;
     }
-    return { N: cx / n, E: cy / n };
+    A = A / 2;
+    if(Math.abs(A) < 1e-9){
+      // fallback to simple average
+      let sx = 0, sy = 0;
+      for(const p of pts){ sx += p.E; sy += p.N; }
+      return { N: sy / n, E: sx / n };
+    }
+    Cx = Cx / (6 * A);
+    Cy = Cy / (6 * A);
+    return { N: Cy, E: Cx };
   }
 
   function render(ptsInput){
@@ -642,13 +663,15 @@ window.addEventListener('resize', fixMapSize);
         </div>
       `;
       
-      // إضافة البطاقة على الخريطة كـ popup ثابت عند إحداثيات المركز
-      const popup = L.popup({ closeButton: false, autoClose: false, className: 'polygon-card-popup' })
-        .setLatLng([centroid.N, centroid.E])
-        .setContent(cardHTML)
-        .addTo(map);
-      // track popup so we can remove it on clear
-      popupLayers.push(popup);
+      // إضافة البطاقة على الخريطة كـ marker مع divIcon (ثابتة الحجم، لا تتغير مع الزووم)
+      const icon = L.divIcon({
+        className: 'polygon-card',
+        html: cardHTML,
+        iconSize: null
+      });
+      const marker = L.marker([centroid.N, centroid.E], { icon, interactive: false }).addTo(map);
+      // track marker so we can remove it on clear
+      popupLayers.push(marker);
       
 
       // تحديث الحدود
