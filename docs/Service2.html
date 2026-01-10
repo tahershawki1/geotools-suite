@@ -125,6 +125,11 @@ Point N E
 
 <script src="vendor/leaflet/leaflet.js"></script>
 <script>
+  // التحقق من تحميل Leaflet
+  if (typeof L === 'undefined') {
+    alert('❌ خطأ: Leaflet لم يتم تحميله!\nتأكد من أن المسارات صحيحة:\nvendor/leaflet/leaflet.css\nvendor/leaflet/leaflet.js');
+  }
+
 (function(){
   // ---------- UI refs ----------
   const elInput   = document.getElementById('coordsInput');
@@ -293,6 +298,12 @@ Point N E
 
     if(mode === 'latlng'){
       map = L.map('map', { crs: L.CRS.EPSG3857 });
+      
+      // إعادة حساب حجم الخريطة
+      setTimeout(() => {
+        map.invalidateSize(true);
+      }, 0);
+      
       baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 20,
         attribution: '&copy; OpenStreetMap contributors'
@@ -302,6 +313,11 @@ Point N E
       showMsg('وضع Lat/Lng مفعل. تأكد أن N=Latitude و E=Longitude.', '');
     } else {
       map = L.map('map', { crs: L.CRS.Simple, minZoom: -10 });
+
+      // إعادة حساب حجم الخريطة
+      setTimeout(() => {
+        map.invalidateSize(true);
+      }, 0);
 
       // Start with a neutral small view; we will fit to points on draw
       const b = L.latLngBounds([[0,0],[1000,1000]]);
@@ -314,6 +330,20 @@ Point N E
     }
 
     clearDrawLayers();
+    
+    // إضافة مستمع resize لإعادة حساب الخريطة عند تغيير حجم النافذة
+    if (!window._mapResizeListener) {
+      window._mapResizeListener = true;
+      window.addEventListener('resize', () => {
+        if (map) {
+          try {
+            map.invalidateSize(false);
+          } catch (e) {
+            console.log('Error resizing map:', e);
+          }
+        }
+      });
+    }
   }
 
   // Initialize default
