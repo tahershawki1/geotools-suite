@@ -1,0 +1,297 @@
+<style>
+  .container-dltm {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius: 24px;
+    overflow:hidden;
+    box-shadow: var(--shadow-lg);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .header-dltm { padding:25px; border-bottom: 1px solid var(--border); background:#fff; display: flex; justify-content: space-between; align-items: center; }
+  .dltm-tabs { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; }
+  .dltm-tab { padding: 15px 30px; cursor: pointer; font-weight: 700; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .dltm-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: #fff; }
+  
+  .content-dltm { padding: 30px; }
+  .tool-section { display: none; }
+  .tool-section.active { display: block; }
+
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+  .input-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--text-main); font-size: 14px; }
+  .input-group input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border); font-size: 16px; outline: none; }
+
+  .batch-dropzone { border: 2px dashed var(--border); border-radius: 16px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc; }
+  .batch-dropzone:hover { border-color: var(--primary); background: var(--primary-light); }
+  
+  .results-table-wrap { margin-top: 30px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f1f5f9; padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 12px; border-bottom: 1px solid var(--border); }
+  
+  .btn-calc { width:100%; padding: 14px; border:none; border-radius: 12px; background:var(--primary); color:#fff; font-weight:700; font-size:16px; cursor:pointer; }
+  .btn-calc:hover { background: var(--primary-hover); }
+
+  #res-box-single { margin-top: 25px; background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid var(--border); display: none; }
+  .res-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; }
+  .res-val { color: var(--primary); font-family: monospace; }
+</style>
+
+<div class="container-dltm">
+  <div class="header-dltm">
+    <div style="text-align: right; direction: rtl;">
+      <h2 style="font-size:20px; font-weight:900; color:var(--primary); margin:0;">📍 محول إحداثيات دبي (DLTM)</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin:0;">التحويل بين DLTM و WGS84</p>
+    </div>
+    <button class="btn-nav-top" onclick="loadPage('')">🏠 الرئيسية</button>
+  </div>
+
+  <div class="dltm-tabs">
+    <div class="dltm-tab active" onclick="switchDltmTab(this, 'single')">تحويل فردي</div>
+    <div class="dltm-tab" onclick="switchDltmTab(this, 'batch')">تحويل جماعي (CSV)</div>
+  </div>
+
+  <div class="content-dltm">
+    <!-- Single Conversion -->
+    <div id="section-single" class="tool-section active">
+      <div class="input-grid">
+        <div class="input-group">
+          <label>Easting (X)</label>
+          <input type="number" id="inp-e" placeholder="500000.00">
+        </div>
+        <div class="input-group">
+          <label>Northing (Y)</label>
+          <input type="number" id="inp-n" placeholder="2768000.00">
+        </div>
+      </div>
+      <button class="btn-calc" id="btn-convert-single" onclick="window.runSingleDltm()">تحويل الآن ✨</button>
+
+      <div id="res-box-single">
+         <div class="res-row"><span>Latitude (N):</span> <span class="res-val" id="res-lat">-</span></div>
+         <div class="res-row"><span>Longitude (E):</span> <span class="res-val" id="res-lon">-</span></div>
+         <div class="res-row"><span>UTM Zone:</span> <span class="res-val" id="res-utm-z">-</span></div>
+         <div class="res-row"><span>UTM E:</span> <span class="res-val" id="res-utm-e">-</span></div>
+         <div class="res-row"><span>UTM N:</span> <span class="res-val" id="res-utm-n">-</span></div>
+      </div>
+    </div>
+
+    <!-- Batch Conversion -->
+    <div id="section-batch" class="tool-section">
+      <div class="batch-dropzone" onclick="document.getElementById('batchFile').click()">
+        <span style="font-size: 40px;">📄</span>
+        <h3 style="margin: 10px 0;">اضغط لرفع ملف CSV</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">يجب أن يحتوي الملف على أعمدة (E, N)</p>
+        <input type="file" id="batchFile" style="display: none;" accept=".csv,.txt" onchange="handleBatchFile(this)">
+      </div>
+
+      <div class="results-table-wrap" id="batchResultsWrap">
+        <div style="padding: 15px; background: #fff; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <strong id="batchCount">0 نقاط تم تحويلها</strong>
+          <button class="btn-nav-top" onclick="downloadBatchCsv()">تحميل CSV 💾</button>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table id="batchTable">
+            <thead>
+              <tr>
+                <th>E (DLTM)</th>
+                <th>N (DLTM)</th>
+                <th>Lat</th>
+                <th>Lon</th>
+                <th>UTM E</th>
+                <th>UTM N</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  let batchData = [];
+
+  window.switchDltmTab = function(el, tab) {
+    document.querySelectorAll('.dltm-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('section-' + tab).classList.add('active');
+  };
+
+  window.runSingleDltm = function() {
+    const e = parseFloat(document.getElementById('inp-e').value);
+    const n = parseFloat(document.getElementById('inp-n').value);
+    if(isNaN(e) || isNaN(n)) return alert('أدخل إحداثيات صحيحة');
+
+    const btn = document.getElementById('btn-convert-single');
+    btn.disabled = true; btn.innerText = 'جاري التحويل...';
+
+    google.script.run
+      .withSuccessHandler(res => {
+        btn.disabled = false; btn.innerText = 'تحويل الآن ✨';
+        if(res.success) {
+          document.getElementById('res-lat').innerText = res.latitude.toFixed(8);
+          document.getElementById('res-lon').innerText = res.longitude.toFixed(8);
+          document.getElementById('res-utm-z').innerText = res.utm.zone + res.utm.hemisphere;
+          document.getElementById('res-utm-e').innerText = res.utm.easting.toFixed(3);
+          document.getElementById('res-utm-n').innerText = res.utm.northing.toFixed(3);
+          document.getElementById('res-box-single').style.display = 'block';
+        } else alert('خطأ: ' + res.error);
+      })
+      .convertDLTMtoWGS84(e, n);
+  };
+
+  window.handleBatchFile = function(input) {
+    const file = input.files[0];
+    if(!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const content = e.target.result;
+      const lines = content.split(/\r?\n/).filter(l => l.trim());
+      const rows = [];
+      
+      lines.forEach((line, i) => {
+        if(i === 0 && /[a-zA-Z]/.test(line)) return; // Skip header
+        const parts = line.split(/[,\t;]+/).map(p => p.trim());
+        if(parts.length >= 2) {
+          const east = parseFloat(parts[0]);
+          const north = parseFloat(parts[1]);
+          if(!isNaN(east) && !isNaN(north)) rows.push([east, north]);
+        }
+      });
+
+      if(rows.length === 0) return alert('لم يتم العثور على بيانات صالحة');
+      
+      showLoader(true);
+      google.script.run
+        .withSuccessHandler(results => {
+          showLoader(false);
+          batchData = results;
+          renderBatchResults(results);
+        })
+        .convertDLTMtoWGS84Batch(rows);
+    };
+    reader.readAsText(file);
+  };
+
+  function renderBatchResults(results) {
+    const tbody = document.querySelector('#batchTable tbody');
+    tbody.innerHTML = '';
+    results.forEach(r => {
+      if(r.error) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.easting.toFixed(2)}</td><td>${r.northing.toFixed(2)}</td><td>${r.latitude.toFixed(7)}</td><td>${r.longitude.toFixed(7)}</td><td>${r.utmE.toFixed(2)}</td><td>${r.utmN.toFixed(2)}</td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('batchCount').innerText = results.filter(r => !r.error).length + ' نقاط تم تحويلها';
+    document.getElementById('batchResultsWrap').style.display = 'block';
+  }
+
+  window.downloadBatchCsv = function() {
+    if(!batchData.length) return;
+    let csv = 'E_DLTM,N_DLTM,Latitude,Longitude,UTM_E,UTM_N,UTM_Zone\n';
+    batchData.forEach(r => {
+      if(!r.error) csv += `${r.easting},${r.northing},${r.latitude},${r.longitude},${r.utmE},${r.utmN},${r.utmZone}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'DLTM_Converted.csv'; a.click();
+  };
+})();
+</script>
+
+
+<script>
+  // Defining globally to ensure access via onclick in SPA
+  window.runConversion = function() {
+    console.log("Starting conversion...");
+    const e = parseFloat(document.getElementById('inp-e').value);
+    const n = parseFloat(document.getElementById('inp-n').value);
+    const btn = document.getElementById('btn-convert');
+
+    if (isNaN(e) || isNaN(n)) {
+      alert('يرجى إدخال قيم صحيحة للإحداثيات');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = 'جاري التحويل...';
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.disabled = false;
+        btn.innerText = 'تحويل الإحداثيات ✨';
+        
+        if (res.success) {
+          document.getElementById('val-lat').innerText = res.latitude.toFixed(8);
+          document.getElementById('val-lon').innerText = res.longitude.toFixed(8);
+
+          if (res.utm) {
+            document.getElementById('val-utm-zone').innerText =
+              String(res.utm.zone) + String(res.utm.hemisphere);
+            document.getElementById('val-utm-e').innerText =
+              Number(res.utm.easting).toFixed(3);
+            document.getElementById('val-utm-n').innerText =
+              Number(res.utm.northing).toFixed(3);
+          } else {
+            document.getElementById('val-utm-zone').innerText = '-';
+            document.getElementById('val-utm-e').innerText = '-';
+            document.getElementById('val-utm-n').innerText = '-';
+          }
+
+          document.getElementById('res-box').style.display = 'block';
+        } else {
+          alert('خطأ في الحساب: ' + res.error);
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.disabled = false;
+        btn.innerText = 'تحويل الإحداثيات ✨';
+        alert('فشل الاتصال بالخادم: ' + err.message);
+      })
+      .convertDLTMtoWGS84(e, n);
+  };
+
+  // Copy a single value by element id
+  window.copyValue = function(elementId) {
+    const el = document.getElementById(elementId);
+    const val = (el && el.innerText) ? el.innerText.trim() : '';
+    if (!val || val === '-') {
+      alert('لا توجد قيمة لنسخها');
+      return;
+    }
+    navigator.clipboard.writeText(val).then(() => alert('تم النسخ!'));
+  };
+
+  // Main copy button: user chooses which single coordinate to copy (no “copy all”)
+  window.copyRes = function() {
+    const choice = prompt(
+      'اختر ما تريد نسخه:\n1) Latitude\n2) Longitude\n3) UTM Zone\n4) UTM Easting\n5) UTM Northing',
+      '1'
+    );
+    const map = {
+      '1': 'val-lat',
+      '2': 'val-lon',
+      '3': 'val-utm-zone',
+      '4': 'val-utm-e',
+      '5': 'val-utm-n'
+    };
+    const id = map[String(choice).trim()];
+    if (!id) return;
+    window.copyValue(id);
+  };
+
+  window.openMaps = function() {
+    const lat = document.getElementById('val-lat').innerText;
+    const lon = document.getElementById('val-lon').innerText;
+    window.open('https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lon, '_blank');
+  };
+</script>
