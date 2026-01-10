@@ -294,6 +294,34 @@
     }
   }
 
+  // DMS conversion helpers
+  function toDMS(value, isLon) {
+    // value: decimal degrees
+    const dir = isLon ? (value >= 0 ? "E" : "W") : (value >= 0 ? "N" : "S");
+    const abs = Math.abs(value);
+
+    const deg = Math.floor(abs);
+    const minFloat = (abs - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = (minFloat - min) * 60;
+
+    // 3 decimals like screenshot (12.036")
+    const secStr = sec.toFixed(3).padStart(6, "0"); // ensures 00.000 style if needed
+
+    return `${deg}°${String(min).padStart(2, "0")}'${secStr}" ${dir}`;
+  }
+
+  function toDMSNoDir(value) {
+    // If you prefer without N/E letters
+    const abs = Math.abs(value);
+    const deg = Math.floor(abs);
+    const minFloat = (abs - deg) * 60;
+    const min = Math.floor(minFloat);
+    const sec = (minFloat - min) * 60;
+    const secStr = sec.toFixed(3).padStart(6, "0");
+    return `${deg}°${String(min).padStart(2, "0")}'${secStr}"`;
+  }
+
   // ----------------------------
   // Single Conversion
   // ----------------------------
@@ -314,8 +342,9 @@
 
     if (!res.success) return alert("خطأ: " + res.error);
 
-    document.getElementById("res-lat").innerText = res.latitude.toFixed(8);
-    document.getElementById("res-lon").innerText = res.longitude.toFixed(8);
+    // DMS output like screenshot
+    document.getElementById("res-lon").innerText = toDMS(res.longitude, true);  // Longitude
+    document.getElementById("res-lat").innerText = toDMS(res.latitude, false);  // Latitude
     document.getElementById("res-utm-z").innerText = String(res.utm.zone) + String(res.utm.hemisphere);
     document.getElementById("res-utm-e").innerText = Number(res.utm.easting).toFixed(3);
     document.getElementById("res-utm-n").innerText = Number(res.utm.northing).toFixed(3);
@@ -396,8 +425,8 @@
         `<td>${escapeHtml(r.code || "")}</td>` +
         `<td>${Number(r.easting).toFixed(2)}</td>` +
         `<td>${Number(r.northing).toFixed(2)}</td>` +
-        `<td>${Number(r.latitude).toFixed(7)}</td>` +
-        `<td>${Number(r.longitude).toFixed(7)}</td>` +
+        `<td>${toDMS(r.latitude, false)}</td>` +
+        `<td>${toDMS(r.longitude, true)}</td>` +
         `<td>${escapeHtml(r.utmZone)}</td>` +
         `<td>${Number(r.utmE).toFixed(2)}</td>` +
         `<td>${Number(r.utmN).toFixed(2)}</td>`;
