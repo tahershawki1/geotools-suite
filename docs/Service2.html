@@ -1,0 +1,159 @@
+<style>
+  .container-service2 {
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  .area-header { padding: 25px; border-bottom: 1px solid var(--border); background: #fff; display: flex; justify-content: space-between; align-items: center; }
+  .area-content { padding: 25px; display: grid; grid-template-columns: 350px 1fr; gap: 25px; }
+  
+  .side-panel { display: flex; flex-direction: column; gap: 20px; }
+  .input-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+  .input-card h3 { font-size: 16px; margin-bottom: 15px; color: var(--text-main); }
+  
+  .coords-textarea { width: 100%; height: 200px; border-radius: 12px; border: 1px solid var(--border); padding: 12px; font-family: monospace; font-size: 14px; resize: none; margin-bottom: 15px; }
+  
+  .btn-calc-area { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+  .btn-calc-area:hover { background: var(--primary-hover); }
+
+  .results-card { background: var(--primary-light); border: 1px solid var(--primary); border-radius: 16px; padding: 20px; color: var(--primary-hover); }
+  .result-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; }
+  .result-val { font-size: 18px; }
+
+  #area-map { height: 500px; border-radius: 16px; border: 1px solid var(--border); background: #eee; }
+
+  @media (max-width: 850px) {
+    .area-content { grid-template-columns: 1fr; }
+    #area-map { height: 350px; }
+  }
+</style>
+
+<div class="container-service2">
+  <div class="area-header">
+    <div style="text-align: right;">
+      <h2 style="font-size:20px; font-weight:900; color:var(--primary); margin:0;">📐 حساب المساحات</h2>
+      <p style="font-size:13px; color:var(--text-muted); margin:0;">احسب المساحة والمحيط من الإحداثيات</p>
+    </div>
+    <button class="btn-nav-top" onclick="loadPage('')">🏠 الرئيسية</button>
+  </div>
+
+  <div class="area-content">
+    <div class="side-panel">
+      <div class="input-card">
+        <h3>أدخل الإحداثيات (N, E)</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">أدخل كل نقطة في سطر (مثال: 2768400, 500200)</p>
+        <textarea id="coordsInput" class="coords-textarea" placeholder="2768400, 500200&#10;2768450, 500250&#10;2768400, 500300"></textarea>
+        <button class="btn-calc-area" onclick="window.calculateAreaFromInput()">احسب وارسِم 📐</button>
+      </div>
+
+      <div class="results-card" id="areaResults" style="display: none;">
+        <div class="result-item">
+          <span>المساحة:</span>
+          <span class="result-val"><span id="res-area">0</span> م²</span>
+        </div>
+        <div class="result-item">
+          <span>المحيط:</span>
+          <span class="result-val"><span id="res-perimeter">0</span> م</span>
+        </div>
+        <div class="result-item" style="font-size: 12px; border-top: 1px solid var(--primary); padding-top: 8px; margin-top: 8px;">
+          <span>عدد النقاط:</span>
+          <span id="res-points">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="area-map"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let areaMap = null;
+  let polyLayer = null;
+  let markersLayer = null;
+
+  function initAreaMap() {
+    if (areaMap) return;
+    areaMap = L.map('area-map', {
+      crs: L.CRS.Simple,
+      minZoom: -10,
+      zoomSnap: 0.25,
+      zoomControl: true,
+      attributionControl: false
+    });
+    polyLayer = L.layerGroup().addTo(areaMap);
+    markersLayer = L.layerGroup().addTo(areaMap);
+  }
+
+  window.calculateAreaFromInput = function() {
+    initAreaMap();
+    const text = document.getElementById('coordsInput').value;
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const points = [];
+
+    lines.forEach(line => {
+      const parts = line.split(/[,\s\t]+/).map(p => parseFloat(p));
+      if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        points.push([parts[0], parts[1]]); // [N, E]
+      }
+    });
+
+    if (points.length < 3) {
+      alert('الرجاء إدخال 3 نقاط على الأقل لحساب المساحة.');
+      return;
+    }
+
+    drawPolygon(points);
+    const stats = computeStats(points);
+    
+    document.getElementById('res-area').innerText = stats.area.toLocaleString(undefined, {maximumFractionDigits: 2});
+    document.getElementById('res-perimeter').innerText = stats.perimeter.toLocaleString(undefined, {maximumFractionDigits: 2});
+    document.getElementById('res-points').innerText = points.length;
+    document.getElementById('areaResults').style.display = 'block';
+  };
+
+  function drawPolygon(points) {
+    polyLayer.clearLayers();
+    markersLayer.clearLayers();
+
+    const poly = L.polygon(points, { color: '#4f46e5', fillOpacity: 0.2 }).addTo(polyLayer);
+    
+    points.forEach((p, i) => {
+      L.circleMarker(p, { radius: 4, color: '#4f46e5', fillOpacity: 1 }).addTo(markersLayer)
+        .bindTooltip((i + 1).toString(), { permanent: true, direction: 'right' });
+    });
+
+    areaMap.fitBounds(poly.getBounds().pad(0.1));
+  }
+
+  // Surveyor's Formula (Shoelace)
+  function computeStats(pts) {
+    let area = 0;
+    let perimeter = 0;
+    for (let i = 0; i < pts.length; i++) {
+        let j = (i + 1) % pts.length;
+        area += pts[i][1] * pts[j][0];
+        area -= pts[j][1] * pts[i][0];
+        
+        let dx = pts[j][1] - pts[i][1];
+        let dy = pts[j][0] - pts[i][0];
+        perimeter += Math.sqrt(dx * dx + dy * dy);
+    }
+    area = Math.abs(area) / 2;
+    return { area, perimeter };
+  }
+
+  // Ensure map resizes correctly if container was hidden
+  setTimeout(() => { if(areaMap) areaMap.invalidateSize(); }, 200);
+})();
+</script>
+
+
