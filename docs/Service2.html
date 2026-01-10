@@ -683,7 +683,11 @@ window.addEventListener('resize', fixMapSize);
   // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
   function splitPolygonsAtClosingPoint(pts){
     const method = document.getElementById('splitMethod')?.value || 'auto';
-    
+
+    // If many points include an ID field, prefer ID splitting automatically
+    const idCount = pts.reduce((c,p) => c + (p && p.id !== undefined ? 1 : 0), 0);
+    const idRatio = pts.length ? (idCount / pts.length) : 0;
+
     if(method === 'duplicates'){
       return splitByDuplicates(pts);
     } else if(method === 'gaps'){
@@ -691,11 +695,12 @@ window.addEventListener('resize', fixMapSize);
     } else if(method === 'id'){
       return splitByIdReset(pts);
     } else {
-      // تجربة الفصل حسب ID أولاً، وإذا لم يعطِ نتائج، استخدم الطريقة التلقائية
-      const idResult = splitByIdReset(pts);
-      if(idResult.length > 1){
-        return idResult;
+      // auto: if many rows contain an ID, use ID-based splitting first
+      if(idRatio > 0.3){
+        const idResult = splitByIdReset(pts);
+        if(idResult.length > 1) return idResult;
       }
+      // fallback to auto heuristic
       return splitByAuto(pts);
     }
   }
