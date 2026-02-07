@@ -1,311 +1,450 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeoTools Suite</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GeoTools Suite</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Proj4js - Global for Transform tool -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+    <!-- Proj4js - Global for Transform tool -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
 
-  <!-- Leaflet (Global for map tools) -->
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css">
-<script src="./vendor/leaflet/leaflet.js"></script>
+    <!-- Leaflet (Global for map tools) -->
+    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+    <script src="./vendor/leaflet/leaflet.js"></script>
 
-  <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --primary-light: #eef2ff;
-      --secondary: #10b981;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: var(--bg);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Navbar */
-    .navbar {
-      height: 70px;
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 40px;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: var(--primary);
-      font-weight: 900;
-      font-size: 22px;
-    }
-    .nav-links {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-    .btn-nav-top {
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text-main);
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .btn-nav-top:hover {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    #app-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
-      transition: opacity 0.3s ease;
-    }
-
-    /* Loading Overlay */
-    #loader {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      backdrop-filter: blur(4px);
-    }
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* Dashboard Styles */
-    .dashboard-view { width: 100%; max-width: 1000px; animation: fadeInUp 0.5s ease forwards; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    .header { text-align: center; margin-bottom: 50px; }
-    .header h1 { font-size: 36px; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
-    .header p { font-size: 18px; color: var(--text-muted); }
-
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-    .card {
-      background: var(--card-bg);
-      padding: 30px;
-      border-radius: 24px;
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      text-decoration: none;
-      color: inherit;
-    }
-    .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
-    .icon-box {
-      width: 50px;
-      height: 50px;
-      background: var(--primary-light);
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      color: var(--primary);
-      font-size: 24px;
-    }
-    .card h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-    .card p { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
-
-    .footer {
-      margin-top: auto;
-      padding: 40px 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
-      border-top: 1px solid var(--border);
-      background: #fff;
-      width: 100%;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="loader"><div class="spinner"></div></div>
-
-  <nav class="navbar">
-    <a href="#" class="nav-logo" onclick="loadPage(''); return false;">
-      <span>🌐</span> GeoTools Suite
-    </a>
-
-    <div class="nav-links">
-      <button class="btn-nav-top" onclick="loadPage('')">الرئيسية</button>
-      <button class="btn-nav-top" onclick="loadPage('Converter')">محول الملفات</button>
-      <button class="btn-nav-top" onclick="loadPage('DLTM')">محول دبي</button>
-      <button class="btn-nav-top" onclick="loadPage('Transform')">تحويل الإحداثيات</button>
-      <button class="btn-nav-top" onclick="loadPage('Service2')">حساب المساحات</button>
-    </div>
-  </nav>
-
-  <div id="app-container">
-    <div id="view-content" class="dashboard-view">
-      <!-- DASHBOARD START -->
-      <div class="header">
-        <h1>مجموعة أدوات المساحة</h1>
-        <p>اختر الخدمة التي تريد البدء باستخدامها اليوم</p>
-      </div>
-
-      <div class="grid">
-        <div class="card" onclick="loadPage('Converter')">
-          <div class="icon-box">🔄</div>
-          <h2>محول الملفات (SDR)</h2>
-          <p>تحويل ملفات الإحداثيات CSV/TXT إلى صيغة SDR الخاصة بأجهزة سوكيا، مع ميزة العرض على الخارطة.</p>
-        </div>
-
-        <div class="card" onclick="loadPage('DLTM')">
-          <div class="icon-box">📍</div>
-          <h2>محول DLTM (دبي)</h2>
-          <p>تحويل الإحداثيات المحلية لمدينة دبي (DLTM) إلى إحداثيات عالمية (Lat/Long) بدقة عالية.</p>
-        </div>
-
-        <div class="card" onclick="loadPage('Service2')">
-          <div class="icon-box">📐</div>
-          <h2>حساب المساحات</h2>
-          <p>أداة هندسية لحساب المساحات بناءً على الإحداثيات أو المسافات والزوايا.</p>
-        </div>
-
-        <div class="card" onclick="loadPage('Transform')">
-          <div class="icon-box">🛰️</div>
-          <h2>تحويل الإحداثيات</h2>
-          <p>تحويل الإحداثيات بين الأنظمة المختلفة UTM, WGS84 وغيرها باستخدام Proj4js.</p>
-        </div>
-      </div>
-      <!-- DASHBOARD END -->
-    </div>
-
-    <div class="footer">
-      <p>&copy; 2026 جميع الحقوق محفوظة - GeoTools Suite</p>
-    </div>
-  </div>
-
-  <script>
-    // بصمة نسخة للتأكد أنك ترى النسخة الجديدة على Pages
-    console.log("GeoTools SPA fetch-loader active - v2026-01-10");
-
-    function showLoader(show) {
-      document.getElementById('loader').style.display = show ? 'flex' : 'none';
-    }
-
-    // حفظ محتوى الداشبورد الأصلي عند أول تحميل
-    let DASHBOARD_HTML = "";
-    window.addEventListener("DOMContentLoaded", () => {
-      const contentDiv = document.getElementById('view-content');
-      DASHBOARD_HTML = contentDiv.innerHTML;
-    });
-
-    async function loadPage(pageName) {
-      const contentDiv = document.getElementById('view-content');
-
-      // الرئيسية: ارجع للداشبورد بدون reload
-      if (!pageName) {
-        contentDiv.innerHTML = DASHBOARD_HTML;
-        document.getElementById('app-container').style.opacity = '1';
-        showLoader(false);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
+    <style>
+      :root {
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --primary-light: #eef2ff;
+        --secondary: #10b981;
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border: #e2e8f0;
+        --shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
 
-      showLoader(true);
-      document.getElementById('app-container').style.opacity = '0.5';
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-      try {
-        const url = `./${pageName}.html`;
-        const res = await fetch(url, { cache: "no-cache" });
+      body {
+        font-family: "Cairo", sans-serif;
+        background: var(--bg);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-        if (!res.ok) {
-          throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
+      /* Navbar */
+      .navbar {
+        height: 70px;
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: var(--primary);
+        font-weight: 900;
+        font-size: 22px;
+      }
+      .nav-links {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-nav-top {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--text-main);
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn-nav-top:hover {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+
+      #app-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+        transition: opacity 0.3s ease;
+      }
+
+      /* Loading Overlay */
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+      }
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Dashboard Styles */
+      .dashboard-view {
+        width: 100%;
+        max-width: 1000px;
+        animation: fadeInUp 0.5s ease forwards;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      .header h1 {
+        font-size: 36px;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 10px;
+      }
+      .header p {
+        font-size: 18px;
+        color: var(--text-muted);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+      }
+      .card {
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-decoration: none;
+        color: inherit;
+      }
+      .card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary);
+      }
+      .icon-box {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-light);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-size: 24px;
+      }
+      .card h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+      .card p {
+        font-size: 15px;
+        color: var(--text-muted);
+        line-height: 1.6;
+      }
+
+      .footer {
+        margin-top: auto;
+        padding: 40px 0;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 14px;
+        border-top: 1px solid var(--border);
+        background: #fff;
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="loader"><div class="spinner"></div></div>
+
+    <nav class="navbar">
+      <a
+        href="#"
+        class="nav-logo"
+        onclick="
+          loadPage('');
+          return false;
+        "
+      >
+        <span>🌐</span> GeoTools Suite
+      </a>
+
+      <div class="nav-links">
+        <button class="btn-nav-top" onclick="loadPage('')">الرئيسية</button>
+        <button class="btn-nav-top" onclick="loadPage('Converter')">
+          محول الملفات
+        </button>
+        <button class="btn-nav-top" onclick="loadPage('DLTM')">محول دبي</button>
+        <button class="btn-nav-top" onclick="loadPage('Transform')">
+          تحويل الإحداثيات
+        </button>
+        <button class="btn-nav-top" onclick="loadPage('Service2')">
+          حساب المساحات
+        </button>
+      </div>
+    </nav>
+
+    <div id="app-container">
+      <div id="view-content" class="dashboard-view">
+        <!-- DASHBOARD START -->
+        <div class="header">
+          <h1>مجموعة أدوات المساحة</h1>
+          <p>اختر الخدمة التي تريد البدء باستخدامها اليوم</p>
+        </div>
+
+        <div class="grid">
+          <div class="card" onclick="loadPage('Converter')">
+            <div class="icon-box">🔄</div>
+            <h2>محول الملفات (SDR)</h2>
+            <p>
+              تحويل ملفات الإحداثيات CSV/TXT إلى صيغة SDR الخاصة بأجهزة سوكيا،
+              مع ميزة العرض على الخارطة.
+            </p>
+          </div>
+
+          <div class="card" onclick="loadPage('DLTM')">
+            <div class="icon-box">📍</div>
+            <h2>محول DLTM (دبي)</h2>
+            <p>
+              تحويل الإحداثيات المحلية لمدينة دبي (DLTM) إلى إحداثيات عالمية
+              (Lat/Long) بدقة عالية.
+            </p>
+          </div>
+
+          <div class="card" onclick="loadPage('Service2')">
+            <div class="icon-box">📐</div>
+            <h2>حساب المساحات</h2>
+            <p>
+              أداة هندسية لحساب المساحات بناءً على الإحداثيات أو المسافات
+              والزوايا.
+            </p>
+          </div>
+
+          <div class="card" onclick="loadPage('Transform')">
+            <div class="icon-box">🛰️</div>
+            <h2>تحويل الإحداثيات</h2>
+            <p>
+              تحويل الإحداثيات بين الأنظمة المختلفة UTM, WGS84 وغيرها باستخدام
+              Proj4js.
+            </p>
+          </div>
+        </div>
+        <!-- DASHBOARD END -->
+      </div>
+
+      <div class="footer">
+        <p>&copy; 2026 جميع الحقوق محفوظة - GeoTools Suite</p>
+      </div>
+    </div>
+
+    <script>
+      // بصمة نسخة للتأكد أنك ترى النسخة الجديدة على Pages
+      console.log("GeoTools SPA fetch-loader active - v2026-01-10");
+
+      function showLoader(show) {
+        document.getElementById("loader").style.display = show
+          ? "flex"
+          : "none";
+      }
+
+      // حفظ محتوى الداشبورد الأصلي عند أول تحميل
+      let DASHBOARD_HTML = "";
+      window.addEventListener("DOMContentLoaded", () => {
+        const contentDiv = document.getElementById("view-content");
+        DASHBOARD_HTML = contentDiv.innerHTML;
+      });
+
+      async function loadPage(pageName) {
+        const contentDiv = document.getElementById("view-content");
+
+        // الرئيسية: ارجع للداشبورد بدون reload
+        if (!pageName) {
+          contentDiv.innerHTML = DASHBOARD_HTML;
+          document.getElementById("app-container").style.opacity = "1";
+          showLoader(false);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
         }
 
-        const html = await res.text();
-        contentDiv.innerHTML = html;
-
-        // تشغيل سكربتات الصفحة المحقونة
-        const scripts = Array.from(contentDiv.querySelectorAll('script'));
-        let i = 0;
-
-        const runNext = () => {
-          if (i >= scripts.length) {
-            document.getElementById('app-container').style.opacity = '1';
-            showLoader(false);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-          }
-
-          const oldScript = scripts[i++];
-          const newScript = document.createElement('script');
-
-          if (oldScript.src) {
-            newScript.src = oldScript.src;
-            newScript.onload = runNext;
-            newScript.onerror = runNext;
-            document.head.appendChild(newScript);
-          } else {
+        // محاولة تنظيف أي خرائط أو عناصر سابقة قد تسبب تعارض
+        try {
+          if (window.map && typeof window.map.remove === "function") {
             try {
-              (0, eval)(oldScript.textContent || oldScript.text || "");
-            } catch (e) {
-              console.error("Injected script error:", e);
-            }
-            runNext();
+              window.map.remove();
+            } catch (e) {}
+            try {
+              delete window.map;
+            } catch (e) {}
+          }
+          if (window._map && typeof window._map.remove === "function") {
+            try {
+              window._map.remove();
+            } catch (e) {}
+            try {
+              delete window._map;
+            } catch (e) {}
+          }
+          // تنظيف أي عناصر خرائط متبقية
+          const mapElements = document.querySelectorAll(".leaflet-container");
+          for (const el of mapElements) {
+            try {
+              el.remove();
+            } catch (e) {}
+          }
+        } catch (e) {
+          /* ignore cleanup errors */
+        }
+
+        showLoader(true);
+        document.getElementById("app-container").style.opacity = "0.5";
+
+        try {
+          const url = `./${pageName}.html`;
+          const res = await fetch(url, { cache: "no-cache" });
+
+          if (!res.ok) {
+            throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
           }
 
-          if (oldScript.parentNode) oldScript.parentNode.removeChild(oldScript);
-        };
+          const html = await res.text();
 
-        runNext();
-      } catch (err) {
-        alert('Error loading page: ' + err.message);
-        showLoader(false);
-        document.getElementById('app-container').style.opacity = '1';
+          // تنظيف كامل للمحتوى القديم قبل الإدراج
+          contentDiv.innerHTML = "";
+
+          // انتظر قليلاً للتأكد من انتهاء التنظيف
+          await new Promise((resolve) => setTimeout(resolve, 10));
+
+          // ضع HTML جديد مباشرة (innerHTML يحافظ على السكربتات)
+          contentDiv.innerHTML = html;
+
+          // اجمع كل السكربتات المحقونة داخل المحتوى
+          const scripts = Array.from(contentDiv.querySelectorAll("script"));
+
+          // تنفيذ السكربتات بالتتابع
+          let idx = 0;
+          const runNextScript = () => {
+            if (idx >= scripts.length) {
+              document.getElementById("app-container").style.opacity = "1";
+              showLoader(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              return;
+            }
+
+            const oldScript = scripts[idx++];
+            const newScript = document.createElement("script");
+
+            // انقل السمات
+            if (oldScript.type) newScript.type = oldScript.type;
+
+            if (oldScript.src) {
+              // تحميل خارجي
+              newScript.src = oldScript.src;
+              newScript.onload = runNextScript;
+              newScript.onerror = () => {
+                console.warn(
+                  `Failed to load external script: ${oldScript.src}`,
+                );
+                runNextScript();
+              };
+              document.head.appendChild(newScript);
+            } else {
+              // سكربت inline
+              try {
+                const scriptContent =
+                  oldScript.textContent || oldScript.text || "";
+                if (scriptContent.trim()) {
+                  newScript.textContent = scriptContent;
+                  document.body.appendChild(newScript);
+                }
+              } catch (e) {
+                console.error("Injected script error:", e);
+              }
+              runNextScript();
+            }
+          };
+
+          runNextScript();
+        } catch (err) {
+          alert("Error loading page: " + err.message);
+          console.error("Page load error:", err);
+          showLoader(false);
+          document.getElementById("app-container").style.opacity = "1";
+        }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

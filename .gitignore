@@ -1,2 +1,24 @@
 ﻿worker/
 green groth phace 3 plot limit points.txt
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Build/Output
+dist/
+build/
+*.log
+
+# Dependencies (if added)
+node_modules/
+venv/
+__pycache__/

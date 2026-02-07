@@ -1,240 +1,269 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>حساب المساحات</title>
+  <head>
+    <meta charset="UTF-8" />
 
-  <!-- Local Leaflet (no Google, no external scripts) -->
-  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<script src="./vendor/leaflet/leaflet.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>حساب المساحات</title>
 
+    <!-- Local Leaflet (no Google, no external scripts) -->
+    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+    <script src="./vendor/leaflet/leaflet.js"></script>
 
-  <style>
-    :root{
-      --bg: #f3f4f6;
-      --card: #ffffff;
-      --text: #111827;
-      --muted: #374151;
-      --border: rgba(0,0,0,.12);
-      --soft: #f9fafb;
-      --primary: #2563eb;
-      --secondary: #475569;
-      --danger: #dc2626;
-      --warn: #f59e0b;
-    }
+    <style>
+      :root {
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #374151;
+        --border: rgba(0, 0, 0, 0.12);
+        --soft: #f9fafb;
+        --primary: #2563eb;
+        --secondary: #475569;
+        --danger: #dc2626;
+        --warn: #f59e0b;
+      }
 
-    *{ box-sizing: border-box; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
 
-    header{
-      padding: 14px 18px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-    }
-    header h1{
-      margin:0;
-      font-size: 18px;
-      font-weight: 800;
-    }
+      header {
+        padding: 14px 18px;
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+      }
+      header h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 800;
+      }
 
-    .wrap{
-      height: calc(100% - 56px);
-      display:grid;
-      grid-template-columns: 420px 1fr;
-      gap: 14px;
-      padding: 14px;
-    }
+      .wrap {
+        height: calc(100% - 56px);
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 14px;
+        padding: 14px;
+      }
 
-    .card{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      display:flex;
-      flex-direction: column;
-      min-width: 0;
-    }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
 
-    .card h2{
-      margin: 0 0 10px;
-      font-size: 15px;
-      font-weight: 800;
-    }
+      .card h2 {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 800;
+      }
 
-    /* Disable lift-on-hover effect for cards on this page */
-    .card, .map-card { transition: none !important; }
-    .card:hover, .map-card:hover { transform: none !important; box-shadow: none !important; }
-
-    /* Polygon card styling (fixed pixel size, no scaling with zoom) */
-    .polygon-card-popup { pointer-events: auto; }
-    .polygon-card { max-width: 220px; overflow: hidden; white-space: normal; }
-    .leaflet-marker-icon .polygon-card { transform: none !important; }
-
-    textarea{
-      width: 100%;
-      min-height: 220px;
-      resize: vertical;
-      background: #fff;
-      color: var(--text);
-      border: 1px solid rgba(0,0,0,.18);
-      border-radius: 10px;
-      padding: 10px;
-      line-height: 1.55;
-      font-family: Consolas, "Courier New", monospace;
-      font-size: 13px;
-    }
-
-    .row{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
-
-    button{
-      background: var(--primary);
-      color: #fff;
-      border: 0;
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    button.secondary{ background: var(--secondary); }
-    button.danger{ background: var(--danger); }
-
-    .hint{
-      margin-top: 10px;
-      background: var(--soft);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .msg{
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(37,99,235,.25);
-      background: rgba(37,99,235,.08);
-      font-size: 13px;
-      display:none;
-    }
-    .msg.warn{
-      border-color: rgba(245,158,11,.35);
-      background: rgba(245,158,11,.12);
-    }
-    .msg.err{
-      border-color: rgba(220,38,38,.35);
-      background: rgba(220,38,38,.12);
-    }
-
-    .results{
-      margin-top: 10px;
-      display:none;
-      gap: 8px;
-    }
-    .result-item{
-      display:flex;
-      justify-content: space-between;
-      align-items:center;
-      padding: 10px;
-      border-radius: 10px;
-      background: var(--soft);
-      border: 1px solid var(--border);
-    }
-    .result-val{
-      font-weight: 900;
-      direction:ltr;
-    }
-
-    .map-card{
-      padding: 12px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-height: 600px;
-    }
-    #map{
-      flex: 1;
-      min-height: 500px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      width: 100%;
-    }
-    
-    @media (max-width: 768px) {
+      /* Disable lift-on-hover effect for cards on this page */
+      .card,
       .map-card {
-        min-height: 400px;
+        transition: none !important;
+      }
+      .card:hover,
+      .map-card:hover {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Polygon card styling (fixed pixel size, no scaling with zoom) */
+      .polygon-card-popup {
+        pointer-events: auto;
+      }
+      .polygon-card {
+        max-width: 220px;
+        overflow: hidden;
+        white-space: normal;
+      }
+      .leaflet-marker-icon .polygon-card {
+        transform: none !important;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 220px;
+        resize: vertical;
+        background: #fff;
+        color: var(--text);
+        border: 1px solid rgba(0, 0, 0, 0.18);
+        border-radius: 10px;
+        padding: 10px;
+        line-height: 1.55;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 13px;
+      }
+
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      button {
+        background: var(--primary);
+        color: #fff;
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: var(--secondary);
+      }
+      button.danger {
+        background: var(--danger);
+      }
+
+      .hint {
+        margin-top: 10px;
+        background: var(--soft);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .msg {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        background: rgba(37, 99, 235, 0.08);
+        font-size: 13px;
+        display: none;
+      }
+      .msg.warn {
+        border-color: rgba(245, 158, 11, 0.35);
+        background: rgba(245, 158, 11, 0.12);
+      }
+      .msg.err {
+        border-color: rgba(220, 38, 38, 0.35);
+        background: rgba(220, 38, 38, 0.12);
+      }
+
+      .results {
+        margin-top: 10px;
+        display: none;
+        gap: 8px;
+      }
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+        background: var(--soft);
+        border: 1px solid var(--border);
+      }
+      .result-val {
+        font-weight: 900;
+        direction: ltr;
+      }
+
+      .map-card {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 600px;
       }
       #map {
-        min-height: 300px;
+        flex: 1;
+        min-height: 500px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #ffffff;
+        width: 100%;
       }
-    }
 
-    /* Leaflet customization */
-    #map .leaflet-container {
-      background: #ffffff !important;
-      font-family: 'Cairo', sans-serif;
-    }
+      @media (max-width: 768px) {
+        .map-card {
+          min-height: 400px;
+        }
+        #map {
+          min-height: 300px;
+        }
+      }
 
-    .leaflet-control {
-      background: #fff !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 8px !important;
-    }
+      /* Leaflet customization */
+      #map .leaflet-container {
+        background: #ffffff !important;
+        font-family: "Cairo", sans-serif;
+      }
 
-    .leaflet-control-zoom-in,
-    .leaflet-control-zoom-out {
-      background-color: #fff !important;
-      color: #333 !important;
-      border-bottom: 1px solid var(--border) !important;
-    }
+      .leaflet-control {
+        background: #fff !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+      }
 
-    .leaflet-control-zoom-in:hover,
-    .leaflet-control-zoom-out:hover {
-      background-color: #f0f0f0 !important;
-    }
+      .leaflet-control-zoom-in,
+      .leaflet-control-zoom-out {
+        background-color: #fff !important;
+        color: #333 !important;
+        border-bottom: 1px solid var(--border) !important;
+      }
 
-    .measure-label {
-      background: #fff !important;
-      border: 1px solid #e74c3c !important;
-      border-radius: 4px !important;
-      padding: 2px 6px !important;
-      font-size: 11px !important;
-      color: #e74c3c !important;
-      font-weight: bold !important;
-    }
+      .leaflet-control-zoom-in:hover,
+      .leaflet-control-zoom-out:hover {
+        background-color: #f0f0f0 !important;
+      }
 
-    input[type="file"]{ display:none; }
+      .measure-label {
+        background: #fff !important;
+        border: 1px solid #e74c3c !important;
+        border-radius: 4px !important;
+        padding: 2px 6px !important;
+        font-size: 11px !important;
+        color: #e74c3c !important;
+        font-weight: bold !important;
+      }
 
-    /* Leaflet tweaks for better visibility in light theme */
-    .leaflet-container { background: #ffffff; }
-  </style>
-</head>
+      input[type="file"] {
+        display: none;
+      }
 
-<body>
-<header>
-  <h1>حساب المساحات (N, E) — وضع مستوي (UTM/محلي)</h1>
-</header>
+      /* Leaflet tweaks for better visibility in light theme */
+      .leaflet-container {
+        background: #ffffff;
+      }
+    </style>
+  </head>
 
-<div class="wrap">
-  <div class="card">
-    <h2>إدخال النقاط</h2>
+  <body>
+    <header>
+      <h1>حساب المساحات (N, E) — وضع مستوي (UTM/محلي)</h1>
+    </header>
 
-    <textarea id="coordsInput" placeholder="كل سطر = نقطة واحدة
+    <div class="wrap">
+      <div class="card">
+        <h2>إدخال النقاط</h2>
+
+        <textarea
+          id="coordsInput"
+          placeholder="كل سطر = نقطة واحدة
 
 أمثلة مقبولة:
 N, E
@@ -242,436 +271,530 @@ N E
 1, N, E
 1 N E
 
-يدعم: , أو ; أو مسافات أو Tab"></textarea>
+يدعم: , أو ; أو مسافات أو Tab"
+        ></textarea>
 
-    <div class="row">
-      <button id="btnDraw" type="button">رسم وحساب</button>
-      <button id="btnImport" type="button" class="secondary">استيراد CSV/TXT</button>
-      <button id="btnClear" type="button" class="danger">مسح</button>
-      <input id="fileInput" type="file" accept=".csv,.txt" />
-    </div>
+        <div class="row">
+          <button id="btnDraw" type="button">رسم وحساب</button>
+          <button id="btnImport" type="button" class="secondary">
+            استيراد CSV/TXT
+          </button>
+          <button id="btnClear" type="button" class="danger">مسح</button>
+          <input id="fileInput" type="file" accept=".csv,.txt" />
+        </div>
 
-    <div class="row" style="gap: 8px; align-items: center; background: #f5f5f5; padding: 8px; border-radius: 4px; font-size: 12px;">
-      <label style="margin: 0;">🔍 طريقة الفصل بين المضلعات:</label>
-      <select id="splitMethod" style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-        <option value="auto">تلقائي (الذكي - يفضل ID تلقائياً)</option>
-        <option value="id">حسب ID (استخدم هذا للبيانات مع أرقام ID)</option>
-        <option value="duplicates">نقاط متطابقة فقط</option>
-        <option value="gaps">فجوات كبيرة فقط (&gt;1000م)</option>
-      </select>
-    </div>
+        <div
+          class="row"
+          style="
+            gap: 8px;
+            align-items: center;
+            background: #f5f5f5;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+          "
+        >
+          <label style="margin: 0">🔍 طريقة الفصل بين المضلعات:</label>
+          <select
+            id="splitMethod"
+            style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px"
+          >
+            <option value="auto">تلقائي (الذكي - يفضل ID تلقائياً)</option>
+            <option value="id">حسب ID (استخدم هذا للبيانات مع أرقام ID)</option>
+            <option value="duplicates">نقاط متطابقة فقط</option>
+            <option value="gaps">فجوات كبيرة فقط (&gt;1000م)</option>
+          </select>
+        </div>
 
-    <div class="hint">
-      <div>• هذه الصفحة تعمل دون إنترنت (لا Tiles). تظهر شبكة للمساعدة في القراءة.</div>
-      <div>• اعتبر الإحداثيات (N,E) بوحدة المتر أو أي وحدة خطية، فتكون المساحة (وحدة²).</div>
-      <div>• إذا كانت النقاط لا تظهر: غالبًا Leaflet لم يُحمّل (مسار vendor/leaflet) أو أن الصفحة ليست داخل docs.</div>
-      <div style="direction:ltr; margin-top:8px;">
-        مثال سريع للاختبار:<br/>
-        3000, 5000<br/>
-        3050, 5080<br/>
-        2980, 5120<br/>
-        2950, 5030
+        <div class="hint">
+          <div>
+            • هذه الصفحة تعمل دون إنترنت (لا Tiles). تظهر شبكة للمساعدة في
+            القراءة.
+          </div>
+          <div>
+            • اعتبر الإحداثيات (N,E) بوحدة المتر أو أي وحدة خطية، فتكون المساحة
+            (وحدة²).
+          </div>
+          <div>
+            • إذا كانت النقاط لا تظهر: غالبًا Leaflet لم يُحمّل (مسار
+            vendor/leaflet) أو أن الصفحة ليست داخل docs.
+          </div>
+          <div style="direction: ltr; margin-top: 8px">
+            مثال سريع للاختبار:<br />
+            3000, 5000<br />
+            3050, 5080<br />
+            2980, 5120<br />
+            2950, 5030
+          </div>
+        </div>
+
+        <div id="message" class="msg"></div>
+
+        <div class="results" id="areaResults">
+          <div class="result-item">
+            <span>عدد النقاط:</span>
+            <span class="result-val"><span id="res-count">0</span></span>
+          </div>
+          <div class="result-item">
+            <span>المساحة:</span>
+            <span class="result-val"><span id="res-area">0</span></span>
+          </div>
+          <div class="result-item">
+            <span>المحيط:</span>
+            <span class="result-val"><span id="res-perimeter">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card map-card">
+        <div id="map"></div>
       </div>
     </div>
 
-    <div id="message" class="msg"></div>
+    <!-- Leaflet already included in the document head; avoid duplicate loading -->
+    <script>
+      (function () {
+        // --- Hard stop if Leaflet not loaded ---
+        if (typeof L === "undefined") {
+          const el = document.getElementById("message");
+          el.className = "msg err";
+          el.style.display = "block";
+          el.textContent =
+            "Leaflet لم يتم تحميله. تأكد أن الملف Service2.html داخل مجلد docs وأن المسار docs/vendor/leaflet/leaflet.js موجود.";
+          return;
+        }
 
-    <div class="results" id="areaResults">
-      <div class="result-item">
-        <span>عدد النقاط:</span>
-        <span class="result-val"><span id="res-count">0</span></span>
-      </div>
-      <div class="result-item">
-        <span>المساحة:</span>
-        <span class="result-val"><span id="res-area">0</span></span>
-      </div>
-      <div class="result-item">
-        <span>المحيط:</span>
-        <span class="result-val"><span id="res-perimeter">0</span></span>
-      </div>
-    </div>
-  </div>
+        // --- UI elements ---
+        const elInput = document.getElementById("coordsInput");
+        const elMsg = document.getElementById("message");
+        const elResults = document.getElementById("areaResults");
 
-  <div class="card map-card">
-    <div id="map"></div>
-  </div>
-</div>
+        const btnDraw = document.getElementById("btnDraw");
+        const btnImport = document.getElementById("btnImport");
+        const btnClear = document.getElementById("btnClear");
+        const fileInput = document.getElementById("fileInput");
 
-<script src="vendor/leaflet/leaflet.js"></script>
-<script>
-(function(){
-  // --- Hard stop if Leaflet not loaded ---
-  if (typeof L === 'undefined') {
-    const el = document.getElementById('message');
-    el.className = 'msg err';
-    el.style.display = 'block';
-    el.textContent =
-      'Leaflet لم يتم تحميله. تأكد أن الملف Service2.html داخل مجلد docs وأن المسار docs/vendor/leaflet/leaflet.js موجود.';
-    return;
-  }
+        function showMsg(text, kind) {
+          elMsg.style.display = "block";
+          elMsg.className = "msg" + (kind ? " " + kind : "");
+          elMsg.textContent = text;
+        }
+        function hideMsg() {
+          elMsg.style.display = "none";
+          elMsg.textContent = "";
+        }
+        function fmt(num, maxFrac) {
+          const n = Number(num);
+          const fixed = n.toFixed(maxFrac ?? 3);
+          return parseFloat(fixed).toString();
+        }
 
-  // --- UI elements ---
-  const elInput   = document.getElementById('coordsInput');
-  const elMsg     = document.getElementById('message');
-  const elResults = document.getElementById('areaResults');
+        // --- Robust parsing (supports: N,E | N E | id,N,E | id N E | extra cols -> last two) ---
+        function extractNumbers(line) {
+          const cleaned = (line || "").trim();
+          if (!cleaned) return [];
 
-  const btnDraw   = document.getElementById('btnDraw');
-  const btnImport = document.getElementById('btnImport');
-  const btnClear  = document.getElementById('btnClear');
-  const fileInput = document.getElementById('fileInput');
+          const tokens = cleaned
+            .replace(/;/g, ",")
+            .replace(/\t/g, " ")
+            .split(/[, ]+/)
+            .filter(Boolean);
 
-  function showMsg(text, kind){
-    elMsg.style.display = 'block';
-    elMsg.className = 'msg' + (kind ? (' ' + kind) : '');
-    elMsg.textContent = text;
-  }
-  function hideMsg(){
-    elMsg.style.display = 'none';
-    elMsg.textContent = '';
-  }
-  function fmt(num, maxFrac){
-    const n = Number(num);
-    const fixed = n.toFixed(maxFrac ?? 3);
-    return parseFloat(fixed).toString();
-  }
+          const nums = [];
+          for (const raw of tokens) {
+            let t = raw.trim();
+            if (!/[0-9]/.test(t)) continue;
 
-  // --- Robust parsing (supports: N,E | N E | id,N,E | id N E | extra cols -> last two) ---
-  function extractNumbers(line){
-    const cleaned = (line || '').trim();
-    if(!cleaned) return [];
+            // allow decimal comma in isolated token, convert to dot
+            if (t.includes(",") && !t.includes(".")) {
+              const c = (t.match(/,/g) || []).length;
+              if (c === 1) t = t.replace(",", ".");
+            }
 
-    const tokens = cleaned
-      .replace(/;/g, ',')
-      .replace(/\t/g, ' ')
-      .split(/[, ]+/)
-      .filter(Boolean);
+            t = t.replace(/[^\d.+-]/g, "");
+            const v = Number.parseFloat(t);
+            if (Number.isFinite(v)) nums.push(v);
+          }
+          return nums;
+        }
 
-    const nums = [];
-    for(const raw of tokens){
-      let t = raw.trim();
-      if(!/[0-9]/.test(t)) continue;
+        function parsePoints(text) {
+          const lines = String(text || "").split(/\r?\n/);
+          const pts = [];
+          const bad = [];
+          let lastId = null;
 
-      // allow decimal comma in isolated token, convert to dot
-      if(t.includes(',') && !t.includes('.')){
-        const c = (t.match(/,/g)||[]).length;
-        if(c === 1) t = t.replace(',', '.');
-      }
+          for (let i = 0; i < lines.length; i++) {
+            const nums = extractNumbers(lines[i]);
+            if (nums.length === 0) continue;
 
-      t = t.replace(/[^\d.+-]/g, '');
-      const v = Number.parseFloat(t);
-      if(Number.isFinite(v)) nums.push(v);
-    }
-    return nums;
-  }
+            let N,
+              E,
+              id = null;
+            if (nums.length === 2) {
+              [N, E] = nums;
+            } else if (nums.length >= 3) {
+              // يوجد عمود ID في البداية => id, N, E
+              id = nums[0];
+              N = nums[nums.length - 2];
+              E = nums[nums.length - 1];
+            } else {
+              bad.push(i + 1);
+              continue;
+            }
 
-  function parsePoints(text){
-    const lines = String(text || '').split(/\r?\n/);
-    const pts = [];
-    const bad = [];
-    let lastId = null;
+            if (!Number.isFinite(N) || !Number.isFinite(E)) {
+              bad.push(i + 1);
+              continue;
+            }
+            pts.push({ N, E, id });
+            lastId = id;
+          }
 
-    for(let i=0;i<lines.length;i++){
-      const nums = extractNumbers(lines[i]);
-      if(nums.length === 0) continue;
+          return { pts, badLines: bad };
+        }
 
-      let N, E, id = null;
-      if(nums.length === 2){
-        [N, E] = nums;
-      } else if(nums.length >= 3){
-        // يوجد عمود ID في البداية => id, N, E
-        id = nums[0];
-        N = nums[nums.length - 2];
-        E = nums[nums.length - 1];
-      } else {
-        bad.push(i+1);
-        continue;
-      }
+        function pointsEqual(a, b, tolerance = 1e-9) {
+          return (
+            Math.abs(a.N - b.N) < tolerance && Math.abs(a.E - b.E) < tolerance
+          );
+        }
 
-      if(!Number.isFinite(N) || !Number.isFinite(E)){
-        bad.push(i+1);
-        continue;
-      }
-      pts.push({ N, E, id });
-      lastId = id;
-    }
+        function normalizeClosedDuplicate(pts) {
+          if (pts.length >= 2 && pointsEqual(pts[0], pts[pts.length - 1])) {
+            return pts.slice(0, -1);
+          }
+          return pts;
+        }
 
-    return { pts, badLines: bad };
-  }
+        // --- Math (Shoelace with x=E, y=N) ---
+        function computeAreaPerimeter(pts) {
+          const n = pts.length;
+          if (n < 2) return { area: 0, perimeter: 0 };
 
-  function pointsEqual(a, b, tolerance = 1e-9){
-    return Math.abs(a.N - b.N) < tolerance && Math.abs(a.E - b.E) < tolerance;
-  }
+          let sum = 0;
+          let per = 0;
 
-  function normalizeClosedDuplicate(pts){
-    if(pts.length >= 2 && pointsEqual(pts[0], pts[pts.length - 1])){
-      return pts.slice(0, -1);
-    }
-    return pts;
-  }
+          for (let i = 0; i < n; i++) {
+            const a = pts[i];
+            const b = pts[(i + 1) % n];
 
-  // --- Math (Shoelace with x=E, y=N) ---
-  function computeAreaPerimeter(pts){
-    const n = pts.length;
-    if(n < 2) return { area: 0, perimeter: 0 };
+            // perimeter always computed for closed loop intent
+            per += Math.hypot(b.E - a.E, b.N - a.N);
 
-    let sum = 0;
-    let per = 0;
+            if (n >= 3) {
+              sum += a.E * b.N - b.E * a.N;
+            }
+          }
 
-    for(let i=0;i<n;i++){
-      const a = pts[i];
-      const b = pts[(i+1) % n];
+          const area = n >= 3 ? Math.abs(sum) / 2 : 0;
+          return { area, perimeter: per };
+        }
 
-      // perimeter always computed for closed loop intent
-      per += Math.hypot((b.E - a.E), (b.N - a.N));
+        // --- Leaflet map (planar / CRS.Simple) ---
+        let map = null;
 
-      if(n >= 3){
-        sum += (a.E * b.N) - (b.E * a.N);
-      }
-    }
+        function initializeMap() {
+          if (map) return;
 
-    const area = (n >= 3) ? (Math.abs(sum) / 2) : 0;
-    return { area, perimeter: per };
-  }
+          const mapEl = document.getElementById("map");
+          if (!mapEl) return;
 
-  // --- Leaflet map (planar / CRS.Simple) ---
-  let map = null;
-  
-  function initializeMap(){
-    if(map) return;
-    
-    const mapEl = document.getElementById("map");
-    if(!mapEl) return;
-    
-    // تنظيف أي معرفات قديمة
-    if(mapEl._leaflet_id) {
-      try { delete mapEl._leaflet_id; } catch {}
-    }
-    
-    map = L.map('map', {
-      crs: L.CRS.Simple,
-      minZoom: -10,
-      zoomSnap: 0.25,
-      zoomDelta: 0.25,
-      attributionControl: false,
-      zoomControl: true
-    });
-    
-    // إعادة حساب الحجم
-    setTimeout(() => {
-      try {
-        map.invalidateSize(true);
-      } catch (e) {
-        console.log('Error sizing map:', e);
-      }
-    }, 50);
-    
-    // مستمع resize
-    if(!window._service2MapResizeListener) {
-      window._service2MapResizeListener = true;
-      window.addEventListener('resize', () => {
-        if(map) {
-          try {
-            map.invalidateSize(false);
-          } catch (e) {
-            console.log('Error on resize:', e);
+          // تنظيف أي معرفات قديمة
+          if (mapEl._leaflet_id) {
+            try {
+              delete mapEl._leaflet_id;
+            } catch {}
+          }
+
+          map = L.map("map", {
+            crs: L.CRS.Simple,
+            minZoom: -10,
+            zoomSnap: 0.25,
+            zoomDelta: 0.25,
+            attributionControl: false,
+            zoomControl: true,
+          });
+
+          // إعادة حساب الحجم
+          setTimeout(() => {
+            try {
+              map.invalidateSize(true);
+            } catch (e) {
+              console.log("Error sizing map:", e);
+            }
+          }, 50);
+
+          // مستمع resize
+          if (!window._service2MapResizeListener) {
+            window._service2MapResizeListener = true;
+            window.addEventListener("resize", () => {
+              if (map) {
+                try {
+                  map.invalidateSize(false);
+                } catch (e) {
+                  console.log("Error on resize:", e);
+                }
+              }
+            });
           }
         }
-      });
-    }
-  }
-  
-  initializeMap();
-  const fixMapSize = () => {
-    if(map) {
-      try {
-        map.invalidateSize(true);
-      } catch (e) {}
-    }
-  };
-setTimeout(fixMapSize, 0);
-setTimeout(fixMapSize, 250);
-window.addEventListener('resize', fixMapSize);
 
+        initializeMap();
+        const fixMapSize = () => {
+          if (map) {
+            try {
+              map.invalidateSize(true);
+            } catch (e) {}
+          }
+        };
+        setTimeout(fixMapSize, 0);
+        setTimeout(fixMapSize, 250);
+        window.addEventListener("resize", fixMapSize);
 
-  // force Leaflet to compute sizes after layout
-  setTimeout(() => map.invalidateSize(), 0);
-  window.addEventListener('resize', () => map.invalidateSize());
+        // force Leaflet to compute sizes after layout
+        setTimeout(() => map.invalidateSize(), 0);
+        window.addEventListener("resize", () => map.invalidateSize());
 
-  // Update card sizes to fit polygon interior in pixel space
-  function updateCardSizes(){
-    try{
-      popupLayers.forEach(obj => {
-        const marker = obj.marker;
-        const pts = obj.pts;
-        const el = marker && marker.getElement && marker.getElement();
-        if(!el) return;
-        const inner = el.firstElementChild || el;
-        // compute pixel bounding box of polygon points
-        const ptsPx = pts.map(p => map.latLngToLayerPoint([p.N, p.E]));
-        const xs = ptsPx.map(p => p.x);
-        const ys = ptsPx.map(p => p.y);
-        const w = Math.max(40, Math.abs(Math.max(...xs) - Math.min(...xs)));
-        const h = Math.max(24, Math.abs(Math.max(...ys) - Math.min(...ys)));
-        inner.style.width = w + 'px';
-        inner.style.height = h + 'px';
-        inner.style.overflow = 'hidden';
-        inner.style.display = 'flex';
-        inner.style.alignItems = 'center';
-        inner.style.justifyContent = 'center';
-        // keep marker centered
-        el.style.transform = 'translate(-50%,-50%)';
-      });
-    }catch(e){/*ignore*/}
-  }
-  map.on('zoomend', updateCardSizes);
-  map.on('moveend', updateCardSizes);
+        // Update card sizes to fit polygon interior in pixel space
+        function updateCardSizes() {
+          try {
+            popupLayers.forEach((obj) => {
+              const marker = obj.marker;
+              const pts = obj.pts;
+              const el = marker && marker.getElement && marker.getElement();
+              if (!el) return;
+              const inner = el.firstElementChild || el;
+              // compute pixel bounding box of polygon points
+              const ptsPx = pts.map((p) => map.latLngToLayerPoint([p.N, p.E]));
+              const xs = ptsPx.map((p) => p.x);
+              const ys = ptsPx.map((p) => p.y);
+              const w = Math.max(
+                40,
+                Math.abs(Math.max(...xs) - Math.min(...xs)),
+              );
+              const h = Math.max(
+                24,
+                Math.abs(Math.max(...ys) - Math.min(...ys)),
+              );
+              inner.style.width = w + "px";
+              inner.style.height = h + "px";
+              inner.style.overflow = "hidden";
+              inner.style.display = "flex";
+              inner.style.alignItems = "center";
+              inner.style.justifyContent = "center";
+              // keep marker centered
+              el.style.transform = "translate(-50%,-50%)";
+            });
+          } catch (e) {
+            /*ignore*/
+          }
+        }
+        map.on("zoomend", updateCardSizes);
+        map.on("moveend", updateCardSizes);
 
-  // Layers
-  let gridLayer = null;
-  let pointsLayer = null;
-  let lineLayer = null;
-  let polyLayer = null;
-  let popupLayers = [];
+        // Layers
+        let gridLayer = null;
+        let pointsLayer = null;
+        let lineLayer = null;
+        let polyLayer = null;
+        let popupLayers = [];
 
-  function clearDraw(){
-    if(pointsLayer){ map.removeLayer(pointsLayer); pointsLayer = null; }
-    if(lineLayer){ map.removeLayer(lineLayer); lineLayer = null; }
-    if(polyLayer){ map.removeLayer(polyLayer); polyLayer = null; }
-    // remove popups added for polygon cards
-    if(popupLayers && popupLayers.length){
-      popupLayers.forEach(obj => { try{ if(obj && obj.marker) map.removeLayer(obj.marker); }catch(e){} });
-      popupLayers = [];
-    }
-    // remove any side polygon details element
-    const existingDetails = document.getElementById('polygon-details');
-    if(existingDetails && existingDetails.parentNode){ existingDetails.parentNode.removeChild(existingDetails); }
-  }
+        function clearDraw() {
+          if (pointsLayer) {
+            map.removeLayer(pointsLayer);
+            pointsLayer = null;
+          }
+          if (lineLayer) {
+            map.removeLayer(lineLayer);
+            lineLayer = null;
+          }
+          if (polyLayer) {
+            map.removeLayer(polyLayer);
+            polyLayer = null;
+          }
+          // remove popups added for polygon cards
+          if (popupLayers && popupLayers.length) {
+            popupLayers.forEach((obj) => {
+              try {
+                if (obj && obj.marker) map.removeLayer(obj.marker);
+              } catch (e) {}
+            });
+            popupLayers = [];
+          }
+          // remove any side polygon details element
+          const existingDetails = document.getElementById("polygon-details");
+          if (existingDetails && existingDetails.parentNode) {
+            existingDetails.parentNode.removeChild(existingDetails);
+          }
+        }
 
-  function buildGrid(bounds, step){
-    const yMin = bounds.getSouth(), yMax = bounds.getNorth();
-    const xMin = bounds.getWest(),  xMax = bounds.getEast();
+        function buildGrid(bounds, step) {
+          const yMin = bounds.getSouth(),
+            yMax = bounds.getNorth();
+          const xMin = bounds.getWest(),
+            xMax = bounds.getEast();
 
-    const lines = [];
-    for(let x = Math.floor(xMin/step)*step; x <= xMax; x += step){
-      lines.push([[yMin, x],[yMax, x]]);
-    }
-    for(let y = Math.floor(yMin/step)*step; y <= yMax; y += step){
-      lines.push([[y, xMin],[y, xMax]]);
-    }
+          const lines = [];
+          for (let x = Math.floor(xMin / step) * step; x <= xMax; x += step) {
+            lines.push([
+              [yMin, x],
+              [yMax, x],
+            ]);
+          }
+          for (let y = Math.floor(yMin / step) * step; y <= yMax; y += step) {
+            lines.push([
+              [y, xMin],
+              [y, xMax],
+            ]);
+          }
 
-    return L.polyline(lines, { weight: 1, opacity: 0.35 }); // كانت 0.25
-  }
+          return L.polyline(lines, { weight: 1, opacity: 0.35 }); // كانت 0.25
+        }
 
-  function setGridToBounds(bounds){
-    if(gridLayer){ map.removeLayer(gridLayer); gridLayer = null; }
+        function setGridToBounds(bounds) {
+          if (gridLayer) {
+            map.removeLayer(gridLayer);
+            gridLayer = null;
+          }
 
-    const width  = Math.abs(bounds.getEast() - bounds.getWest());
-    const height = Math.abs(bounds.getNorth() - bounds.getSouth());
-    const span = Math.max(width, height);
+          const width = Math.abs(bounds.getEast() - bounds.getWest());
+          const height = Math.abs(bounds.getNorth() - bounds.getSouth());
+          const span = Math.max(width, height);
 
-    let step = 100;
-    if(span > 50000) step = 5000;
-    else if(span > 10000) step = 1000;
-    else if(span > 2000)  step = 200;
-    else if(span > 500)   step = 50;
-    else if(span > 100)   step = 10;
+          let step = 100;
+          if (span > 50000) step = 5000;
+          else if (span > 10000) step = 1000;
+          else if (span > 2000) step = 200;
+          else if (span > 500) step = 50;
+          else if (span > 100) step = 10;
 
-    gridLayer = buildGrid(bounds, step).addTo(map);
-  }
+          gridLayer = buildGrid(bounds, step).addTo(map);
+        }
 
-  // initial neutral view + grid
-  const initBounds = L.latLngBounds([[0,0],[1000,1000]]);
-  map.fitBounds(initBounds);
-  setGridToBounds(initBounds);
+        // initial neutral view + grid
+        const initBounds = L.latLngBounds([
+          [0, 0],
+          [1000, 1000],
+        ]);
+        map.fitBounds(initBounds);
+        setGridToBounds(initBounds);
 
-  function toLatLngs(pts){
-    // CRS.Simple expects [y, x] -> [N, E]
-    return pts.map(p => [p.N, p.E]);
-  }
+        function toLatLngs(pts) {
+          // CRS.Simple expects [y, x] -> [N, E]
+          return pts.map((p) => [p.N, p.E]);
+        }
 
-  function computePolygonCentroid(pts){
-    // Area-weighted centroid (uses shoelace formula)
-    // pts: array of {N, E} where N=lat(Y), E=lng(X)
-    let A = 0, Cx = 0, Cy = 0;
-    const n = pts.length;
-    for(let i = 0; i < n; i++){
-      const a = pts[i];
-      const b = pts[(i+1) % n];
-      const x0 = a.E, y0 = a.N;
-      const x1 = b.E, y1 = b.N;
-      const cross = (x0 * y1) - (x1 * y0);
-      A += cross;
-      Cx += (x0 + x1) * cross;
-      Cy += (y0 + y1) * cross;
-    }
-    A = A / 2;
-    if(Math.abs(A) < 1e-9){
-      // fallback to simple average
-      let sx = 0, sy = 0;
-      for(const p of pts){ sx += p.E; sy += p.N; }
-      return { N: sy / n, E: sx / n };
-    }
-    Cx = Cx / (6 * A);
-    Cy = Cy / (6 * A);
-    return { N: Cy, E: Cx };
-  }
+        function computePolygonCentroid(pts) {
+          // Area-weighted centroid (uses shoelace formula)
+          // pts: array of {N, E} where N=lat(Y), E=lng(X)
+          let A = 0,
+            Cx = 0,
+            Cy = 0;
+          const n = pts.length;
+          for (let i = 0; i < n; i++) {
+            const a = pts[i];
+            const b = pts[(i + 1) % n];
+            const x0 = a.E,
+              y0 = a.N;
+            const x1 = b.E,
+              y1 = b.N;
+            const cross = x0 * y1 - x1 * y0;
+            A += cross;
+            Cx += (x0 + x1) * cross;
+            Cy += (y0 + y1) * cross;
+          }
+          A = A / 2;
+          if (Math.abs(A) < 1e-9) {
+            // fallback to simple average
+            let sx = 0,
+              sy = 0;
+            for (const p of pts) {
+              sx += p.E;
+              sy += p.N;
+            }
+            return { N: sy / n, E: sx / n };
+          }
+          Cx = Cx / (6 * A);
+          Cy = Cy / (6 * A);
+          return { N: Cy, E: Cx };
+        }
 
-  function render(ptsInput){
-    hideMsg();
-    clearDraw();
+        function render(ptsInput) {
+          hideMsg();
+          clearDraw();
 
-    // تقسيم النقاط إلى مضلعات متعددة
-    const polygons = splitPolygonsAtClosingPoint(ptsInput);
-    
-    if(polygons.length === 0 || ptsInput.length < 2){
-      elResults.style.display = 'none';
-      showMsg('Enter at least 2 points to draw.', 'warn');
-      return;
-    }
+          // تقسيم النقاط إلى مضلعات متعددة
+          const polygons = splitPolygonsAtClosingPoint(ptsInput);
 
-    // عرض كل مضلع بلون مختلف
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8'];
-    pointsLayer = L.layerGroup();
-    let allBounds = null;
-    let totalArea = 0;
-    let totalPerimeter = 0;
+          if (polygons.length === 0 || ptsInput.length < 2) {
+            elResults.style.display = "none";
+            showMsg("Enter at least 2 points to draw.", "warn");
+            return;
+          }
 
-    polygons.forEach((polyPts, polyIdx) => {
-      if(polyPts.length < 2) return;
-      
-      const latlngs = toLatLngs(polyPts);
-      const color = colors[polyIdx % colors.length];
+          // عرض كل مضلع بلون مختلف
+          const colors = [
+            "#FF6B6B",
+            "#4ECDC4",
+            "#45B7D1",
+            "#FFA07A",
+            "#98D8C8",
+          ];
+          pointsLayer = L.layerGroup();
+          let allBounds = null;
+          let totalArea = 0;
+          let totalPerimeter = 0;
 
-      // الماركرات
-      latlngs.forEach((ll, idx) => {
-        const m = L.circleMarker(ll, { radius: 6, weight: 2, fillOpacity: 0.85, color: color });
-        m.bindTooltip(
-          `P${idx+1}<br/>N=${fmt(polyPts[idx].N,3)}<br/>E=${fmt(polyPts[idx].E,3)}`,
-          { sticky: true }
-        );
-        m.addTo(pointsLayer);
-      });
+          polygons.forEach((polyPts, polyIdx) => {
+            if (polyPts.length < 2) return;
 
-      // الخط المغلق
-      const closed = latlngs.slice();
-      closed.push(latlngs[0]);
-      L.polyline(closed, { weight: 3, opacity: 0.95, color: color }).addTo(pointsLayer);
+            const latlngs = toLatLngs(polyPts);
+            const color = colors[polyIdx % colors.length];
 
-      // المضلع (مساحة)
-      if(polyPts.length >= 3){
-        L.polygon(latlngs, { weight: 2, fillOpacity: 0.20, color: color }).addTo(pointsLayer);
-      }
+            // الماركرات
+            latlngs.forEach((ll, idx) => {
+              const m = L.circleMarker(ll, {
+                radius: 6,
+                weight: 2,
+                fillOpacity: 0.85,
+                color: color,
+              });
+              m.bindTooltip(
+                `P${idx + 1}<br/>N=${fmt(polyPts[idx].N, 3)}<br/>E=${fmt(polyPts[idx].E, 3)}`,
+                { sticky: true },
+              );
+              m.addTo(pointsLayer);
+            });
 
-      // حساب الإحصائيات
-      const stats = computeAreaPerimeter(polyPts);
-      totalArea += stats.area;
-      totalPerimeter += stats.perimeter;
+            // الخط المغلق
+            const closed = latlngs.slice();
+            closed.push(latlngs[0]);
+            L.polyline(closed, {
+              weight: 3,
+              opacity: 0.95,
+              color: color,
+            }).addTo(pointsLayer);
 
-      // حساب مركز المضلع لعرض البطاقة
-      const centroid = computePolygonCentroid(polyPts);
+            // المضلع (مساحة)
+            if (polyPts.length >= 3) {
+              L.polygon(latlngs, {
+                weight: 2,
+                fillOpacity: 0.2,
+                color: color,
+              }).addTo(pointsLayer);
+            }
 
-      // إنشاء بطاقة HTML
-      const cardHTML = `
+            // حساب الإحصائيات
+            const stats = computeAreaPerimeter(polyPts);
+            totalArea += stats.area;
+            totalPerimeter += stats.perimeter;
+
+            // حساب مركز المضلع لعرض البطاقة
+            const centroid = computePolygonCentroid(polyPts);
+
+            // إنشاء بطاقة HTML
+            const cardHTML = `
         <div style="
           background: ${color}dd;
           border: 2px solid ${color};
@@ -691,265 +814,294 @@ window.addEventListener('resize', fixMapSize);
           <div style="font-size: 11px; margin: 3px 0;">Perimeter: ${fmt(stats.perimeter, 2)} m</div>
         </div>
       `;
-      
-      // إضافة البطاقة على الخريطة كـ marker مع divIcon (ثابتة الحجم، لا تتغير مع الزووم)
-      const icon = L.divIcon({
-        className: 'polygon-card',
-        html: cardHTML,
-        iconSize: null
-      });
-      const marker = L.marker([centroid.N, centroid.E], { icon, interactive: false }).addTo(map);
-      // track marker with associated polygon points so we can size it later
-      popupLayers.push({ marker: marker, pts: polyPts });
-      
 
-      // تحديث الحدود
-      if(!allBounds) allBounds = L.latLngBounds(latlngs);
-      else allBounds.extend(latlngs);
-    });
+            // إضافة البطاقة على الخريطة كـ marker مع divIcon (ثابتة الحجم، لا تتغير مع الزووم)
+            const icon = L.divIcon({
+              className: "polygon-card",
+              html: cardHTML,
+              iconSize: null,
+            });
+            const marker = L.marker([centroid.N, centroid.E], {
+              icon,
+              interactive: false,
+            }).addTo(map);
+            // track marker with associated polygon points so we can size it later
+            popupLayers.push({ marker: marker, pts: polyPts });
 
-    pointsLayer.addTo(map);
+            // تحديث الحدود
+            if (!allBounds) allBounds = L.latLngBounds(latlngs);
+            else allBounds.extend(latlngs);
+          });
 
-    // عرض النتائج
-    if(allBounds){
-      map.fitBounds(allBounds.pad(0.2));
-      setGridToBounds(allBounds.pad(0.2));
-    }
+          pointsLayer.addTo(map);
 
-    // إظهار الإجمالي والتفاصيل
-    document.getElementById('res-count').innerText = String(ptsInput.length);
-    document.getElementById('res-area').innerText = fmt(totalArea, 3);
-    document.getElementById('res-perimeter').innerText = fmt(totalPerimeter, 3);
+          // عرض النتائج
+          if (allBounds) {
+            map.fitBounds(allBounds.pad(0.2));
+            setGridToBounds(allBounds.pad(0.2));
+          }
 
-    elResults.style.display = 'grid';
+          // إظهار الإجمالي والتفاصيل
+          document.getElementById("res-count").innerText = String(
+            ptsInput.length,
+          );
+          document.getElementById("res-area").innerText = fmt(totalArea, 3);
+          document.getElementById("res-perimeter").innerText = fmt(
+            totalPerimeter,
+            3,
+          );
 
-    if(polygons.length > 1){
-      showMsg(`Detected ${polygons.length} polygons. Area and perimeter calculated for each.`, '');
-    } else if(ptsInput.length < 3){
-      showMsg('Drawing complete. Area calculation requires at least 3 points.', 'warn');
-    } else {
-      showMsg('Drawing and calculation completed successfully.', '');
-    }
-  }
+          elResults.style.display = "grid";
 
-  // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
-  function splitPolygonsAtClosingPoint(pts){
-    const method = document.getElementById('splitMethod')?.value || 'auto';
-
-    // If many points include an ID field, prefer ID splitting automatically
-    const idCount = pts.reduce((c,p) => c + (p && p.id !== undefined ? 1 : 0), 0);
-    const idRatio = pts.length ? (idCount / pts.length) : 0;
-
-    if(method === 'duplicates'){
-      return splitByDuplicates(pts);
-    } else if(method === 'gaps'){
-      return splitByGaps(pts);
-    } else if(method === 'id'){
-      return splitByIdReset(pts);
-    } else {
-      // auto: if many rows contain an ID, use ID-based splitting first
-      if(idRatio > 0.3){
-        const idResult = splitByIdReset(pts);
-        if(idResult.length > 1) return idResult;
-      }
-      // fallback to auto heuristic
-      return splitByAuto(pts);
-    }
-  }
-
-  function splitByDuplicates(pts){
-    const polygons = [];
-    let currentPolygon = [];
-
-    for(let i = 0; i < pts.length; i++){
-      const currentPt = pts[i];
-      
-      if(currentPolygon.length === 0){
-        currentPolygon.push(currentPt);
-      } else {
-        const firstPt = currentPolygon[0];
-        
-        // البحث عن نقطة متطابقة مع البداية
-        if(pointsEqual(currentPt, firstPt, 0.01) && currentPolygon.length > 2){
-          // حفظ المضلع بدون النقطة الأخيرة (المكررة)
-          polygons.push(currentPolygon);
-          currentPolygon = [currentPt];
-        } else {
-          currentPolygon.push(currentPt);
+          if (polygons.length > 1) {
+            showMsg(
+              `Detected ${polygons.length} polygons. Area and perimeter calculated for each.`,
+              "",
+            );
+          } else if (ptsInput.length < 3) {
+            showMsg(
+              "Drawing complete. Area calculation requires at least 3 points.",
+              "warn",
+            );
+          } else {
+            showMsg("Drawing and calculation completed successfully.", "");
+          }
         }
-      }
-    }
 
-    if(currentPolygon.length >= 2){
-      polygons.push(currentPolygon);
-    }
+        // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
+        function splitPolygonsAtClosingPoint(pts) {
+          const method =
+            document.getElementById("splitMethod")?.value || "auto";
 
-    return polygons.length > 0 ? polygons : [pts];
-  }
+          // If many points include an ID field, prefer ID splitting automatically
+          const idCount = pts.reduce(
+            (c, p) => c + (p && p.id !== undefined ? 1 : 0),
+            0,
+          );
+          const idRatio = pts.length ? idCount / pts.length : 0;
 
-  function splitByGaps(pts){
-    const polygons = [];
-    let currentPolygon = [];
-    const gapThreshold = 1000; // متر
-
-    for(let i = 0; i < pts.length; i++){
-      const currentPt = pts[i];
-      
-      if(currentPolygon.length === 0){
-        currentPolygon.push(currentPt);
-      } else {
-        const prevPt = currentPolygon[currentPolygon.length - 1];
-        const distN = Math.abs(currentPt.N - prevPt.N);
-        const distE = Math.abs(currentPt.E - prevPt.E);
-        const distance = Math.sqrt(distN * distN + distE * distE);
-        
-        // إذا كانت الفجوة كبيرة جداً
-        if(distance > gapThreshold && currentPolygon.length >= 2){
-          polygons.push(currentPolygon);
-          currentPolygon = [currentPt];
-        } else {
-          currentPolygon.push(currentPt);
+          if (method === "duplicates") {
+            return splitByDuplicates(pts);
+          } else if (method === "gaps") {
+            return splitByGaps(pts);
+          } else if (method === "id") {
+            return splitByIdReset(pts);
+          } else {
+            // auto: if many rows contain an ID, use ID-based splitting first
+            if (idRatio > 0.3) {
+              const idResult = splitByIdReset(pts);
+              if (idResult.length > 1) return idResult;
+            }
+            // fallback to auto heuristic
+            return splitByAuto(pts);
+          }
         }
-      }
-    }
 
-    if(currentPolygon.length >= 2){
-      polygons.push(currentPolygon);
-    }
+        function splitByDuplicates(pts) {
+          const polygons = [];
+          let currentPolygon = [];
 
-    return polygons.length > 0 ? polygons : [pts];
-  }
+          for (let i = 0; i < pts.length; i++) {
+            const currentPt = pts[i];
 
-  function splitByAuto(pts){
-    const polygons = [];
-    let currentPolygon = [];
-    const gapThreshold = 1000; // متر
+            if (currentPolygon.length === 0) {
+              currentPolygon.push(currentPt);
+            } else {
+              const firstPt = currentPolygon[0];
 
-    for(let i = 0; i < pts.length; i++){
-      const currentPt = pts[i];
-      
-      if(currentPolygon.length === 0){
-        currentPolygon.push(currentPt);
-      } else {
-        const firstPt = currentPolygon[0];
-        const prevPt = currentPolygon[currentPolygon.length - 1];
-        
-        // الحالة 1: نقطة متطابقة مع البداية
-        const isDuplicate = pointsEqual(currentPt, firstPt, 0.01) && currentPolygon.length > 2;
-        
-        // الحالة 2: فجوة كبيرة
-        const distN = Math.abs(currentPt.N - prevPt.N);
-        const distE = Math.abs(currentPt.E - prevPt.E);
-        const distance = Math.sqrt(distN * distN + distE * distE);
-        const hasGap = distance > gapThreshold && currentPolygon.length >= 2;
-        
-        if(isDuplicate || hasGap){
-          polygons.push(currentPolygon);
-          currentPolygon = [currentPt];
-        } else {
-          currentPolygon.push(currentPt);
+              // البحث عن نقطة متطابقة مع البداية
+              if (
+                pointsEqual(currentPt, firstPt, 0.01) &&
+                currentPolygon.length > 2
+              ) {
+                // حفظ المضلع بدون النقطة الأخيرة (المكررة)
+                polygons.push(currentPolygon);
+                currentPolygon = [currentPt];
+              } else {
+                currentPolygon.push(currentPt);
+              }
+            }
+          }
+
+          if (currentPolygon.length >= 2) {
+            polygons.push(currentPolygon);
+          }
+
+          return polygons.length > 0 ? polygons : [pts];
         }
-      }
-    }
 
-    if(currentPolygon.length >= 2){
-      polygons.push(currentPolygon);
-    }
+        function splitByGaps(pts) {
+          const polygons = [];
+          let currentPolygon = [];
+          const gapThreshold = 1000; // متر
 
-    return polygons.length > 0 ? polygons : [pts];
-  }
+          for (let i = 0; i < pts.length; i++) {
+            const currentPt = pts[i];
 
-  function splitByIdReset(pts){
-    // الفصل حسب عمود ID: عندما ينخفض ID من قيمة أعلى للقيمة 1، يكون هناك مضلع جديد
-    const polygons = [];
-    let currentPolygon = [];
+            if (currentPolygon.length === 0) {
+              currentPolygon.push(currentPt);
+            } else {
+              const prevPt = currentPolygon[currentPolygon.length - 1];
+              const distN = Math.abs(currentPt.N - prevPt.N);
+              const distE = Math.abs(currentPt.E - prevPt.E);
+              const distance = Math.sqrt(distN * distN + distE * distE);
 
-    for(let i = 0; i < pts.length; i++){
-      const currentPt = pts[i];
-      
-      if(currentPolygon.length === 0){
-        currentPolygon.push(currentPt);
-      } else {
-        const prevPt = currentPolygon[currentPolygon.length - 1];
-        
-        // التحقق من انخفاض ID (إشارة لبداية مضلع جديد)
-        const prevId = prevPt.id !== undefined ? prevPt.id : 1;
-        const currId = currentPt.id !== undefined ? currentPt.id : 1;
-        
-        // إذا كان ID أقل من السابق بكثير أو انخفض للـ 1 أو 2، فهو مضلع جديد
-        if(currId < prevId * 0.5 || (currId <= 2 && prevId > 5)){
-          polygons.push(currentPolygon);
-          currentPolygon = [currentPt];
-        } else {
-          currentPolygon.push(currentPt);
+              // إذا كانت الفجوة كبيرة جداً
+              if (distance > gapThreshold && currentPolygon.length >= 2) {
+                polygons.push(currentPolygon);
+                currentPolygon = [currentPt];
+              } else {
+                currentPolygon.push(currentPt);
+              }
+            }
+          }
+
+          if (currentPolygon.length >= 2) {
+            polygons.push(currentPolygon);
+          }
+
+          return polygons.length > 0 ? polygons : [pts];
         }
-      }
-    }
 
-    if(currentPolygon.length >= 2){
-      polygons.push(currentPolygon);
-    }
+        function splitByAuto(pts) {
+          const polygons = [];
+          let currentPolygon = [];
+          const gapThreshold = 1000; // متر
 
-    return polygons.length > 0 ? polygons : [pts];
-  }
+          for (let i = 0; i < pts.length; i++) {
+            const currentPt = pts[i];
 
-  function importFromFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = String(reader.result || '');
-      const { pts, badLines } = parsePoints(content);
+            if (currentPolygon.length === 0) {
+              currentPolygon.push(currentPt);
+            } else {
+              const firstPt = currentPolygon[0];
+              const prevPt = currentPolygon[currentPolygon.length - 1];
 
-      if(!pts.length){
-        showMsg('No valid points found in file.', 'err');
-        return;
-      }
-      if(badLines.length){
-        showMsg(`Imported with ignored unreadable lines: ${badLines.join(', ')}.`, 'warn');
-      } else {
-        showMsg('Points imported successfully.', '');
-      }
+              // الحالة 1: نقطة متطابقة مع البداية
+              const isDuplicate =
+                pointsEqual(currentPt, firstPt, 0.01) &&
+                currentPolygon.length > 2;
 
-      // Preserve original content so any ID column remains available for splitting
-      elInput.value = content.trim() + '\n';
-    };
-    reader.onerror = () => showMsg('Failed to read file.', 'err');
-    reader.readAsText(file);
-  }
+              // الحالة 2: فجوة كبيرة
+              const distN = Math.abs(currentPt.N - prevPt.N);
+              const distE = Math.abs(currentPt.E - prevPt.E);
+              const distance = Math.sqrt(distN * distN + distE * distE);
+              const hasGap =
+                distance > gapThreshold && currentPolygon.length >= 2;
 
-  // --- Events ---
-  btnDraw.addEventListener('click', () => {
-    const { pts, badLines } = parsePoints(elInput.value);
-    if(badLines.length){
-      showMsg(`Unreadable lines: ${badLines.join(', ')}. Each line must contain N and E.`, 'err');
-      return;
-    }
-    if(!pts.length){
-      showMsg('Enter points first.', 'warn');
-      return;
-    }
-    render(pts);
-  });
+              if (isDuplicate || hasGap) {
+                polygons.push(currentPolygon);
+                currentPolygon = [currentPt];
+              } else {
+                currentPolygon.push(currentPt);
+              }
+            }
+          }
 
-  btnImport.addEventListener('click', () => {
-    fileInput.value = '';
-    fileInput.click();
-  });
+          if (currentPolygon.length >= 2) {
+            polygons.push(currentPolygon);
+          }
 
-  fileInput.addEventListener('change', (e) => {
-    const f = e.target.files && e.target.files[0];
-    if(f) importFromFile(f);
-  });
+          return polygons.length > 0 ? polygons : [pts];
+        }
 
-  btnClear.addEventListener('click', () => {
-    elInput.value = '';
-    elResults.style.display = 'none';
-    clearDraw();
-    hideMsg();
-    showMsg('Input and drawing cleared.', '');
-  });
+        function splitByIdReset(pts) {
+          // الفصل حسب عمود ID: عندما ينخفض ID من قيمة أعلى للقيمة 1، يكون هناك مضلع جديد
+          const polygons = [];
+          let currentPolygon = [];
 
-  showMsg('Ready. Enter your points then click "Draw & Calculate".', '');
-})();
-</script>
-</body>
+          for (let i = 0; i < pts.length; i++) {
+            const currentPt = pts[i];
+
+            if (currentPolygon.length === 0) {
+              currentPolygon.push(currentPt);
+            } else {
+              const prevPt = currentPolygon[currentPolygon.length - 1];
+
+              // التحقق من انخفاض ID (إشارة لبداية مضلع جديد)
+              const prevId = prevPt.id !== undefined ? prevPt.id : 1;
+              const currId = currentPt.id !== undefined ? currentPt.id : 1;
+
+              // إذا كان ID أقل من السابق بكثير أو انخفض للـ 1 أو 2، فهو مضلع جديد
+              if (currId < prevId * 0.5 || (currId <= 2 && prevId > 5)) {
+                polygons.push(currentPolygon);
+                currentPolygon = [currentPt];
+              } else {
+                currentPolygon.push(currentPt);
+              }
+            }
+          }
+
+          if (currentPolygon.length >= 2) {
+            polygons.push(currentPolygon);
+          }
+
+          return polygons.length > 0 ? polygons : [pts];
+        }
+
+        function importFromFile(file) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const content = String(reader.result || "");
+            const { pts, badLines } = parsePoints(content);
+
+            if (!pts.length) {
+              showMsg("No valid points found in file.", "err");
+              return;
+            }
+            if (badLines.length) {
+              showMsg(
+                `Imported with ignored unreadable lines: ${badLines.join(", ")}.`,
+                "warn",
+              );
+            } else {
+              showMsg("Points imported successfully.", "");
+            }
+
+            // Preserve original content so any ID column remains available for splitting
+            elInput.value = content.trim() + "\n";
+          };
+          reader.onerror = () => showMsg("Failed to read file.", "err");
+          reader.readAsText(file);
+        }
+
+        // --- Events ---
+        btnDraw.addEventListener("click", () => {
+          const { pts, badLines } = parsePoints(elInput.value);
+          if (badLines.length) {
+            showMsg(
+              `Unreadable lines: ${badLines.join(", ")}. Each line must contain N and E.`,
+              "err",
+            );
+            return;
+          }
+          if (!pts.length) {
+            showMsg("Enter points first.", "warn");
+            return;
+          }
+          render(pts);
+        });
+
+        btnImport.addEventListener("click", () => {
+          fileInput.value = "";
+          fileInput.click();
+        });
+
+        fileInput.addEventListener("change", (e) => {
+          const f = e.target.files && e.target.files[0];
+          if (f) importFromFile(f);
+        });
+
+        btnClear.addEventListener("click", () => {
+          elInput.value = "";
+          elResults.style.display = "none";
+          clearDraw();
+          hideMsg();
+          showMsg("Input and drawing cleared.", "");
+        });
+
+        showMsg('Ready. Enter your points then click "Draw & Calculate".', "");
+      })();
+    </script>
+  </body>
 </html>

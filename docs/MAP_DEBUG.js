@@ -16,7 +16,8 @@ console.log(`   ✓ يجب أن يكون 'object' أو 'function'\n`);
 
 // 3. التحقق من حالة الخريطة بعد التحويل
 console.log("3. بعد عمل تحويل، تحقق من:");
-console.log(`   _map && _map._loaded = ${_map && _map._loaded}`);
+const _mapRef = (typeof window !== 'undefined') ? (window._map || window.map) : undefined;
+console.log(`   mapLoaded = ${_mapRef && _mapRef._loaded}`);
 console.log(`   ✓ يجب أن يكون true\n`);
 
 // 4. تشخيص المشاكل
@@ -40,12 +41,21 @@ console.log("1. أدخل إحداثيات وقم بالتحويل");
 console.log("2. تحقق من ظهور الخريطة");
 console.log("3. اضغط على صف من الجدول الجماعي لعرض النقطة");
 const btnSwap = document.getElementById('btnSwap');
-btnSwap.addEventListener('click', () => {
-  const { pts, badLines } = parsePoints(elInput.value);
-  if (badLines.length || !pts.length) return;
+if (btnSwap) {
+  btnSwap.addEventListener('click', () => {
+    try {
+      const elInput = document.getElementById('coordsInput') || document.getElementById('elInput') || window.elInput;
+      const parsePointsFn = window.parsePoints || (typeof parsePoints === 'function' ? parsePoints : null);
+      const showMsgFn = window.showMsg || (typeof showMsg === 'function' ? showMsg : null);
+      if (!parsePointsFn || !elInput) return;
+      const { pts, badLines } = parsePointsFn(elInput.value);
+      if (badLines.length || !pts.length) return;
 
-  // swap
-  const swapped = pts.map(p => ({ N: p.E, E: p.N }));
-  elInput.value = swapped.map(p => `${p.N}, ${p.E}`).join('\n') + '\n';
-  showMsg('تم عكس N/E. اضغط "رسم وحساب" مرة أخرى.', '');
-});
+      const swapped = pts.map(p => ({ N: p.E, E: p.N }));
+      elInput.value = swapped.map(p => `${p.N}, ${p.E}`).join('\n') + '\n';
+      if (showMsgFn) showMsgFn('تم عكس N/E. اضغط "رسم وحساب" مرة أخرى.', '');
+    } catch (e) {
+      console.error('btnSwap handler error', e);
+    }
+  });
+}
