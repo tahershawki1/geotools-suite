@@ -1291,35 +1291,89 @@
             .map((p) => p.trim())
             .filter(Boolean);
           if (parts.length < 2) return;
-          
-          // Auto-detect column order: ID, E, N or E, N or N, E, ID
-          let val1, val2, pId = "", code = "";
+
+          // Auto-detect column order with range validation
+          // DLTM ranges: E: 200,000-900,000 | N: 2,000,000-4,000,000
+          let val1,
+            val2,
+            pId = "",
+            code = "";
           const p0 = parseFloat(parts[0]);
           const p1 = parseFloat(parts[1]);
           const p2 = parseFloat(parts[2]);
-          
+
+          // Helper to check if value is valid E (East)
+          const isValidE = (v) => v > 200000 && v < 900000;
+          // Helper to check if value is valid N (North)
+          const isValidN = (v) => v > 2000000 && v < 4000000;
+
           if (isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
             // Format: ID, E, N or ID, N, E
             pId = parts[0];
-            val1 = p1;  // Second column (E or N)
-            val2 = p2;  // Third column (N or E)
+            val1 = p1; // Second column
+            val2 = p2; // Third column
             code = parts.length >= 4 ? parts[3] : "";
           } else if (!isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
-            // Format: E, N, ID or N, E, ID (all numeric)
-            val1 = p0;
-            val2 = p1;
-            pId = parts[2];
+            // All numeric: need to determine order by range validation
+            // Check which arrangement makes sense for DLTM
+            let east, north, id;
+            
+            // p0, p1, p2 - try to find E, N, ID pattern
+            if (isValidE(p0) && isValidN(p1) && p2 < 1000) {
+              // E, N, ID
+              east = p0;
+              north = p1;
+              id = p2;
+            } else if (isValidE(p1) && isValidN(p2) && p0 < 1000) {
+              // ID, E, N (most common)
+              id = p0;
+              east = p1;
+              north = p2;
+            } else if (isValidE(p2) && isValidN(p1) && p0 < 1000) {
+              // ID, N, E
+              id = p0;
+              north = p1;
+              east = p2;
+            } else if (isValidE(p0) && isValidN(p2) && p1 < 1000) {
+              // E, ID, N
+              east = p0;
+              id = p1;
+              north = p2;
+            } else if (isValidN(p0) && isValidE(p1) && p2 < 1000) {
+              // N, E, ID
+              north = p0;
+              east = p1;
+              id = p2;
+            } else {
+              // Fallback: assume first valid E, then N
+              east = isValidE(p0) ? p0 : isValidE(p1) ? p1 : p0;
+              north = isValidN(p0) ? p0 : isValidN(p1) ? p1 : p1;
+              id = !isValidE(east) && !isValidN(north) ? p0 : p2;
+            }
+            
+            val1 = east;
+            val2 = north;
+            pId = String(id);
             code = parts.length >= 4 ? parts[3] : "";
           } else if (!isNaN(p0) && !isNaN(p1)) {
             // Format: E, N or N, E (only 2 columns)
-            val1 = p0;
-            val2 = p1;
+            // Determine which is E and which is N
+            if (isValidE(p0) && isValidN(p1)) {
+              val1 = p0; // E
+              val2 = p1; // N
+            } else if (isValidN(p0) && isValidE(p1)) {
+              val1 = p1; // E
+              val2 = p0; // N
+            } else {
+              val1 = p0;
+              val2 = p1;
+            }
             pId = parts.length >= 3 ? parts[2] : "";
             code = parts.length >= 4 ? parts[3] : "";
           } else {
             return; // Invalid row
           }
-          
+
           rows.push([val1, val2, pId, code]);
         });
 
