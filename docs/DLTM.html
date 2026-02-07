@@ -1296,54 +1296,45 @@
           if (parts.length < 2) return;
 
           // Identify columns by digit count: N has 7 digits, E has 6 digits
-          let pointId = "",
+          let pointId = null,
             northing = null,
             easting = null,
-            zValue = "",
-            code = "";
+            zValue = null,
+            code = null;
 
           for (let j = 0; j < parts.length; j++) {
             const val = parts[j];
-            const digits = val.replace(/[^0-9]/g, "").length; // Count all digits
-            const integerDigits = val
-              .split(".")[0]
-              .replace(/[^0-9]/g, "").length; // Count integer digits only
+            const integerPart = val.split(".")[0];
+            const integerDigits = integerPart.replace(/[^0-9]/g, "").length;
+            const isNumeric = !isNaN(parseFloat(val)) && isFinite(val);
 
-            // Prioritize by integer digit count: N=7, E=6
-            if (integerDigits === 7 && northing === null) {
-              // This is N (7 integer digits like 2768047)
+            // Identify by digit count first
+            if (isNumeric && integerDigits === 7 && northing === null) {
               northing = parseFloat(val);
-            } else if (integerDigits === 6 && easting === null) {
-              // This is E (6 integer digits like 489817)
+            } else if (isNumeric && integerDigits === 6 && easting === null) {
               easting = parseFloat(val);
-            } else if (isNaN(parseFloat(val)) && pointId === "") {
-              // This is the Point ID (text)
+            } else if (isNumeric && integerDigits <= 4 && northing !== null && easting !== null && zValue === null) {
+              // Small number after N,E = Z value
+              zValue = parseFloat(val);
+            } else if (!isNumeric && pointId === null) {
+              // Text = Point ID
               pointId = val;
-            } else if (
-              !isNaN(parseFloat(val)) &&
-              northing !== null &&
-              easting !== null &&
-              zValue === "" &&
-              integerDigits < 5
-            ) {
-              // This is Z value (elevation, small number)
-              zValue = val;
-            } else if (pointId === "" && integerDigits < 4) {
-              // Treat as Point ID if it's a small number
-              pointId = val;
-            } else if (code === "" && isNaN(parseFloat(val))) {
-              // This is Code (text after coordinates)
+            } else if (isNumeric && integerDigits <= 2 && pointId === null) {
+              // Small number first = Point ID
+              pointId = String(val);
+            } else if (!isNumeric && code === null && pointId !== null) {
+              // Text after others = Code
               code = val;
             }
           }
 
           if (northing !== null && easting !== null) {
             rows.push({
-              pointId,
+              pointId: pointId || "",
               northing,
               easting,
-              zValue,
-              code,
+              zValue: zValue || 0,
+              code: code || "",
             });
           }
         });
@@ -1362,27 +1353,20 @@
           }
 
           // Convert to UTM Zone 40N
-          const utm = latLonToUTM(conv.latitude, conv.longitude);
-          // Force to Zone 40N
-          const utm40 = {
-            easting: convertWGS84toUTMZone40N(conv.latitude, conv.longitude)
-              .easting,
-            northing: convertWGS84toUTMZone40N(conv.latitude, conv.longitude)
-              .northing,
-          };
+          const utm40 = convertWGS84toUTMZone40N(conv.latitude, conv.longitude);
 
           return {
             pointId: r.pointId,
             nDltm: r.northing,
             eDltm: r.easting,
-            zDltm: r.zValue || "",
+            zDltm: r.zValue,
             code: r.code,
             latitude: conv.latitude,
             longitude: conv.longitude,
             utmN: utm40.northing,
             utmE: utm40.easting,
             utmZone: "40N",
-            altitude: "",
+            altitude: r.zValue || "",
           };
         });
 
@@ -1452,18 +1436,18 @@
         tr.innerHTML =
           `<td>${escapeHtml(r.pointId || "")}</td>` +
           `<td>${escapeHtml(r.pointId || "")}</td>` +
-          `<td>${Number(r.nDltm || 0).toFixed(2)}</td>` +
-          `<td>${Number(r.eDltm || 0).toFixed(2)}</td>` +
-          `<td>${Number(r.zDltm || 0).toFixed(2)}</td>` +
+          `<td>${r.nDltm ? Number(r.nDltm).toFixed(2) : ""}</td>` +
+          `<td>${r.eDltm ? Number(r.eDltm).toFixed(2) : ""}</td>` +
+          `<td>${r.zDltm ? Number(r.zDltm).toFixed(2) : ""}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>` +
           `<td></td>` +
           `<td></td>` +
-          `<td>${Number(r.utmN || 0).toFixed(2)}</td>` +
-          `<td>${Number(r.utmE || 0).toFixed(2)}</td>` +
+          `<td>${r.utmN ? Number(r.utmN).toFixed(2) : ""}</td>` +
+          `<td>${r.utmE ? Number(r.utmE).toFixed(2) : ""}</td>` +
           `<td>${r.utmZone || "40N"}</td>` +
-          `<td>${Number(r.latitude || 0).toFixed(6)}</td>` +
-          `<td>${Number(r.longitude || 0).toFixed(6)}</td>` +
-          `<td>${Number(r.altitude || 0).toFixed(2)}</td>` +
+          `<td>${r.latitude ? Number(r.latitude).toFixed(6) : ""}</td>` +
+          `<td>${r.longitude ? Number(r.longitude).toFixed(6) : ""}</td>` +
+          `<td>${r.altitude ? Number(r.altitude).toFixed(2) : ""}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>`;
 
         // Click to show on map
