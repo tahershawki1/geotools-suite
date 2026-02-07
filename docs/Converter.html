@@ -4,182 +4,429 @@
     max-width: 980px;
     width: 100%;
     margin: 0 auto;
-    background:#fff;
-    border:1px solid #e9edf5;
+    background: #fff;
+    border: 1px solid #e9edf5;
     border-radius: 16px;
-    overflow:hidden;
-    box-shadow: 0 12px 40px rgba(15,23,42,.08);
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
     direction: ltr;
     text-align: left;
     margin-top: 20px;
   }
   .header-conv {
-    padding:18px 18px 14px;
+    padding: 18px 18px 14px;
     border-bottom: 1px solid #eef2f7;
-    background:#fff;
+    background: #fff;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: 10px;
   }
-  .content-conv { padding: 18px; }
+  .content-conv {
+    padding: 18px;
+  }
   .card-conv {
-    background:#f8fafc;
-    border:1px solid #eef2f7;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
     border-radius: 14px;
-    padding:14px;
+    padding: 14px;
     margin-bottom: 12px;
   }
-  #map { width:100%; height: 520px; background: #eee; border-radius: 12px; }
-  
-  .btn-nav {
-      padding: 8px 16px; background: #f1f5f9; color: #475569; border-radius: 10px; font-size: 13px; font-weight: 700; border: 1px solid #e2e8f0; cursor: pointer; font-family: 'Cairo', sans-serif;
+  #map {
+    width: 100%;
+    height: 520px;
+    background: #eee;
+    border-radius: 12px;
   }
-  .btn-conv { width:100%; padding: 12px 14px; border:none; border-radius: 12px; background:#111827; color:#fff; font-weight:700; font-size:15px; cursor:pointer; margin-top:10px; }
-  .btn-green { background:#16a34a; }
-  
-  .file-picker{ display:flex; gap:10px; align-items:center; background:#fff; border:1px solid #d0d5dd; border-radius: 12px; padding: 10px 10px; }
-  .file-picker input[type="file"]{ display:none; }
-  .file-btn{ border:1px solid #e4e7ec; background:#111827; color:#fff; border-radius: 10px; padding: 8px 12px; cursor:pointer; font-weight:800; font-size:13px; }
-  .file-name{ font-size:13px; color:#667085; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%; }
 
-  #status-conv { margin-top: 10px; padding: 10px 12px; border-radius: 12px; border:1px solid #eef2f7; font-size:13px; display:none; }
-  .st-loading { display:block; background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a; }
-  .st-error { display:block; background:#fef2f2; border-color:#fecaca; color:#991b1b; }
-  .st-ok { display:block; background:#f0fdf4; border-color:#bbf7d0; color:#166534; }
+  .btn-nav {
+    padding: 8px 16px;
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+    font-family: "Cairo", sans-serif;
+  }
+  .btn-conv {
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+    background: #111827;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-green {
+    background: #16a34a;
+  }
 
-  .metrics-conv { display:flex; gap:10px; flex-wrap: wrap; margin: 12px 0 10px; display:none; }
-  .metric-item { background:#fff; border:1px solid #eef2f7; border-radius: 14px; padding:10px 12px; min-width: 140px; }
-  .metric-item .num { font-size:20px; font-weight:800; }
-  .metric-item .lbl { font-size:12px; color:#667085; }
+  .file-picker {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    border-radius: 12px;
+    padding: 10px 10px;
+  }
+  .file-picker input[type="file"] {
+    display: none;
+  }
+  .file-btn {
+    border: 1px solid #e4e7ec;
+    background: #111827;
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 13px;
+  }
+  .file-name {
+    font-size: 13px;
+    color: #667085;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+  }
 
-  .map-wrap-conv { border:1px solid #eef2f7; border-radius: 14px; overflow:hidden; background:#fff; display:none; margin-top: 10px; position: relative; }
-  .north-arrow-conv { position:absolute; top:12px; right:12px; z-index: 999; background: rgba(255,255,255,.92); border:1px solid #eef2f7; border-radius: 12px; padding:10px 10px 8px; box-shadow: 0 10px 22px rgba(15,23,42,.12); display:flex; align-items:center; gap:8px; }
+  #status-conv {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #eef2f7;
+    font-size: 13px;
+    display: none;
+  }
+  .st-loading {
+    display: block;
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e3a8a;
+  }
+  .st-error {
+    display: block;
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+  }
+  .st-ok {
+    display: block;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+  }
 
-  .pt-label { background: transparent !important; border: none !important; box-shadow: none !important; pointer-events: none; }
-  .pt-label .wrap { display:flex; flex-direction: column; align-items: center; gap: 2px; }
-  .pt-label .num { font-weight: 900; font-size: 12px; color: #111827; text-shadow: 0 1px 0 rgba(255,255,255,.95); }
-  .pt-label .arrow { font-size: 16px; color: #111827; }
+  .metrics-conv {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 12px 0 10px;
+    display: none;
+  }
+  .metric-item {
+    background: #fff;
+    border: 1px solid #eef2f7;
+    border-radius: 14px;
+    padding: 10px 12px;
+    min-width: 140px;
+  }
+  .metric-item .num {
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .metric-item .lbl {
+    font-size: 12px;
+    color: #667085;
+  }
 
-  .row-conv { display:grid; gap:10px; }
-  label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:#111827; }
-  select { width:100%; padding: 11px 12px; border-radius: 12px; border:1px solid #d0d5dd; background:#fff; font-size:14px; }
-  
-  .chip { border:1px solid #e4e7ec; background:#fff; border-radius: 999px; padding: 6px 10px; cursor:pointer; font-weight:700; font-size:12px; }
-  .chip:hover { background:#f8fafc; }
+  .map-wrap-conv {
+    border: 1px solid #eef2f7;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    display: none;
+    margin-top: 10px;
+    position: relative;
+  }
+  .north-arrow-conv {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 999;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #eef2f7;
+    border-radius: 12px;
+    padding: 10px 10px 8px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pt-label {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none;
+  }
+  .pt-label .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .pt-label .num {
+    font-weight: 900;
+    font-size: 12px;
+    color: #111827;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+  .pt-label .arrow {
+    font-size: 16px;
+    color: #111827;
+  }
+
+  .row-conv {
+    display: grid;
+    gap: 10px;
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #111827;
+  }
+  select {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    font-size: 14px;
+  }
+
+  .chip {
+    border: 1px solid #e4e7ec;
+    background: #fff;
+    border-radius: 999px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .chip:hover {
+    background: #f8fafc;
+  }
 </style>
 
 <div class="container-converter">
-    <div class="header-conv">
-      <div>
-        <h1 style="font-size:18px; font-weight:700; margin-bottom:4px;">File Points Map Viewer</h1>
-        <p style="font-size:13px; color:#667085;">عرض وتحويل ملفات المساحة (CSV, TXT, SDR)</p>
-      </div>
-      <button class="btn-nav" onclick="loadPage('')">
-        🏠 الرئيسية
-      </button>
+  <div class="header-conv">
+    <div>
+      <h1 style="font-size: 18px; font-weight: 700; margin-bottom: 4px">
+        File Points Map Viewer
+      </h1>
+      <p style="font-size: 13px; color: #667085">
+        عرض وتحويل ملفات المساحة (CSV, TXT, SDR)
+      </p>
     </div>
+    <button class="btn-nav" onclick="loadPage('')">🏠 الرئيسية</button>
+  </div>
 
-    <div class="content-conv">
-      <form id="converterForm">
-        <div class="card-conv">
-          <div class="row-conv">
-            <div>
-              <label>Select File</label>
-              <div class="file-picker">
-                <label class="file-btn" for="csvFile">Choose File</label>
-                <div class="file-name" id="fileName">No file selected</div>
-                <input type="file" id="csvFile" name="csvFile" accept=".csv,.txt,text/plain" required>
-              </div>
-
-              <div id="sdrNotice" style="display:none; margin-top:10px; padding:10px 12px; border-radius:12px; border:1px solid #fde68a; background:#fffbeb; color:#92400e; font-size:13px;">
-                <strong>Note:</strong> This is an <strong>SDR</strong> file.
-                <div style="margin-top:10px; display:flex; gap:10px;">
-                  <button type="button" class="chip" id="convertSdrBtn">Convert SDR → CSV</button>
-                  <button type="button" class="chip" id="downloadCsvBtn" style="display:none;">Download CSV</button>
-                </div>
-              </div>
+  <div class="content-conv">
+    <form id="converterForm">
+      <div class="card-conv">
+        <div class="row-conv">
+          <div>
+            <label>Select File</label>
+            <div class="file-picker">
+              <label class="file-btn" for="csvFile">Choose File</label>
+              <div class="file-name" id="fileName">No file selected</div>
+              <input
+                type="file"
+                id="csvFile"
+                name="csvFile"
+                accept=".csv,.txt,text/plain"
+                required
+              />
             </div>
 
-            <div>
-              <label for="coordFormat">File Column Order</label>
-              <select id="coordFormat">
-                <option value="NEZ">P, N, E, Z, Code (default)</option>
-                <option value="ENZ">P, E, N, Z, Code</option>
-              </select>
+            <div
+              id="sdrNotice"
+              style="
+                display: none;
+                margin-top: 10px;
+                padding: 10px 12px;
+                border-radius: 12px;
+                border: 1px solid #fde68a;
+                background: #fffbeb;
+                color: #92400e;
+                font-size: 13px;
+              "
+            >
+              <strong>Note:</strong> This is an <strong>SDR</strong> file.
+              <div style="margin-top: 10px; display: flex; gap: 10px">
+                <button type="button" class="chip" id="convertSdrBtn">
+                  Convert SDR → CSV
+                </button>
+                <button
+                  type="button"
+                  class="chip"
+                  id="downloadCsvBtn"
+                  style="display: none"
+                >
+                  Download CSV
+                </button>
+              </div>
             </div>
-
-            <button type="submit" class="btn-conv" id="convertBtn">Show Map</button>
           </div>
-          <div id="status-conv"></div>
+
+          <div>
+            <label for="coordFormat">File Column Order</label>
+            <select id="coordFormat">
+              <option value="NEZ">P, N, E, Z, Code (default)</option>
+              <option value="ENZ">P, E, N, Z, Code</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-conv" id="convertBtn">
+            Show Map
+          </button>
         </div>
-      </form>
-
-      <div class="metrics-conv" id="metrics">
-        <div class="metric-item">
-          <div class="num" id="pointsCount">0</div>
-          <div class="lbl">Points</div>
-        </div>
+        <div id="status-conv"></div>
       </div>
+    </form>
 
-      <div class="map-wrap-conv" id="mapWrap">
-        <div class="north-arrow-conv" title="North">
-           <svg width="20" height="40" viewBox="0 0 40 90">
-            <path d="M20 5 L33 28 L26 28 L26 85 L14 85 L14 28 L7 28 Z" fill="#111827"/>
-            <path d="M20 10 L29 27 L24 27 L24 82 L16 82 L16 27 L11 27 Z" fill="#ffffff" opacity="0.25"/>
-          </svg>
-          <span style="font-weight:900; margin-right: 5px;">N</span>
-        </div>
-        <div id="map"></div>
+    <div class="metrics-conv" id="metrics">
+      <div class="metric-item">
+        <div class="num" id="pointsCount">0</div>
+        <div class="lbl">Points</div>
       </div>
+    </div>
 
-      <div id="mapTools" style="display:none; gap:8px; margin-top:10px; flex-wrap: wrap;">
-         <button class="chip" type="button" id="fitBtn">Zoom Extents</button>
-         <button class="chip" type="button" id="measureBtn">Measure Distance</button>
-         <button class="chip" type="button" id="clearBtn">Clear Map</button>
-         <button class="chip" type="button" id="previewBtn" style="background: var(--primary-light); border-color: var(--primary); color: var(--primary);">Preview SDR 📄</button>
+    <div class="map-wrap-conv" id="mapWrap">
+      <div class="north-arrow-conv" title="North">
+        <svg width="20" height="40" viewBox="0 0 40 90">
+          <path
+            d="M20 5 L33 28 L26 28 L26 85 L14 85 L14 28 L7 28 Z"
+            fill="#111827"
+          />
+          <path
+            d="M20 10 L29 27 L24 27 L24 82 L16 82 L16 27 L11 27 Z"
+            fill="#ffffff"
+            opacity="0.25"
+          />
+        </svg>
+        <span style="font-weight: 900; margin-right: 5px">N</span>
       </div>
+      <div id="map"></div>
+    </div>
 
-      <div id="sdrPreviewWrap" style="display:none; margin-top:15px; background:#1e293b; color:#cbd5e1; border-radius:12px; padding:15px; font-family:monospace; font-size:12px; overflow-x:auto; border:1px solid #334155;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; color:#fff; font-size:13px; font-family: 'Cairo', sans-serif;">
-            <strong>SDR File Preview (First 20 lines)</strong>
-            <span style="cursor:pointer;" onclick="document.getElementById('sdrPreviewWrap').style.display='none'">✕</span>
-        </div>
-        <pre id="sdrPreviewText" style="margin:0;"></pre>
-      </div>
-
-      <button type="button" class="btn-conv btn-green" id="downloadBtn" style="display:none; margin-top:12px; background: var(--secondary);">
-        Download SDR File 💾
+    <div
+      id="mapTools"
+      style="display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap"
+    >
+      <button class="chip" type="button" id="fitBtn">Zoom Extents</button>
+      <button class="chip" type="button" id="measureBtn">
+        Measure Distance
+      </button>
+      <button class="chip" type="button" id="clearBtn">Clear Map</button>
+      <button
+        class="chip"
+        type="button"
+        id="previewBtn"
+        style="
+          background: var(--primary-light);
+          border-color: var(--primary);
+          color: var(--primary);
+        "
+      >
+        Preview SDR 📄
       </button>
     </div>
+
+    <div
+      id="sdrPreviewWrap"
+      style="
+        display: none;
+        margin-top: 15px;
+        background: #1e293b;
+        color: #cbd5e1;
+        border-radius: 12px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 12px;
+        overflow-x: auto;
+        border: 1px solid #334155;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 10px;
+          color: #fff;
+          font-size: 13px;
+          font-family: &quot;Cairo&quot;, sans-serif;
+        "
+      >
+        <strong>SDR File Preview (First 20 lines)</strong>
+        <span
+          style="cursor: pointer"
+          onclick="
+            document.getElementById('sdrPreviewWrap').style.display = 'none'
+          "
+          >✕</span
+        >
+      </div>
+      <pre id="sdrPreviewText" style="margin: 0"></pre>
+    </div>
+
+    <button
+      type="button"
+      class="btn-conv btn-green"
+      id="downloadBtn"
+      style="display: none; margin-top: 12px; background: var(--secondary)"
+    >
+      Download SDR File 💾
+    </button>
+  </div>
 </div>
 
 <script>
-const API_BASE = "https://worker.geotools.workers.dev";
+  const API_BASE = "https://worker.geotools.workers.dev";
 
-async function apiCsvToSdr(content, format) {
-  const res = await fetch(`${API_BASE}/api/csv-to-sdr`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content, format })
-  });
+  async function apiCsvToSdr(content, format) {
+    const res = await fetch(`${API_BASE}/api/csv-to-sdr`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, format }),
+    });
 
-  if (!res.ok) {
-    let msg = `HTTP ${res.status}`;
-    try {
-      const j = await res.json();
-      msg = j?.error || msg;
-    } catch {
-      const t = await res.text();
-      if (t) msg = t;
+    if (!res.ok) {
+      let msg = `HTTP ${res.status}`;
+      try {
+        const j = await res.json();
+        msg = j?.error || msg;
+      } catch {
+        const t = await res.text();
+        if (t) msg = t;
+      }
+      throw new Error(msg);
     }
-    throw new Error(msg);
+
+    return await res.text();
   }
 
-  return await res.text();
-}
-
-(function() {
+  (function () {
     let map = null;
     let pointsLayer = null;
     let measureLayer = null;
@@ -197,60 +444,72 @@ async function apiCsvToSdr(content, format) {
     const convertSdrBtn = document.getElementById("convertSdrBtn");
     const downloadCsvBtn = document.getElementById("downloadCsvBtn");
 
-    document.getElementById('csvFile').addEventListener('change', function(){
+    document.getElementById("csvFile").addEventListener("change", function () {
       const f = this.files && this.files[0];
-      document.getElementById('fileName').textContent = f ? f.name : 'No file selected';
+      document.getElementById("fileName").textContent = f
+        ? f.name
+        : "No file selected";
       sdrNotice.style.display = "none";
       downloadCsvBtn.style.display = "none";
       csvFromSdr = "";
       loadedFileText = "";
     });
 
-    document.getElementById('converterForm').addEventListener('submit', function(e){
-      e.preventDefault();
-      run();
-    });
+    document
+      .getElementById("converterForm")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+        run();
+      });
 
-    document.getElementById('fitBtn').addEventListener('click', zoomExtents);
-    
-    document.getElementById('measureBtn').addEventListener('click', function() {
-      isMeasuring = !isMeasuring;
-      this.style.background = isMeasuring ? 'var(--primary-light)' : '';
-      this.style.borderColor = isMeasuring ? 'var(--primary)' : '';
-      if (!isMeasuring) {
-        if (measureLayer) measureLayer.clearLayers();
-        measurePoints = [];
-      } else {
-        setStatus('Click on the map to start measuring.', 'ok');
-      }
-    });
+    document.getElementById("fitBtn").addEventListener("click", zoomExtents);
 
-    document.getElementById('previewBtn').addEventListener('click', function() {
-      if (!sdrResult) return alert('No SDR data to preview.');
-      const lines = sdrResult.split('\n').slice(0, 20).join('\n');
-      document.getElementById('sdrPreviewText').textContent = lines;
-      document.getElementById('sdrPreviewWrap').style.display = 'block';
-      document.getElementById('sdrPreviewWrap').scrollIntoView({ behavior: 'smooth' });
-    });
+    document
+      .getElementById("measureBtn")
+      .addEventListener("click", function () {
+        isMeasuring = !isMeasuring;
+        this.style.background = isMeasuring ? "var(--primary-light)" : "";
+        this.style.borderColor = isMeasuring ? "var(--primary)" : "";
+        if (!isMeasuring) {
+          if (measureLayer) measureLayer.clearLayers();
+          measurePoints = [];
+        } else {
+          setStatus("Click on the map to start measuring.", "ok");
+        }
+      });
 
-    document.getElementById('clearBtn').addEventListener('click', function(){
+    document
+      .getElementById("previewBtn")
+      .addEventListener("click", function () {
+        if (!sdrResult) return alert("No SDR data to preview.");
+        const lines = sdrResult.split("\n").slice(0, 20).join("\n");
+        document.getElementById("sdrPreviewText").textContent = lines;
+        document.getElementById("sdrPreviewWrap").style.display = "block";
+        document
+          .getElementById("sdrPreviewWrap")
+          .scrollIntoView({ behavior: "smooth" });
+      });
+
+    document.getElementById("clearBtn").addEventListener("click", function () {
       if (pointsLayer) pointsLayer.clearLayers();
       if (measureLayer) measureLayer.clearLayers();
       lastBounds = null;
-      document.getElementById('pointsCount').textContent = '0';
-      document.getElementById('sdrPreviewWrap').style.display = 'none';
+      document.getElementById("pointsCount").textContent = "0";
+      document.getElementById("sdrPreviewWrap").style.display = "none";
     });
 
-    document.getElementById('downloadBtn').addEventListener('click', function(){
-      if (!sdrResult){
-        setStatus('No SDR is ready to download yet.', 'error');
-        return;
-      }
-      downloadText(sdrResult, 'output.sdr', 'text/plain');
-    });
+    document
+      .getElementById("downloadBtn")
+      .addEventListener("click", function () {
+        if (!sdrResult) {
+          setStatus("No SDR is ready to download yet.", "error");
+          return;
+        }
+        downloadText(sdrResult, "output.sdr", "text/plain");
+      });
 
     convertSdrBtn.addEventListener("click", function () {
-      const file = document.getElementById('csvFile').files[0];
+      const file = document.getElementById("csvFile").files[0];
       if (!file) {
         setStatus("Please select an SDR file first.", "error");
         return;
@@ -258,7 +517,7 @@ async function apiCsvToSdr(content, format) {
       if (!loadedFileText) {
         const reader = new FileReader();
         reader.onload = function (e) {
-          loadedFileText = String(e.target.result || '');
+          loadedFileText = String(e.target.result || "");
           doSdrToCsvConversion();
         };
         reader.readAsText(file);
@@ -286,91 +545,117 @@ async function apiCsvToSdr(content, format) {
       downloadText(csvFromSdr, "output.csv", "text/csv");
     });
 
-    function setStatus(msg, type){
-      const div = document.getElementById('status-conv');
-      div.className = ''; div.style.display = 'block'; div.textContent = msg;
-      if (type === 'loading') div.classList.add('st-loading');
-      else if (type === 'error') div.classList.add('st-error');
-      else div.classList.add('st-ok');
+    function setStatus(msg, type) {
+      const div = document.getElementById("status-conv");
+      div.className = "";
+      div.style.display = "block";
+      div.textContent = msg;
+      if (type === "loading") div.classList.add("st-loading");
+      else if (type === "error") div.classList.add("st-error");
+      else div.classList.add("st-ok");
     }
 
-    function hideStatus(){
-      document.getElementById('status-conv').style.display = 'none';
+    function hideStatus() {
+      document.getElementById("status-conv").style.display = "none";
     }
 
-    function initMapIfNeeded(){
+    function initMapIfNeeded() {
       if (map) return;
-      map = L.map('map', {
+      map = L.map("map", {
         crs: L.CRS.Simple,
-        minZoom: -10, zoomSnap: 0.25, zoomDelta: 0.25,
-        attributionControl: false, zoomControl: true
+        minZoom: -10,
+        zoomSnap: 0.25,
+        zoomDelta: 0.25,
+        attributionControl: false,
+        zoomControl: true,
       });
-      map.zoomControl.setPosition('topleft');
+      map.zoomControl.setPosition("topleft");
       pointsLayer = L.layerGroup().addTo(map);
       measureLayer = L.layerGroup().addTo(map);
       addZoomExtentsControl();
 
-      map.on('click', function(e) {
+      map.on("click", function (e) {
         if (!isMeasuring) return;
         measurePoints.push(e.latlng);
-        L.circleMarker(e.latlng, { radius: 3, color: 'red' }).addTo(measureLayer);
-        
+        L.circleMarker(e.latlng, { radius: 3, color: "red" }).addTo(
+          measureLayer,
+        );
+
         if (measurePoints.length > 1) {
           const p1 = measurePoints[measurePoints.length - 2];
           const p2 = measurePoints[measurePoints.length - 1];
-          const dist = Math.sqrt(Math.pow(p2.lat - p1.lat, 2) + Math.pow(p2.lng - p1.lng, 2));
-          
-          L.polyline([p1, p2], { color: 'red', weight: 2, dashArray: '5, 5' }).addTo(measureLayer);
+          const dist = Math.sqrt(
+            Math.pow(p2.lat - p1.lat, 2) + Math.pow(p2.lng - p1.lng, 2),
+          );
+
+          L.polyline([p1, p2], {
+            color: "red",
+            weight: 2,
+            dashArray: "5, 5",
+          }).addTo(measureLayer);
           L.marker([(p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2], {
             icon: L.divIcon({
-              className: 'measure-label',
+              className: "measure-label",
               html: `<span style="background:white; border:1px solid red; padding:2px 4px; border-radius:4px; font-size:10px; color:red; font-weight:bold;">${dist.toFixed(2)}m</span>`,
-              iconSize: [40, 20]
-            })
+              iconSize: [40, 20],
+            }),
           }).addTo(measureLayer);
         }
       });
     }
 
-    function zoomExtents(){
+    function zoomExtents() {
       if (!map || !lastBounds) return;
-      map.fitBounds(lastBounds.pad(0.10));
+      map.fitBounds(lastBounds.pad(0.1));
     }
 
-    function addZoomExtentsControl(){
+    function addZoomExtentsControl() {
       const ZoomExtControl = L.Control.extend({
-        options: { position: 'topleft' },
+        options: { position: "topleft" },
         onAdd: function () {
-          const container = L.DomUtil.create('div', 'leaflet-control leaflet-bar');
-          const a = L.DomUtil.create('a', '', container);
-          a.href = '#'; a.title = 'Zoom Extents'; a.innerHTML = '⤢';
-          a.style.display = 'flex'; a.style.alignItems = 'center'; a.style.justifyContent = 'center';
-          a.style.width = '36px'; a.style.height = '36px';
+          const container = L.DomUtil.create(
+            "div",
+            "leaflet-control leaflet-bar",
+          );
+          const a = L.DomUtil.create("a", "", container);
+          a.href = "#";
+          a.title = "Zoom Extents";
+          a.innerHTML = "⤢";
+          a.style.display = "flex";
+          a.style.alignItems = "center";
+          a.style.justifyContent = "center";
+          a.style.width = "36px";
+          a.style.height = "36px";
           L.DomEvent.disableClickPropagation(container);
-          L.DomEvent.on(a, 'click', L.DomEvent.stop).on(a, 'click', zoomExtents);
+          L.DomEvent.on(a, "click", L.DomEvent.stop).on(
+            a,
+            "click",
+            zoomExtents,
+          );
           return container;
-        }
+        },
       });
       map.addControl(new ZoomExtControl());
     }
 
-    function run(){
-      const file = document.getElementById('csvFile').files[0];
+    function run() {
+      const file = document.getElementById("csvFile").files[0];
       if (!file) return;
-      const format = document.getElementById('coordFormat').value;
-      setStatus('Reading file...', 'loading');
+      const format = document.getElementById("coordFormat").value;
+      setStatus("Reading file...", "loading");
       const reader = new FileReader();
-      reader.onload = function(ev){
-        const content = String(ev.target.result || '');
+      reader.onload = function (ev) {
+        const content = String(ev.target.result || "");
         initMapIfNeeded();
-        document.getElementById('mapWrap').style.display = 'block';
-        document.getElementById('mapTools').style.display = 'flex';
-        document.getElementById('metrics').style.display = 'flex';
-        document.getElementById('downloadBtn').style.display = 'block';
+        document.getElementById("mapWrap").style.display = "block";
+        document.getElementById("mapTools").style.display = "flex";
+        document.getElementById("metrics").style.display = "flex";
+        document.getElementById("downloadBtn").style.display = "block";
 
         const isSdr = content.includes("08KI");
         if (isSdr) {
-          loadedFileText = content; sdrResult = content;
+          loadedFileText = content;
+          sdrResult = content;
           sdrNotice.style.display = "block";
           const pts = parseSdrToPoints(content);
           drawPoints(pts);
@@ -393,54 +678,93 @@ async function apiCsvToSdr(content, format) {
       reader.readAsText(file);
     }
 
-    function normalizeLines(text){
-      return (text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').map(s => s.trim()).filter(Boolean);
+    function normalizeLines(text) {
+      return (text || "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
     }
 
-    function drawPointsFromCsv(csvLines, format){
-      pointsLayer.clearLayers(); lastBounds = null;
-      let minE = Infinity, minN = Infinity, maxE = -Infinity, maxN = -Infinity, plotted = 0;
-      const delim = detectDelimiter(csvLines[0] || '');
-      const startIndex = looksLikeHeader(csvLines[0] || '') ? 1 : 0;
+    function drawPointsFromCsv(csvLines, format) {
+      pointsLayer.clearLayers();
+      lastBounds = null;
+      let minE = Infinity,
+        minN = Infinity,
+        maxE = -Infinity,
+        maxN = -Infinity,
+        plotted = 0;
+      const delim = detectDelimiter(csvLines[0] || "");
+      const startIndex = looksLikeHeader(csvLines[0] || "") ? 1 : 0;
 
-      for (let i = startIndex; i < csvLines.length; i++){
+      for (let i = startIndex; i < csvLines.length; i++) {
         const cols = splitDelimitedLine(csvLines[i], delim);
-        const P = (cols[0] ?? '').trim();
-        let N = format === 'NEZ' ? cols[1] : cols[2];
-        let E = format === 'NEZ' ? cols[2] : cols[1];
-        const n = parseFloat(N), e = parseFloat(E);
+        const P = (cols[0] ?? "").trim();
+        // Fixed: Handle column order correctly
+        // For format 'ENZ': cols[0]=ID, cols[1]=E, cols[2]=N
+        // For format 'NEZ': cols[0]=ID, cols[1]=N, cols[2]=E
+        let E = format === "NEZ" ? cols[2] : cols[1];
+        let N = format === "NEZ" ? cols[1] : cols[2];
+        const n = parseFloat(N),
+          e = parseFloat(E);
         if (!isFinite(n) || !isFinite(e)) continue;
 
-        minE = Math.min(minE, e); maxE = Math.max(maxE, e);
-        minN = Math.min(minN, n); maxN = Math.max(maxN, n);
-        
-        const marker = L.circleMarker([n, e], { radius: 4, weight: 1 }).addTo(pointsLayer);
+        minE = Math.min(minE, e);
+        maxE = Math.max(maxE, e);
+        minN = Math.min(minN, n);
+        maxN = Math.max(maxN, n);
+
+        const marker = L.circleMarker([n, e], { radius: 4, weight: 1 }).addTo(
+          pointsLayer,
+        );
         if (P) {
-          marker.bindTooltip('<div class="wrap"><div class="num">'+escapeHtml(P)+'</div><div class="arrow">▼</div></div>', {
-              permanent: true, direction: 'top', offset: [0, -6], className: 'pt-label', opacity: 1
-          });
+          marker.bindTooltip(
+            '<div class="wrap"><div class="num">' +
+              escapeHtml(P) +
+              '</div><div class="arrow">▼</div></div>',
+            {
+              permanent: true,
+              direction: "top",
+              offset: [0, -6],
+              className: "pt-label",
+              opacity: 1,
+            },
+          );
         }
         plotted++;
       }
-      document.getElementById('pointsCount').textContent = plotted;
-      if (plotted > 0) { lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]); map.fitBounds(lastBounds.pad(0.1)); }
+      document.getElementById("pointsCount").textContent = plotted;
+      if (plotted > 0) {
+        lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]);
+        map.fitBounds(lastBounds.pad(0.1));
+      }
     }
 
-    function looksLikeHeader(line){ return /point|pnt|name|id|north|east|level|code/i.test(line); }
-    function detectDelimiter(line){
-      const counts = {',':0,';':0,'\t':0};
-      for(let char of line) if(counts.hasOwnProperty(char)) counts[char]++;
-      return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    function looksLikeHeader(line) {
+      return /point|pnt|name|id|north|east|level|code/i.test(line);
     }
-    function splitDelimitedLine(line, delim){
-      const res = []; let cur = '', inQuotes = false;
-      for (let i=0; i<line.length; i++){
+    function detectDelimiter(line) {
+      const counts = { ",": 0, ";": 0, "\t": 0 };
+      for (let char of line) if (counts.hasOwnProperty(char)) counts[char]++;
+      return Object.keys(counts).reduce((a, b) =>
+        counts[a] > counts[b] ? a : b,
+      );
+    }
+    function splitDelimitedLine(line, delim) {
+      const res = [];
+      let cur = "",
+        inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
         const ch = line[i];
         if (ch === '"') inQuotes = !inQuotes;
-        else if (!inQuotes && ch === delim) { res.push(cur); cur = ''; }
-        else cur += ch;
+        else if (!inQuotes && ch === delim) {
+          res.push(cur);
+          cur = "";
+        } else cur += ch;
       }
-      res.push(cur); return res;
+      res.push(cur);
+      return res;
     }
 
     function parseSdrToPoints(sdrText) {
@@ -448,24 +772,50 @@ async function apiCsvToSdr(content, format) {
       const pts = [];
       for (const line of lines) {
         if (!line.startsWith("08KI")) continue;
-        const p = line.slice(4, 20).trim(), nS = line.slice(20, 36).trim(), eS = line.slice(36, 52).trim();
-        const n = parseFloatSmart(nS), e = parseFloatSmart(eS);
+        const p = line.slice(4, 20).trim(),
+          nS = line.slice(20, 36).trim(),
+          eS = line.slice(36, 52).trim();
+        const n = parseFloatSmart(nS),
+          e = parseFloatSmart(eS);
         if (isFinite(n) && isFinite(e)) pts.push({ p, n, e });
       }
       return pts;
     }
 
     function drawPoints(points) {
-      pointsLayer.clearLayers(); lastBounds = null;
-      let minE = Infinity, minN = Infinity, maxE = -Infinity, maxN = -Infinity;
+      pointsLayer.clearLayers();
+      lastBounds = null;
+      let minE = Infinity,
+        minN = Infinity,
+        maxE = -Infinity,
+        maxN = -Infinity;
       for (const pt of points) {
-        minE = Math.min(minE, pt.e); maxE = Math.max(maxE, pt.e);
-        minN = Math.min(minN, pt.n); maxN = Math.max(maxN, pt.n);
-        const marker = L.circleMarker([pt.n, pt.e], { radius: 4, weight: 1 }).addTo(pointsLayer);
-        if (pt.p) marker.bindTooltip('<div class="wrap"><div class="num">'+escapeHtml(pt.p)+'</div><div class="arrow">▼</div></div>', { permanent: true, direction: 'top', offset: [0, -6], className: 'pt-label' });
+        minE = Math.min(minE, pt.e);
+        maxE = Math.max(maxE, pt.e);
+        minN = Math.min(minN, pt.n);
+        maxN = Math.max(maxN, pt.n);
+        const marker = L.circleMarker([pt.n, pt.e], {
+          radius: 4,
+          weight: 1,
+        }).addTo(pointsLayer);
+        if (pt.p)
+          marker.bindTooltip(
+            '<div class="wrap"><div class="num">' +
+              escapeHtml(pt.p) +
+              '</div><div class="arrow">▼</div></div>',
+            {
+              permanent: true,
+              direction: "top",
+              offset: [0, -6],
+              className: "pt-label",
+            },
+          );
       }
-      document.getElementById('pointsCount').textContent = points.length;
-      if (points.length) { lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]); map.fitBounds(lastBounds.pad(0.1)); }
+      document.getElementById("pointsCount").textContent = points.length;
+      if (points.length) {
+        lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]);
+        map.fitBounds(lastBounds.pad(0.1));
+      }
     }
 
     function convertSdrTextToCsv(sdrText) {
@@ -473,16 +823,36 @@ async function apiCsvToSdr(content, format) {
       const out = ["P,N,E,Z,Code"];
       for (const line of lines) {
         if (!line.startsWith("08KI")) continue;
-        out.push([line.slice(4, 20).trim(), line.slice(20, 36).trim(), line.slice(36, 52).trim(), line.slice(52, 68).trim(), line.slice(68, 84).trim()].join(","));
+        out.push(
+          [
+            line.slice(4, 20).trim(),
+            line.slice(20, 36).trim(),
+            line.slice(36, 52).trim(),
+            line.slice(52, 68).trim(),
+            line.slice(68, 84).trim(),
+          ].join(","),
+        );
       }
       return out.join("\n") + "\n";
     }
 
-    function parseFloatSmart(v) { let s = String(v).replace(/\s+/g, ""); return s.includes(",") ? parseFloat(s.replace(/,/g, ".")) : parseFloat(s); }
-    function escapeHtml(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function downloadText(c, f, m) {
-      const b = new Blob([c], { type: m }); const u = URL.createObjectURL(b);
-      const a = document.createElement("a"); a.href = u; a.download = f; a.click();
+    function parseFloatSmart(v) {
+      let s = String(v).replace(/\s+/g, "");
+      return s.includes(",") ? parseFloat(s.replace(/,/g, ".")) : parseFloat(s);
     }
-})();
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+    function downloadText(c, f, m) {
+      const b = new Blob([c], { type: m });
+      const u = URL.createObjectURL(b);
+      const a = document.createElement("a");
+      a.href = u;
+      a.download = f;
+      a.click();
+    }
+  })();
 </script>

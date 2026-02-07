@@ -667,15 +667,21 @@
           <table id="batchTable">
             <thead>
               <tr>
-                <th>Point</th>
+                <th>POINT</th>
+                <th>ID</th>
+                <th>N_DLTM</th>
+                <th>E_DLTM</th>
+                <th>Z_DLTM</th>
                 <th>Code</th>
-                <th>E (DLTM)</th>
-                <th>N (DLTM)</th>
-                <th>Lat</th>
-                <th>Lon</th>
-                <th>UTM Zone</th>
-                <th>UTM E</th>
-                <th>UTM N</th>
+                <th>عامود</th>
+                <th>فارغ</th>
+                <th>UTM_N</th>
+                <th>UTM_E</th>
+                <th>UTM_Z</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>altitude</th>
+                <th>code</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -1274,9 +1280,6 @@
     window.handleBatchFile = function (input) {
       const file = input.files[0];
       if (!file) return;
-      const direction =
-        document.querySelector("input[name='batch-direction']:checked")
-          ?.value || "dltm-to-wgs";
 
       const reader = new FileReader();
       reader.onload = function (ev) {
@@ -1285,153 +1288,103 @@
         const rows = [];
 
         lines.forEach((line, i) => {
-          if (i === 0 && /[a-zA-Z]/.test(line)) return;
+          if (i === 0 && /[a-zA-Z]/.test(line)) return; // Skip header
           const parts = line
             .split(/[,\t;]+/)
             .map((p) => p.trim())
             .filter(Boolean);
           if (parts.length < 2) return;
 
-          // Auto-detect column order with range validation
-          // DLTM ranges: E: 200,000-900,000 | N: 2,000,000-4,000,000
-          let val1,
-            val2,
-            pId = "",
+          // Identify columns by digit count: N has 7 digits, E has 6 digits
+          let pointId = "",
+            northing = null,
+            easting = null,
+            zValue = "",
             code = "";
-          const p0 = parseFloat(parts[0]);
-          const p1 = parseFloat(parts[1]);
-          const p2 = parseFloat(parts[2]);
 
-          // Helper to check if value is valid E (East)
-          const isValidE = (v) => v > 200000 && v < 900000;
-          // Helper to check if value is valid N (North)
-          const isValidN = (v) => v > 2000000 && v < 4000000;
+          for (let j = 0; j < parts.length; j++) {
+            const val = parts[j];
+            const digits = val.replace(/[^0-9]/g, "").length; // Count all digits
+            const integerDigits = val
+              .split(".")[0]
+              .replace(/[^0-9]/g, "").length; // Count integer digits only
 
-          if (isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
-            // Format: ID, E, N or ID, N, E
-            pId = parts[0];
-            val1 = p1; // Second column
-            val2 = p2; // Third column
-            code = parts.length >= 4 ? parts[3] : "";
-          } else if (!isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
-            // All numeric: need to determine order by range validation
-            // Check which arrangement makes sense for DLTM
-            let east, north, id;
-            
-            // p0, p1, p2 - try to find E, N, ID pattern
-            if (isValidE(p0) && isValidN(p1) && p2 < 1000) {
-              // E, N, ID
-              east = p0;
-              north = p1;
-              id = p2;
-            } else if (isValidE(p1) && isValidN(p2) && p0 < 1000) {
-              // ID, E, N (most common)
-              id = p0;
-              east = p1;
-              north = p2;
-            } else if (isValidE(p2) && isValidN(p1) && p0 < 1000) {
-              // ID, N, E
-              id = p0;
-              north = p1;
-              east = p2;
-            } else if (isValidE(p0) && isValidN(p2) && p1 < 1000) {
-              // E, ID, N
-              east = p0;
-              id = p1;
-              north = p2;
-            } else if (isValidN(p0) && isValidE(p1) && p2 < 1000) {
-              // N, E, ID
-              north = p0;
-              east = p1;
-              id = p2;
-            } else {
-              // Fallback: assume first valid E, then N
-              east = isValidE(p0) ? p0 : isValidE(p1) ? p1 : p0;
-              north = isValidN(p0) ? p0 : isValidN(p1) ? p1 : p1;
-              id = !isValidE(east) && !isValidN(north) ? p0 : p2;
+            // Prioritize by integer digit count: N=7, E=6
+            if (integerDigits === 7 && northing === null) {
+              // This is N (7 integer digits like 2768047)
+              northing = parseFloat(val);
+            } else if (integerDigits === 6 && easting === null) {
+              // This is E (6 integer digits like 489817)
+              easting = parseFloat(val);
+            } else if (isNaN(parseFloat(val)) && pointId === "") {
+              // This is the Point ID (text)
+              pointId = val;
+            } else if (
+              !isNaN(parseFloat(val)) &&
+              northing !== null &&
+              easting !== null &&
+              zValue === "" &&
+              integerDigits < 5
+            ) {
+              // This is Z value (elevation, small number)
+              zValue = val;
+            } else if (pointId === "" && integerDigits < 4) {
+              // Treat as Point ID if it's a small number
+              pointId = val;
+            } else if (code === "" && isNaN(parseFloat(val))) {
+              // This is Code (text after coordinates)
+              code = val;
             }
-            
-            val1 = east;
-            val2 = north;
-            pId = String(id);
-            code = parts.length >= 4 ? parts[3] : "";
-          } else if (!isNaN(p0) && !isNaN(p1)) {
-            // Format: E, N or N, E (only 2 columns)
-            // Determine which is E and which is N
-            if (isValidE(p0) && isValidN(p1)) {
-              val1 = p0; // E
-              val2 = p1; // N
-            } else if (isValidN(p0) && isValidE(p1)) {
-              val1 = p1; // E
-              val2 = p0; // N
-            } else {
-              val1 = p0;
-              val2 = p1;
-            }
-            pId = parts.length >= 3 ? parts[2] : "";
-            code = parts.length >= 4 ? parts[3] : "";
-          } else {
-            return; // Invalid row
           }
 
-          rows.push([val1, val2, pId, code]);
+          if (northing !== null && easting !== null) {
+            rows.push({
+              pointId,
+              northing,
+              easting,
+              zValue,
+              code,
+            });
+          }
         });
 
         if (!rows.length) return alert("لم يتم العثور على بيانات صالحة");
         safeShowLoader(true);
 
-        let results;
-        if (direction === "wgs-to-dltm") {
-          results = rows.map((r) => {
-            const [lon, lat, pId, code] = r;
-            const conv = convertWGS84toDLTM(lat, lon);
-            if (!conv.success)
-              return {
-                pId,
-                code,
-                longitude: lon,
-                latitude: lat,
-                error: conv.error,
-              };
-            const utm = latLonToUTM(lat, lon);
+        // Convert DLTM to WGS84 and then to UTM Zone 40N
+        const results = rows.map((r) => {
+          const conv = convertDLTMtoWGS84(r.easting, r.northing);
+          if (!conv.success) {
             return {
-              pId,
-              code,
-              easting: conv.easting,
-              northing: conv.northing,
-              latitude: lat,
-              longitude: lon,
-              utmE: utm.easting,
-              utmN: utm.northing,
-              utmZone: String(utm.zone) + String(utm.hemisphere),
+              error: conv.error,
+              pointId: r.pointId,
             };
-          });
-        } else {
-          results = rows.map((r) => {
-            const [east, north, pId, code] = r;
-            const v = validateAndMaybeSwap(east, north);
-            const conv = convertDLTMtoWGS84(v.E, v.N);
-            if (!conv.success)
-              return {
-                pId,
-                code,
-                easting: east,
-                northing: north,
-                error: conv.error,
-              };
-            return {
-              pId,
-              code,
-              easting: east,
-              northing: north,
-              latitude: conv.latitude,
-              longitude: conv.longitude,
-              utmE: conv.utm.easting,
-              utmN: conv.utm.northing,
-              utmZone: String(conv.utm.zone) + String(conv.utm.hemisphere),
-            };
-          });
-        }
+          }
+
+          // Convert to UTM Zone 40N
+          const utm = latLonToUTM(conv.latitude, conv.longitude);
+          // Force to Zone 40N
+          const utm40 = {
+            easting: convertWGS84toUTMZone40N(conv.latitude, conv.longitude)
+              .easting,
+            northing: convertWGS84toUTMZone40N(conv.latitude, conv.longitude)
+              .northing,
+          };
+
+          return {
+            pointId: r.pointId,
+            nDltm: r.northing,
+            eDltm: r.easting,
+            zDltm: r.zValue || "",
+            code: r.code,
+            latitude: conv.latitude,
+            longitude: conv.longitude,
+            utmN: utm40.northing,
+            utmE: utm40.easting,
+            utmZone: "40N",
+            altitude: "",
+          };
+        });
 
         safeShowLoader(false);
         batchData = results;
@@ -1441,6 +1394,54 @@
       reader.readAsText(file);
     };
 
+    // Helper function to convert WGS84 to UTM Zone 40N
+    function convertWGS84toUTMZone40N(lat, lon) {
+      const zone = 40;
+      const lonOrigin = (zone - 0.5) * 6 - 180; // Central meridian for zone 40
+      const a = 6378137.0; // WGS84 semi-major axis
+      const b = 6356752.314245; // WGS84 semi-minor axis
+      const f = 1 / 298.257223563; // WGS84 flattening
+      const k0 = 0.9996; // UTM scale factor
+      const e2 = f * (2 - f);
+      const e4 = e2 * e2;
+      const e6 = e4 * e2;
+
+      const latRad = (lat * Math.PI) / 180;
+      const lonRad = (lon * Math.PI) / 180;
+      const lonOriginRad = (lonOrigin * Math.PI) / 180;
+
+      const N = a / Math.sqrt(1 - e2 * Math.sin(latRad) * Math.sin(latRad));
+      const T = Math.tan(latRad) * Math.tan(latRad);
+      const C = (e2 / (1 - e2)) * Math.cos(latRad) * Math.cos(latRad);
+      const A = Math.cos(latRad) * (lonRad - lonOriginRad);
+      const M =
+        a *
+        ((1 - e2 / 4 - (3 * e4) / 64 - (5 * e6) / 256) * latRad -
+          ((3 * e2) / 8 + (3 * e4) / 32 - (45 * e6) / 1024) *
+            Math.sin(2 * latRad) +
+          ((15 * e4) / 256 - (45 * e6) / 1024) * Math.sin(4 * latRad) -
+          ((35 * e6) / 3072) * Math.sin(6 * latRad));
+
+      const easting =
+        k0 *
+          N *
+          (A +
+            ((A * A * A) / 6) * (1 - T + C) +
+            (Math.pow(A, 5) / 120) * (1 - 5 * T + 9 * C + 4 * C * C)) +
+        500000;
+      const northing =
+        k0 *
+        (M +
+          N *
+            Math.tan(latRad) *
+            ((A * A) / 2 +
+              (Math.pow(A, 4) / 24) * (5 - T + 9 * C + 4 * C * C) +
+              (Math.pow(A, 6) / 720) *
+                (61 - 58 * T + T * T + 600 * C - 330 * e2)));
+
+      return { easting, northing };
+    }
+
     function renderBatchResults(results) {
       const tbody = document.querySelector("#batchTable tbody");
       tbody.innerHTML = "";
@@ -1449,17 +1450,23 @@
         if (r.error) return;
         const tr = document.createElement("tr");
         tr.innerHTML =
-          `<td>${escapeHtml(r.pId || "")}</td>` +
+          `<td>${escapeHtml(r.pointId || "")}</td>` +
+          `<td>${escapeHtml(r.pointId || "")}</td>` +
+          `<td>${Number(r.nDltm || 0).toFixed(2)}</td>` +
+          `<td>${Number(r.eDltm || 0).toFixed(2)}</td>` +
+          `<td>${Number(r.zDltm || 0).toFixed(2)}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>` +
-          `<td>${Number(r.easting).toFixed(2)}</td>` +
-          `<td>${Number(r.northing).toFixed(2)}</td>` +
-          `<td>${toDMS(r.latitude, false)}</td>` +
-          `<td>${toDMS(r.longitude, true)}</td>` +
-          `<td>${escapeHtml(r.utmZone)}</td>` +
-          `<td>${Number(r.utmE).toFixed(2)}</td>` +
-          `<td>${Number(r.utmN).toFixed(2)}</td>`;
+          `<td></td>` +
+          `<td></td>` +
+          `<td>${Number(r.utmN || 0).toFixed(2)}</td>` +
+          `<td>${Number(r.utmE || 0).toFixed(2)}</td>` +
+          `<td>${r.utmZone || "40N"}</td>` +
+          `<td>${Number(r.latitude || 0).toFixed(6)}</td>` +
+          `<td>${Number(r.longitude || 0).toFixed(6)}</td>` +
+          `<td>${Number(r.altitude || 0).toFixed(2)}</td>` +
+          `<td>${escapeHtml(r.code || "")}</td>`;
 
-        // اضافة القدرة على الضغط لعرض على الخريطة
+        // Click to show on map
         tr.style.cursor = "pointer";
         tr.addEventListener("click", () =>
           showPointOnMap(r.latitude, r.longitude),
@@ -1476,17 +1483,13 @@
 
     window.downloadBatchCsv = function () {
       if (!batchData.length) return;
-      const direction =
-        document.querySelector("input[name='batch-direction']:checked")
-          ?.value || "dltm-to-wgs";
       let csv =
-        "PointID,Code,E_DLTM,N_DLTM,Latitude,Longitude,UTM_Zone,UTM_E,UTM_N\n";
-      let filename =
-        direction === "wgs-to-dltm" ? "WGS84_to_DLTM.csv" : "DLTM_to_WGS84.csv";
+        "POINT,ID,N_DLTM,E_DLTM,Z_DLTM,Code,عامود,فارغ,UTM_N,UTM_E,UTM_Z,Latitude,Longitude,altitude,code\n";
+      let filename = "DLTM_to_UTM_Zone40N.csv";
 
       batchData.forEach((r) => {
         if (r.error) return;
-        csv += `${safeCsv(r.pId)},${safeCsv(r.code)},${r.easting},${r.northing},${r.latitude},${r.longitude},${r.utmZone},${r.utmE},${r.utmN}\n`;
+        csv += `${safeCsv(r.pointId)},${safeCsv(r.pointId)},${r.nDltm},${r.eDltm},${r.zDltm},${safeCsv(r.code)},,,${r.utmN},${r.utmE},${r.utmZone},${r.latitude},${r.longitude},${r.altitude},${safeCsv(r.code)}\n`;
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
