@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,6 +22,12 @@
 
     <!-- GeoTools Theme & Features -->
     <script src="./theme.js" defer></script>
+    
+    <!-- Unified Navbar & Footer & Keyboard Navigation & Notifications Loaders -->
+    <script src="./navbar-loader.js"></script>
+    <script src="./footer-loader.js"></script>
+    <script src="./keyboard-navigation.js"></script>
+    <script src="./notification-system.js"></script>
 
     <style>
       :root {
@@ -56,55 +62,6 @@
         flex-direction: column;
       }
 
-      /* Navbar */
-      .navbar {
-        height: 70px;
-        background: var(--card-bg);
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 40px;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        transition:
-          background-color 0.3s ease,
-          border-color 0.3s ease;
-      }
-      .nav-logo {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        text-decoration: none;
-        color: var(--primary);
-        font-weight: 900;
-        font-size: 22px;
-      }
-      .nav-links {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-      }
-      .btn-nav-top {
-        padding: 8px 16px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        border: 1px solid var(--border);
-        background: var(--card-bg);
-        color: var(--text-main);
-        transition: all 0.2s;
-        white-space: nowrap;
-      }
-      .btn-nav-top:hover {
-        background: var(--primary-light);
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-
       #app-container {
         flex: 1;
         display: flex;
@@ -114,31 +71,55 @@
         transition: opacity 0.3s ease;
       }
 
-      /* Loading Overlay */
+      /* Loading Overlay - Enhanced */
       #loader {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(248, 250, 252, 0.8);
+        background: rgba(248, 250, 252, 0.95);
         display: none;
         justify-content: center;
         align-items: center;
         z-index: 10000;
         backdrop-filter: blur(4px);
-        transition: background 0.3s ease;
+        transition: background 0.3s ease, opacity 0.3s ease;
+      }
+      #loader.hidden {
+        opacity: 0;
+        pointer-events: none;
       }
       body.dark-mode #loader {
-        background: rgba(15, 23, 42, 0.8);
+        background: rgba(15, 23, 42, 0.95);
+      }
+      .loader-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
       }
       .spinner {
-        width: 50px;
-        height: 50px;
-        border: 5px solid #f3f3f3;
+        width: 60px;
+        height: 60px;
+        border: 5px solid rgba(0, 0, 0, 0.1);
         border-top: 5px solid var(--primary);
+        border-right: 5px solid var(--primary-hover);
         border-radius: 50%;
-        animation: spin 1s linear infinite;
+        animation: spin 1.2s linear infinite;
+        box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+      }
+      body.dark-mode .spinner {
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .loader-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+        animation: fadeInOut 1.5s ease-in-out infinite;
+      }
+      body.dark-mode .loader-text {
+        color: var(--text-muted);
       }
       @keyframes spin {
         0% {
@@ -146,6 +127,14 @@
         }
         100% {
           transform: rotate(360deg);
+        }
+      }
+      @keyframes fadeInOut {
+        0%, 100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
         }
       }
 
@@ -196,7 +185,8 @@
         cursor: pointer;
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        text-align: center;
         text-decoration: none;
         color: inherit;
       }
@@ -227,95 +217,58 @@
         color: var(--text-muted);
         line-height: 1.6;
       }
-
-      .footer {
-        margin-top: auto;
-        padding: 40px 0;
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 14px;
-        border-top: 1px solid var(--border);
-        background: var(--card-bg);
-        width: 100%;
-        transition:
-          background-color 0.3s ease,
-          border-color 0.3s ease,
-          color 0.3s ease;
-      }
     </style>
   </head>
 
   <body>
-    <div id="loader"><div class="spinner"></div></div>
-
-    <nav class="navbar">
-      <a
-        href="#"
-        class="nav-logo"
-        onclick="
-          loadPage('');
-          return false;
-        "
-      >
-        <span>🌐</span> GeoTools Suite
-      </a>
-
-      <div class="nav-links">
-        <button class="btn-nav-top" onclick="loadPage('')">الرئيسية</button>
-        <button class="btn-nav-top" onclick="loadPage('Converter')">
-          محول الملفات
-        </button>
-        <button class="btn-nav-top" onclick="loadPage('DLTM')">محول دبي</button>
-        <button class="btn-nav-top" onclick="loadPage('Transform')">
-          تحويل الإحداثيات
-        </button>
-        <button class="btn-nav-top" onclick="loadPage('Service2')">
-          حساب المساحات
-        </button>
+    <div id="loader">
+      <div class="loader-content">
+        <div class="spinner"></div>
+        <div class="loader-text">Loading...</div>
       </div>
-    </nav>
+    </div>
 
     <div id="app-container">
       <div id="view-content" class="dashboard-view">
         <!-- DASHBOARD START -->
         <div class="header">
-          <h1>مجموعة أدوات المساحة</h1>
-          <p>اختر الخدمة التي تريد البدء باستخدامها اليوم</p>
+          <h1>GeoTools Survey Suite</h1>
+          <p>Choose the service you want to use today</p>
         </div>
 
         <div class="grid">
           <div class="card" onclick="loadPage('Converter')">
             <div class="icon-box">🔄</div>
-            <h2>محول الملفات (SDR)</h2>
+            <h2>File Converter (SDR)</h2>
             <p>
-              تحويل ملفات الإحداثيات CSV/TXT إلى صيغة SDR الخاصة بأجهزة سوكيا،
-              مع ميزة العرض على الخارطة.
+              Convert coordinate CSV/TXT files to SDR format for Sokkia devices,
+              with map view feature.
             </p>
           </div>
 
           <div class="card" onclick="loadPage('DLTM')">
             <div class="icon-box">📍</div>
-            <h2>محول DLTM (دبي)</h2>
+            <h2>DLTM Converter (Dubai)</h2>
             <p>
-              تحويل الإحداثيات المحلية لمدينة دبي (DLTM) إلى إحداثيات عالمية
-              (Lat/Long) بدقة عالية.
+              Convert Dubai local coordinates (DLTM) to global coordinates
+              (Lat/Long) with high accuracy.
             </p>
           </div>
 
           <div class="card" onclick="loadPage('Service2')">
             <div class="icon-box">📐</div>
-            <h2>حساب المساحات</h2>
+            <h2>Area Calculator</h2>
             <p>
-              أداة هندسية لحساب المساحات بناءً على الإحداثيات أو المسافات
-              والزوايا.
+              Engineering tool for calculating areas based on coordinates or distances
+              and angles.
             </p>
           </div>
 
           <div class="card" onclick="loadPage('Transform')">
             <div class="icon-box">🛰️</div>
-            <h2>تحويل الإحداثيات</h2>
+            <h2>Coordinate Transformation</h2>
             <p>
-              تحويل الإحداثيات بين الأنظمة المختلفة UTM, WGS84 وغيرها باستخدام
+              Convert coordinates between different systems UTM, WGS84 and others using
               Proj4js.
             </p>
           </div>
@@ -324,7 +277,7 @@
       </div>
 
       <div class="footer">
-        <p>&copy; 2026 جميع الحقوق محفوظة - GeoTools Suite</p>
+        <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
       </div>
     </div>
 

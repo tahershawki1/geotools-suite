@@ -1,0 +1,102 @@
+<!-- Unified Navigation Bar -->
+<style>
+  .navbar-unified {
+    height: 70px;
+    background: var(--card-bg, #ffffff);
+    border-bottom: 1px solid var(--border, #e2e8f0);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 40px;
+    padding: 0 40px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease;
+  }
+
+  .nav-logo-unified {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--primary, #4f46e5);
+    font-weight: 900;
+    font-size: 22px;
+    white-space: nowrap;
+  }
+
+  .nav-links-unified {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-nav-unified {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--border, #e2e8f0);
+    background: var(--card-bg, #ffffff);
+    color: var(--text-main, #1e293b);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-nav-unified:hover {
+    background: var(--primary-light, #eef2ff);
+    border-color: var(--primary, #4f46e5);
+    color: var(--primary, #4f46e5);
+  }
+
+  /* Dark mode support */
+  body.dark-mode .navbar-unified {
+    background: var(--card-bg, #1e293b);
+    border-color: var(--border, #475569);
+  }
+
+  body.dark-mode .btn-nav-unified {
+    background: var(--card-bg, #1e293b);
+    color: var(--text-main, #e2e8f0);
+    border-color: var(--border, #475569);
+  }
+</style>
+
+<nav class="navbar-unified" role="navigation" aria-label="Main navigation">
+  <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
+    <span>🌐</span> GeoTools Suite
+  </a>
+
+  <div class="nav-links-unified">
+    <button class="btn-nav-unified" data-page="" aria-label="Home - Main dashboard">Home</button>
+    <button class="btn-nav-unified" data-page="Converter" aria-label="File Converter - Convert survey files">File Converter</button>
+    <button class="btn-nav-unified" data-page="DLTM" aria-label="Dubai Converter - DLTM coordinate conversion">Dubai Converter</button>
+    <button class="btn-nav-unified" data-page="Transform" aria-label="Coordinate Transformation - WGS84 and UTM conversion">Coordinate Transformation</button>
+    <button class="btn-nav-unified" data-page="Service2" aria-label="Area Calculator - Calculate areas from coordinates">Area Calculator</button>
+  </div>
+</nav>
+
+<script>
+// Smart navigation: use loadPage() if inside SPA (index.html), otherwise direct link
+document.querySelectorAll('.btn-nav-unified').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const page = this.getAttribute('data-page');
+    if (typeof window.loadPage === 'function') {
+      // Inside SPA - use loadPage
+      loadPage(page);
+    } else {
+      // Standalone page - navigate directly
+      if (!page) {
+        window.location.href = './index.html';
+      } else {
+        window.location.href = './' + page + '.html';
+      }
+    }
+  });
+});
+</script>

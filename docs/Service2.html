@@ -4,9 +4,17 @@
     <meta charset="UTF-8" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>حساب المساحات</title>
+    <title>Area Calculator - GeoTools Suite</title>
 
-    <!-- Local Leaflet (no Google, no external scripts) -->
+    <!-- Global Styles & Theme -->
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./theme.js" defer></script>
+
+    <!-- Local Leaflet -->
+    <script src="./navbar-loader.js"></script>
+    <script src="./footer-loader.js"></script>
+    <script src="./keyboard-navigation.js"></script>
+    <script src="./notification-system.js"></script>
     <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
     <script src="./vendor/leaflet/leaflet.js"></script>
 
@@ -38,19 +46,8 @@
         color: var(--text);
       }
 
-      header {
-        padding: 14px 18px;
-        background: var(--card);
-        border-bottom: 1px solid var(--border);
-      }
-      header h1 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 800;
-      }
-
       .wrap {
-        height: calc(100% - 56px);
+        height: 100%;
         display: grid;
         grid-template-columns: 420px 1fr;
         gap: 14px;
@@ -253,10 +250,6 @@
   </head>
 
   <body>
-    <header>
-      <h1>حساب المساحات (N, E) — وضع مستوي (UTM/محلي)</h1>
-    </header>
-
     <div class="wrap">
       <div class="card">
         <h2>إدخال النقاط</h2>

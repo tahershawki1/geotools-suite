@@ -1,0 +1,107 @@
+<!-- Unified Footer -->
+<style>
+  .footer-unified {
+    margin-top: auto;
+    padding: 40px 0;
+    text-align: center;
+    color: var(--text-muted, #64748b);
+    font-size: 14px;
+    border-top: 1px solid var(--border, #e2e8f0);
+    background: var(--card-bg, #ffffff);
+    width: 100%;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .footer-links {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .footer-link {
+    text-decoration: none;
+    color: var(--primary, #4f46e5);
+    font-weight: 600;
+    transition: color 0.2s ease;
+  }
+
+  .footer-link:hover {
+    color: var(--primary-hover, #4338ca);
+    text-decoration: underline;
+  }
+
+  .footer-divider {
+    height: 1px;
+    background: var(--border, #e2e8f0);
+    margin: 20px 0;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--text-muted, #64748b);
+  }
+
+  .footer-text strong {
+    color: var(--text-main, #1e293b);
+    font-weight: 600;
+  }
+
+  /* Dark mode support */
+  body.dark-mode .footer-unified {
+    background: var(--card-bg, #1e293b);
+    border-color: var(--border, #475569);
+    color: var(--text-muted, #94a3b8);
+  }
+
+  body.dark-mode .footer-text {
+    color: var(--text-muted, #94a3b8);
+  }
+
+  body.dark-mode .footer-text strong {
+    color: var(--text-main, #e2e8f0);
+  }
+</style>
+
+<footer class="footer-unified" role="contentinfo">
+  <div class="footer-content">
+    <div class="footer-links">
+      <a href="./index.html" class="footer-link" data-page="" aria-label="Home">Home</a>
+      <a href="./Converter.html" class="footer-link" data-page="Converter" aria-label="File Converter">File Converter</a>
+      <a href="./DLTM.html" class="footer-link" data-page="DLTM" aria-label="Dubai Converter">Dubai Converter</a>
+      <a href="./Transform.html" class="footer-link" data-page="Transform" aria-label="Coordinate Transformation">Transformation</a>
+      <a href="./Service2.html" class="footer-link" data-page="Service2" aria-label="Area Calculator">Area Calculator</a>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="footer-text">
+      <p><strong>GeoTools Survey Suite</strong> v1.0.0 | All rights reserved © 2026</p>
+      <p>Professional geospatial coordinate transformation and file conversion tools</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Smart navigation for footer links
+document.querySelectorAll('.footer-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const page = this.getAttribute('data-page');
+    if (typeof window.loadPage === 'function') {
+      e.preventDefault();
+      loadPage(page);
+    }
+    // else: let the href navigate normally
+  });
+});
+</script>

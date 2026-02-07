@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Converter - GeoTools Suite</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+  <script src="./vendor/leaflet/leaflet.js"></script>
+  <script src="./theme.js" defer></script>
+  <script src="./navbar-loader.js"></script>
+  <script src="./footer-loader.js"></script>
+  <script src="./keyboard-navigation.js"></script>
+  <script src="./notification-system.js"></script>
+</head>
+<body>
 <style>
   /* Local overrides for Converter when injected */
   .container-converter {
@@ -12,15 +28,6 @@
     direction: ltr;
     text-align: left;
     margin-top: 20px;
-  }
-  .header-conv {
-    padding: 18px 18px 14px;
-    border-bottom: 1px solid #eef2f7;
-    background: #fff;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
   }
   .content-conv {
     padding: 18px;
@@ -159,7 +166,7 @@
   .north-arrow-conv {
     position: absolute;
     top: 12px;
-    right: 12px;
+    left: 12px;
     z-index: 999;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid #eef2f7;
@@ -229,18 +236,6 @@
 </style>
 
 <div class="container-converter">
-  <div class="header-conv">
-    <div>
-      <h1 style="font-size: 18px; font-weight: 700; margin-bottom: 4px">
-        File Points Map Viewer
-      </h1>
-      <p style="font-size: 13px; color: #667085">
-        عرض وتحويل ملفات المساحة (CSV, TXT, SDR)
-      </p>
-    </div>
-    <button class="btn-nav" onclick="loadPage('')">🏠 الرئيسية</button>
-  </div>
-
   <div class="content-conv">
     <form id="converterForm">
       <div class="card-conv">
@@ -325,7 +320,7 @@
             opacity="0.25"
           />
         </svg>
-        <span style="font-weight: 900; margin-right: 5px">N</span>
+        <span style="font-weight: 900; margin-left: 5px">N</span>
       </div>
       <div id="map"></div>
     </div>
@@ -856,3 +851,5 @@
     }
   })();
 </script>
+</body>
+</html>

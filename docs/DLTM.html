@@ -1,5 +1,19 @@
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<script src="./vendor/leaflet/leaflet.js"></script>
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dubai DLTM Converter - GeoTools Suite</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+  <script src="./vendor/leaflet/leaflet.js"></script>
+  <script src="./theme.js" defer></script>
+  <script src="./navbar-loader.js"></script>
+  <script src="./footer-loader.js"></script>
+  <script src="./keyboard-navigation.js"></script>
+  <script src="./notification-system.js"></script>
+</head>
+<body>
 
 <style>
   .container-dltm {
@@ -15,17 +29,6 @@
     display: flex;
     flex-direction: column;
     color: var(--text-main);
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease;
-  }
-  .header-dltm {
-    padding: 25px;
-    border-bottom: 1px solid var(--border);
-    background: var(--card-bg);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     transition:
       background-color 0.3s ease,
       border-color 0.3s ease;
@@ -337,31 +340,12 @@
 </style>
 
 <div class="container-dltm">
-  <div class="header-dltm">
-    <div style="text-align: right; direction: rtl">
-      <h2
-        style="
-          font-size: 20px;
-          font-weight: 900;
-          color: var(--primary);
-          margin: 0;
-        "
-      >
-        📍 محول إحداثيات دبي (DLTM)
-      </h2>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 0">
-        التحويل بين DLTM و WGS84
-      </p>
-    </div>
-    <button class="btn-nav-top" onclick="loadPage('')">🏠 الرئيسية</button>
-  </div>
-
   <div class="dltm-tabs">
     <div class="dltm-tab active" onclick="switchDltmTab(this, 'single')">
-      تحويل فردي
+      Single Conversion
     </div>
     <div class="dltm-tab" onclick="switchDltmTab(this, 'batch')">
-      تحويل جماعي (CSV)
+      Batch Conversion (CSV)
     </div>
     <div class="dltm-tab" onclick="switchDltmTab(this, 'reverse')">
       WGS84 → DLTM
@@ -442,13 +426,13 @@
 
           <div class="result-actions">
             <button class="btn-mini" onclick="copySingle('dms')">
-              نسخ DMS
+              Copy DMS
             </button>
             <button class="btn-mini" onclick="copySingle('dd')">
-              نسخ Decimal
+              Copy Decimal
             </button>
             <button class="btn-mini" onclick="copySingle('utm')">
-              نسخ UTM
+              Copy UTM
             </button>
           </div>
         </div>
@@ -530,7 +514,7 @@
     <div id="section-batch" class="tool-section">
       <div style="margin-bottom: 14px">
         <label style="display: block; font-weight: 900; margin-bottom: 8px"
-          >اختر نوع التحويل الجماعي:</label
+          >Choose Batch Conversion Type:</label
         >
         <div style="display: flex; gap: 10px; margin-bottom: 12px">
           <label
@@ -571,15 +555,15 @@
 
       <div style="margin-bottom: 14px">
         <label style="display: block; font-weight: 900; margin-bottom: 8px"
-          >لصق الإحداثيات (بدل رفع ملف)</label
+          >Paste Coordinates (instead of uploading file)</label
         >
         <textarea
           id="batchPaste"
           rows="8"
-          placeholder="مثال:
+          placeholder="Example:
 489817.908,2768047.013
 489790.938,2768033.067
-أو بفواصل/مسافات/Tab"
+Or with commas/spaces/Tab"
           style="
             width: 100%;
             padding: 12px;
@@ -593,13 +577,13 @@
           style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px"
         >
           <button class="btn-nav-top" onclick="runBatchFromPaste()">
-            تحويل اللصق
+            Convert Paste
           </button>
           <button
             class="btn-nav-top"
             onclick="document.getElementById('batchPaste').value = ''"
           >
-            مسح
+            Clear
           </button>
 
           <div
@@ -633,10 +617,9 @@
         onclick="document.getElementById('batchFile').click()"
       >
         <span style="font-size: 40px">📄</span>
-        <h3 style="margin: 10px 0">اضغط لرفع ملف CSV</h3>
+        <h3 style="margin: 10px 0">Click to Upload CSV File</h3>
         <p style="font-size: 13px; color: var(--text-muted)">
-          يجب أن يحتوي الملف على أعمدة (E, N) ويمكن إضافة (PointID, Code)
-          اختياريًا
+          File must contain columns (E, N) and optionally (PointID, Code)
         </p>
         <input
           type="file"
@@ -658,9 +641,9 @@
             align-items: center;
           "
         >
-          <strong id="batchCount">0 نقاط تم تحويلها</strong>
+          <strong id="batchCount">0 points converted</strong>
           <button class="btn-nav-top" onclick="downloadBatch()">
-            تحميل 💾
+            Download 💾
           </button>
         </div>
         <div style="max-height: 400px; overflow-y: auto">
@@ -694,7 +677,7 @@
     <div id="section-reverse" class="tool-section">
       <div style="margin-bottom: 12px">
         <label style="display: block; font-weight: 900; margin-bottom: 8px"
-          >اختر نوع المدخل:</label
+          >Choose Input Type:</label
         >
         <div style="display: flex; gap: 10px; margin-bottom: 12px">
           <label
@@ -783,7 +766,7 @@
           تحويل الآن ✨
         </button>
         <button class="btn-nav-top" onclick="showOnMapFromWgs()">
-          عرض على الخريطة
+          Show on Map
         </button>
         <button
           class="btn-nav-top"
@@ -802,10 +785,10 @@
           </div>
           <div class="result-actions">
             <button class="btn-mini" onclick="copyReverse('dltm')">
-              نسخ DLTM
+              Copy DLTM
             </button>
             <button class="btn-mini" onclick="copyReverse('wgs')">
-              نسخ WGS84
+              Copy WGS84
             </button>
           </div>
         </div>
@@ -908,10 +891,10 @@
       const textarea = document.getElementById("batchPaste");
       if (dir === "wgs-to-dltm") {
         textarea.placeholder =
-          "WGS84 مثال:\n55.123456,25.123456\n55.234567,25.234567\nأو بفواصل/مسافات/Tab";
+          "WGS84 Example:\n55.123456,25.123456\n55.234567,25.234567\nOr with commas/spaces/Tab";
       } else {
         textarea.placeholder =
-          "DLTM مثال:\n489817.908,2768047.013\n489790.938,2768033.067\nأو بفواصل/مسافات/Tab";
+          "DLTM Example:\n489817.908,2768047.013\n489790.938,2768033.067\nOr with commas/spaces/Tab";
       }
     };
 
@@ -1232,7 +1215,7 @@
       btn.disabled = false;
       btn.innerText = "تحويل الآن ✨";
 
-      if (!res.success) return alert("خطأ: " + res.error);
+      if (!res.success) return alert("Error: " + res.error);
 
       // Longitude/Latitude (formatCoord changes based on selection)
       document.getElementById("res-lon-dms").innerText = formatCoord(
@@ -1313,7 +1296,13 @@
               northing = parseFloat(val);
             } else if (isNumeric && integerDigits === 6 && easting === null) {
               easting = parseFloat(val);
-            } else if (isNumeric && integerDigits <= 4 && northing !== null && easting !== null && zValue === null) {
+            } else if (
+              isNumeric &&
+              integerDigits <= 4 &&
+              northing !== null &&
+              easting !== null &&
+              zValue === null
+            ) {
               // Small number after N,E = Z value
               zValue = parseFloat(val);
             } else if (!isNumeric && pointId === null) {
@@ -1345,6 +1334,7 @@
         // Convert DLTM to WGS84 and then to UTM Zone 40N
         const results = rows.map((r) => {
           const conv = convertDLTMtoWGS84(r.easting, r.northing);
+
           if (!conv.success) {
             return {
               error: conv.error,
@@ -1433,21 +1423,29 @@
       results.forEach((r) => {
         if (r.error) return;
         const tr = document.createElement("tr");
+
+        // Format numbers safely
+        const formatNum = (val, decimals) => {
+          if (val === null || val === undefined || val === "") return "";
+          const num = Number(val);
+          return isFinite(num) ? num.toFixed(decimals) : "";
+        };
+
         tr.innerHTML =
           `<td>${escapeHtml(r.pointId || "")}</td>` +
           `<td>${escapeHtml(r.pointId || "")}</td>` +
-          `<td>${r.nDltm ? Number(r.nDltm).toFixed(2) : ""}</td>` +
-          `<td>${r.eDltm ? Number(r.eDltm).toFixed(2) : ""}</td>` +
-          `<td>${r.zDltm ? Number(r.zDltm).toFixed(2) : ""}</td>` +
+          `<td>${formatNum(r.nDltm, 2)}</td>` +
+          `<td>${formatNum(r.eDltm, 2)}</td>` +
+          `<td>${formatNum(r.zDltm, 2)}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>` +
           `<td></td>` +
           `<td></td>` +
-          `<td>${r.utmN ? Number(r.utmN).toFixed(2) : ""}</td>` +
-          `<td>${r.utmE ? Number(r.utmE).toFixed(2) : ""}</td>` +
+          `<td>${formatNum(r.utmN, 2)}</td>` +
+          `<td>${formatNum(r.utmE, 2)}</td>` +
           `<td>${r.utmZone || "40N"}</td>` +
-          `<td>${r.latitude ? Number(r.latitude).toFixed(6) : ""}</td>` +
-          `<td>${r.longitude ? Number(r.longitude).toFixed(6) : ""}</td>` +
-          `<td>${r.altitude ? Number(r.altitude).toFixed(2) : ""}</td>` +
+          `<td>${formatNum(r.latitude, 6)}</td>` +
+          `<td>${formatNum(r.longitude, 6)}</td>` +
+          `<td>${formatNum(r.altitude, 2)}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>`;
 
         // Click to show on map
@@ -1578,7 +1576,7 @@
 
     function downloadBatchKml() {
       const ok = batchData.filter((r) => !r.error);
-      if (!ok.length) return alert("لا توجد بيانات للتصدير");
+      if (!ok.length) return alert("No data to export");
       const direction =
         document.querySelector("input[name='batch-direction']:checked")
           ?.value || "dltm-to-wgs";
@@ -1587,18 +1585,18 @@
       const placemarks = ok
         .map(
           (r, i) => `
-  <Placemark>
-    <name>${r.pId || "P" + (i + 1)}</name>
-    <description>${r.code || ""}</description>
-    <Point><coordinates>${r.longitude},${r.latitude},0</coordinates></Point>
-  </Placemark>`,
+    <Placemark>
+      <name>${r.pId || "P" + (i + 1)}</name>
+      <description>${r.code || ""}</description>
+      <Point><coordinates>${r.longitude},${r.latitude},0</coordinates></Point>
+    </Placemark>`,
         )
         .join("\n");
       const kml = `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-<Document>${placemarks}
-</Document>
-</kml>`;
+  <kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>${placemarks}
+  </Document>
+  </kml>`;
       const blob = new Blob([kml], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
@@ -1612,7 +1610,7 @@
 
     function downloadBatchGeoJson() {
       const ok = batchData.filter((r) => !r.error);
-      if (!ok.length) return alert("لا توجد بيانات للتصدير");
+      if (!ok.length) return alert("No data to export");
       const direction =
         document.querySelector("input[name='batch-direction']:checked")
           ?.value || "dltm-to-wgs";
@@ -1706,9 +1704,9 @@
         // استخدام ماركر SVG مدمج بدلاً من الاعتماد على CDN خارجي
         const markerIcon = L.divIcon({
           html: `<svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 20 0 C 8.954 0 0 8.954 0 20 C 0 35 20 50 20 50 S 40 35 40 20 C 40 8.954 31.046 0 20 0 Z" fill="#FF0000" stroke="#FFF" stroke-width="2"/>
-          <circle cx="20" cy="20" r="8" fill="#FFF"/>
-        </svg>`,
+            <path d="M 20 0 C 8.954 0 0 8.954 0 20 C 0 35 20 50 20 50 S 40 35 40 20 C 40 8.954 31.046 0 20 0 Z" fill="#FF0000" stroke="#FFF" stroke-width="2"/>
+            <circle cx="20" cy="20" r="8" fill="#FFF"/>
+          </svg>`,
           className: "custom-marker",
           iconSize: [40, 50],
           iconAnchor: [20, 50],
@@ -1746,12 +1744,12 @@
       if (!_lastLatLon) return alert("لا توجد نقطة للتصدير");
       const { lat, lon } = _lastLatLon;
       const kml = `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Placemark>
-    <name>DLTM Convert</name>
-    <Point><coordinates>${lon},${lat},0</coordinates></Point>
-  </Placemark>
-</kml>`;
+  <kml xmlns="http://www.opengis.net/kml/2.2">
+    <Placemark>
+      <name>DLTM Convert</name>
+      <Point><coordinates>${lon},${lat},0</coordinates></Point>
+    </Placemark>
+  </kml>`;
       const blob = new Blob([kml], {
         type: "application/vnd.google-earth.kml+xml;charset=utf-8",
       });
@@ -1838,7 +1836,7 @@
         if (!zone || isNaN(utmE) || isNaN(utmN))
           return alert("أدخل UTM Zone, Easting, Northing صحيحة");
         const wgs = convertUTMtoWGS84(zone, utmE, utmN);
-        if (!wgs.success) return alert("خطأ: " + wgs.error);
+        if (!wgs.success) return alert("Error: " + wgs.error);
         showPointOnMap(wgs.latitude, wgs.longitude);
       }
     };
@@ -1910,7 +1908,7 @@
       else text = `UTM: ${utmZ}\nEasting: ${utmE}\nNorthing: ${utmN}`;
 
       const ok = await copyTextSmart(text);
-      alert(ok ? "تم النسخ ✅" : "تعذر النسخ ❌");
+      alert(ok ? "Copied ✅" : "Copy failed ❌");
     };
 
     // ----------------------------
@@ -2134,5 +2132,21 @@
 
     // Load saved inputs on page load
     loadLastInputs();
+
+    // Test function for batch conversion
+    window.testBatchConversion = function () {
+      // استخدام البيانات المحملة من الملف أو من الجدول
+      if (!batchData || batchData.length === 0) {
+        console.log("❌ No data loaded. Please upload a CSV file first.");
+        return;
+      }
+
+      console.log("✓ اختبار معالجة البيانات المحملة:", batchData.length, "صف");
+      console.table(batchData);
+
+      return batchData;
+    };
   })();
 </script>
+</body>
+</html>

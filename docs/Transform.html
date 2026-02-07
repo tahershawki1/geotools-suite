@@ -1,3 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coordinate Transformation - GeoTools Suite</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+  <script src="./theme.js" defer></script>
+  <script src="./navbar-loader.js"></script>
+  <script src="./footer-loader.js"></script>
+  <script src="./keyboard-navigation.js"></script>
+  <script src="./notification-system.js"></script>
+</head>
+<body>
+
 <style>
   .container-transform {
     max-width: 650px;
@@ -12,7 +28,6 @@
     display: flex;
     flex-direction: column;
   }
-  .header-trans { padding:25px; border-bottom: 1px solid var(--border); background:#fff; display: flex; justify-content: space-between; align-items: center; }
   .content-trans { padding: 30px; }
 
   .input-group { margin-bottom: 20px; }
@@ -28,14 +43,6 @@
 </style>
 
 <div class="container-transform">
-  <div class="header-trans">
-    <div style="text-align: right; direction: rtl;">
-      <h2 style="font-size:20px; font-weight:900; color:var(--primary); margin:0;">🛰️ تحويل الإحداثيات</h2>
-      <p style="font-size:13px; color:var(--text-muted); margin:0;">التحويل بين WGS84 و UTM</p>
-    </div>
-    <button class="btn-nav-top" onclick="loadPage('')">🏠 الرئيسية</button>
-  </div>
-
   <div class="content-trans">
     <div class="input-group">
       <label>نوع التحويل</label>
@@ -134,3 +141,5 @@
   };
 })();
 </script>
+</body>
+</html>

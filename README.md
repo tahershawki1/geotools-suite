@@ -1,111 +1,215 @@
-# GeoTools Suite - مجموعة أدوات المساحة
+# GeoTools Survey Suite v1.0.0
 
-## نظرة عامة
-
-مجموعة متكاملة من أدوات المساحة والإحداثيات المتقدمة تعمل في المتصفح بدون تثبيت:
-
-- **محول الملفات (SDR)**: تحويل ملفات CSV/TXT إلى صيغة SDR مع عرض على الخريطة
-- **محول DLTM (دبي)**: تحويل الإحداثيات بين نظام DLTM المحلي و WGS84 العالمي
-- **حساب المساحات**: أداة هندسية لحساب مساحات ومحيط المضلعات
-- **تحويل الإحداثيات**: تحويل بين أنظمة مختلفة (UTM, WGS84, إلخ)
+> A comprehensive browser-based surveying and coordinate tools suite with professional UI, accessibility, and dark mode support.
 
 ---
 
-## البدء السريع
+## 🎯 Overview
 
-### متطلبات النظام
+GeoTools Survey Suite is a modern, accessible, browser-based application for surveying professionals. It provides 5 powerful tools for coordinate conversion, file handling, and area calculation — all running locally without installation.
 
-- متصفح حديث (Chrome, Firefox, Safari, Edge)
-- خادم ويب محلي بسيط
+### Tools Included
 
-### طريقة التشغيل
+| Tool | Description | Page |
+|------|-------------|------|
+| 🏠 **Dashboard** | Central hub with quick access to all tools | `index.html` |
+| 📄 **File Converter** | Convert CSV/TXT/SDR files with map display | `Converter.html` |
+| 🔄 **Dubai Converter** | DLTM ↔ WGS84 coordinate conversion (single & batch) | `DLTM.html` |
+| 🌍 **Coordinate Transform** | WGS84 ↔ UTM coordinate transformation | `Transform.html` |
+| 📐 **Area Calculator** | Polygon area & perimeter calculation with map | `Service2.html` |
 
-#### الطريقة 1: Python (الأسهل)
+---
 
+## 🚀 Quick Start
+
+### Requirements
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- Python 3.6+ or any static file server
+
+### Run Locally
+
+**Option 1: Python (Recommended)**
 ```bash
-cd c:\Dev\geotools-suite
+cd geotools-suite
 python -m http.server 8000
 ```
+Open: **http://localhost:8000/docs/**
 
-افتح المتصفح: **http://localhost:8000/docs/index.html**
-
-#### الطريقة 2: Node.js
-
+**Option 2: Node.js**
 ```bash
-cd c:\Dev\geotools-suite\docs
+cd geotools-suite/docs
 npx http-server
 ```
 
-#### الطريقة 3: Live Server في VS Code
-
-1. ثبّت إضافة "Live Server"
-2. انقر بزر الماوس الأيمن على `docs/index.html`
-3. اختر "Open with Live Server"
+**Option 3: VS Code Live Server**
+1. Install "Live Server" extension
+2. Right-click `docs/index.html`
+3. Select "Open with Live Server"
 
 ---
 
-## بنية المشروع
+## 📁 Project Structure
 
 ```
 geotools-suite/
-├── README.md                 # هذا الملف
+├── README.md                      # This file
 ├── docs/
-│   ├── index.html           # الصفحة الرئيسية (SPA)
-│   ├── Converter.html       # محول الملفات
-│   ├── DLTM.html           # محول DLTM دبي
-│   ├── Transform.html       # تحويل الإحداثيات
-│   ├── Service2.html        # حساب المساحات
-│   ├── MAP_DEBUG.js         # أداة اختبار الخرائط
-│   ├── vendor/
-│   │   └── leaflet/         # مكتبة الخرائط المحلية
-│   └── MAP_FIXES_SUMMARY.txt
+│   ├── index.html                 # Dashboard (LTR)
+│   ├── Converter.html             # File Converter (LTR)
+│   ├── DLTM.html                  # Dubai DLTM Converter (RTL)
+│   ├── Transform.html             # Coordinate Transform (RTL)
+│   ├── Service2.html              # Area Calculator (RTL)
+│   ├── navbar.html                # Unified navigation bar component
+│   ├── navbar-loader.js           # Auto-loads navbar on all pages
+│   ├── footer.html                # Unified footer component
+│   ├── footer-loader.js           # Auto-loads footer on all pages
+│   ├── keyboard-navigation.js     # Keyboard accessibility module
+│   ├── notification-system.js     # Toast notification system
+│   ├── theme.js                   # Dark mode & theme management
+│   ├── styles.css                 # Global styles & CSS variables
+│   ├── service-worker.js          # PWA service worker
+│   ├── sample_batch.csv           # Sample data for batch testing
+│   ├── MAP_DEBUG.js               # Map debugging utility
+│   └── vendor/
+│       └── leaflet/               # Leaflet.js mapping library (local)
+│           ├── leaflet.js
+│           └── leaflet.css
 ```
 
 ---
 
-## الميزات التقنية
+## ✨ Features
 
-✅ **بدون إنترنت**: تعمل بالكامل دون اتصال (ما عدا Google Maps)
-✅ **واجهة عربية كاملة**: دعم العربية و RTL
-✅ **حفظ البيانات**: تخزين محلي للمدخلات الأخيرة
-✅ **سريع ومستقيم**: بدون مكتبات ثقيلة غير ضرورية
+### Core Features
+- ✅ **Unified Navigation** — Consistent navbar & footer across all pages
+- ✅ **Dark Mode** — Toggle with localStorage persistence
+- ✅ **Keyboard Accessible** — Full keyboard navigation (WCAG AA)
+- ✅ **Toast Notifications** — 4 types (success, error, warning, info)
+- ✅ **Page Indicators** — Active page highlighted in navbar
+- ✅ **Responsive Design** — Works on desktop, tablet, and mobile
+- ✅ **Offline Capable** — Works without internet (except base maps)
 
-### التقنيات المستخدمة
+### Accessibility (WCAG AA)
+- ✅ ARIA labels on all interactive elements
+- ✅ Keyboard navigation (Tab, Arrow keys, Home/End)
+- ✅ Skip-to-content link
+- ✅ Focus indicators (2px outline)
+- ✅ Screen reader support (ARIA live regions)
+- ✅ 4.5:1 color contrast ratio
+- ✅ Alt+H keyboard shortcut (jump to home)
 
-- Leaflet.js: رسم الخرائط التفاعلية
-- Proj4js: تحويل الإحداثيات
-- Local Storage: حفظ البيانات محلياً
-
----
-
-## الإصلاحات الأخيرة (فبراير 2026)
-
-✅ توحيد تحميل Leaflet (استخدام النسخة المحلية فقط)
-✅ إزالة التحميل المكرر للمكتبات
-✅ تحسين طريقة تنفيذ السكربتات (بدلاً من eval)
-✅ تنظيف DOM محسّن عند التنقل
-✅ معالجة أفضل للأخطاء و console logging
-
----
-
-## استكشاف الأخطاء
-
-### الخريطة لا تظهر؟
-
-1. افتح DevTools (`F12`)
-2. تحقق من console للأخطاء
-3. تأكد من مسار `vendor/leaflet/leaflet.js`
-
-### تحويل الإحداثيات لا يعمل؟
-
-- تحقق من Proj4js في `index.html`
-- استخدم صيغة صحيحة: `25.2048` (عشرية)
-
-### البيانات المحفوظة اختفت؟
-
-- امسح localStorage: DevTools → Storage → Clear All
-- أعد تحميل الصفحة
+### Technologies
+- **Leaflet.js** v1.9.4 — Interactive mapping
+- **Proj4js** v2.11.0 — Coordinate projection
+- **CSS Variables** — Dynamic theming
+- **localStorage** — User preference persistence
 
 ---
 
-**آخر تحديث**: 7 فبراير 2026
+## 🔧 Developer Guide
+
+### Adding a New Page
+
+1. Create your HTML file in `docs/`
+2. Add these script tags in `<head>`:
+```html
+<script src="./navbar-loader.js"></script>
+<script src="./footer-loader.js"></script>
+<script src="./keyboard-navigation.js"></script>
+<script src="./notification-system.js"></script>
+```
+3. Use CSS variables for consistent styling
+4. Add navigation button in `navbar.html`
+
+### Using Notifications
+```javascript
+showSuccess("File uploaded!", "Success", 5000);
+showError("Invalid coordinates", "Error", 7000);
+showWarning("Check your input", "Warning");
+showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
+```
+
+### Keyboard Shortcuts
+| Key | Action |
+|-----|--------|
+| `Tab` | Navigate through interactive elements |
+| `→` Arrow Right | Next navbar/footer button |
+| `←` Arrow Left | Previous navbar/footer button |
+| `Home` | First button |
+| `End` | Last button |
+| `Alt+H` | Jump to home page |
+| `Enter/Space` | Activate focused button |
+
+### Dark Mode API
+```javascript
+window.toggleDarkMode();
+const isDark = document.documentElement.classList.contains('dark-mode');
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Map Not Displaying?
+1. Open DevTools (`F12`) → Console tab
+2. Check for JavaScript errors
+3. Verify `vendor/leaflet/leaflet.js` path exists
+
+### Coordinate Conversion Not Working?
+- Verify Proj4js is loaded
+- Use decimal format: `25.2048` (not DMS)
+- Check coordinate ranges are valid
+
+### Dark Mode Not Persisting?
+- Ensure localStorage is enabled in browser
+- Clear browser cache and retry
+- Check `theme.js` is loaded
+
+### Navbar/Footer Missing?
+- Check browser console for fetch errors
+- Verify `navbar.html` and `footer.html` exist
+- Ensure loader scripts are included in correct order
+
+---
+
+## 📊 Recent Updates (February 2026)
+
+### v1.0.0 — Major Enhancement Release
+- ✅ Unified navbar & footer across all pages
+- ✅ Full keyboard accessibility (WCAG AA)
+- ✅ Dark mode with smooth transitions
+- ✅ Toast notification system (4 types)
+- ✅ Page indicator system
+- ✅ Enhanced loader animation
+- ✅ Skip-to-content accessibility link
+- ✅ ARIA labels & live regions
+- ✅ Responsive mobile design
+- ✅ Comprehensive documentation
+
+### Previous Fixes
+- ✅ Unified Leaflet loading (local copy only)
+- ✅ Removed duplicate library loading
+- ✅ Improved script execution (replaced eval)
+- ✅ Enhanced DOM cleanup on navigation
+- ✅ Better error handling & logging
+
+---
+
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [ENHANCEMENT_PLAN.md](ENHANCEMENT_PLAN.md) | 7-phase project plan |
+| [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) | Complete implementation guide |
+| [QUALITY_ASSURANCE_REPORT.md](QUALITY_ASSURANCE_REPORT.md) | Code quality & QA report |
+| [PROJECT_COMPLETION_SUMMARY.md](PROJECT_COMPLETION_SUMMARY.md) | Final project summary |
+
+---
+
+## 📄 License
+
+All rights reserved © 2026 GeoTools Survey Suite
+
+---
+
+**Last Updated:** February 7, 2026 | **Version:** 1.0.0 | **Status:** ✅ Production Ready
