@@ -45,6 +45,79 @@ body.dark-mode {
     --primary-light: #312e81;
 }
 
+/* ===== Global Navbar Dark Mode ===== */
+body.dark-mode .navbar {
+    background: var(--card-bg);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+body.dark-mode .nav-logo {
+    color: var(--primary);
+}
+
+body.dark-mode .btn-nav-top {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+body.dark-mode .btn-nav-top:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ===== Global Footer Dark Mode ===== */
+body.dark-mode .footer {
+    background: var(--card-bg);
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+
+/* ===== Global Button Dark Mode ===== */
+body.dark-mode button {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+body.dark-mode button:hover {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* ===== Input Fields Dark Mode ===== */
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* ===== Dialog/Modal Dark Mode ===== */
+body.dark-mode dialog {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border);
+}
+
+/* ===== Card Elements Dark Mode ===== */
+body.dark-mode .card,
+body.dark-mode .result-card,
+body.dark-mode .input-group {
+    background: var(--card-bg);
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
 /* ===== Global Styles ===== */
 * {
     box-sizing: border-box;
@@ -285,6 +358,17 @@ textarea {
 
 .dark-mode-toggle:active {
     transform: scale(0.95);
+}
+
+/* Dark mode specific styling for toggle */
+body.dark-mode .dark-mode-toggle {
+    background: var(--primary);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+body.dark-mode .dark-mode-toggle:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.6);
 }
 
 @media (max-width: 768px) {
