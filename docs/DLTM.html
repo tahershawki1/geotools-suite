@@ -1291,11 +1291,36 @@
             .map((p) => p.trim())
             .filter(Boolean);
           if (parts.length < 2) return;
-          const val1 = parseFloat(parts[0]);
-          const val2 = parseFloat(parts[1]);
-          const pId = parts.length >= 3 ? parts[2] : "";
-          const code = parts.length >= 4 ? parts[3] : "";
-          if (!isNaN(val1) && !isNaN(val2)) rows.push([val1, val2, pId, code]);
+          
+          // Auto-detect column order: ID, E, N or E, N or N, E, ID
+          let val1, val2, pId = "", code = "";
+          const p0 = parseFloat(parts[0]);
+          const p1 = parseFloat(parts[1]);
+          const p2 = parseFloat(parts[2]);
+          
+          if (isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
+            // Format: ID, E, N or ID, N, E
+            pId = parts[0];
+            val1 = p1;  // Second column (E or N)
+            val2 = p2;  // Third column (N or E)
+            code = parts.length >= 4 ? parts[3] : "";
+          } else if (!isNaN(p0) && !isNaN(p1) && !isNaN(p2)) {
+            // Format: E, N, ID or N, E, ID (all numeric)
+            val1 = p0;
+            val2 = p1;
+            pId = parts[2];
+            code = parts.length >= 4 ? parts[3] : "";
+          } else if (!isNaN(p0) && !isNaN(p1)) {
+            // Format: E, N or N, E (only 2 columns)
+            val1 = p0;
+            val2 = p1;
+            pId = parts.length >= 3 ? parts[2] : "";
+            code = parts.length >= 4 ? parts[3] : "";
+          } else {
+            return; // Invalid row
+          }
+          
+          rows.push([val1, val2, pId, code]);
         });
 
         if (!rows.length) return alert("لم يتم العثور على بيانات صالحة");
