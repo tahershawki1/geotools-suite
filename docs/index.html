@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoTools Suite</title>
-
+    <!-- Unified Navbar & Footer & Keyboard Navigation & Notifications Loaders -->
+    <script src="./navbar-loader.js"></script>
+    <script src="./keyboard-navigation.js"></script>
+    <script src="./notification-system.js"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
       rel="stylesheet"
@@ -20,14 +23,9 @@
     <!-- GeoTools Enhanced Styles -->
     <link rel="stylesheet" href="./styles.css" />
 
-    <!-- GeoTools Theme & Features -->
-    <script src="./theme.js" defer></script>
+    <!-- Theme.js removed: No dark mode or theme switching -->
     
-    <!-- Unified Navbar & Footer & Keyboard Navigation & Notifications Loaders -->
-    <script src="./navbar-loader.js"></script>
-    <script src="./footer-loader.js"></script>
-    <script src="./keyboard-navigation.js"></script>
-    <script src="./notification-system.js"></script>
+
 
     <style>
       :root {
@@ -90,9 +88,6 @@
         opacity: 0;
         pointer-events: none;
       }
-      body.dark-mode #loader {
-        background: rgba(15, 23, 42, 0.95);
-      }
       .loader-content {
         display: flex;
         flex-direction: column;
@@ -109,17 +104,11 @@
         animation: spin 1.2s linear infinite;
         box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
       }
-      body.dark-mode .spinner {
-        border-color: rgba(255, 255, 255, 0.1);
-      }
       .loader-text {
         font-size: 14px;
         font-weight: 600;
         color: var(--text-main);
         animation: fadeInOut 1.5s ease-in-out infinite;
-      }
-      body.dark-mode .loader-text {
-        color: var(--text-muted);
       }
       @keyframes spin {
         0% {
@@ -298,6 +287,42 @@
         DASHBOARD_HTML = contentDiv.innerHTML;
       });
 
+      // Helper functions for script management
+      function appendScriptOnce(scriptEl) {
+        const src = scriptEl.getAttribute('src');
+
+        // External script
+        if (src) {
+          const absSrc = new URL(src, location.href).href;
+          if (document.querySelector(`script[data-spa-src="${absSrc}"]`)) return;
+
+          const s = document.createElement('script');
+          s.src = absSrc;
+          s.async = false;
+          s.defer = false;
+          s.dataset.spaSrc = absSrc;
+          document.head.appendChild(s);
+          return;
+        }
+
+        // Inline script (avoid re-execution)
+        const code = scriptEl.textContent || '';
+        const key = 'inline:' + simpleHash(code);
+        if (document.querySelector(`script[data-spa-inline="${key}"]`)) return;
+
+        const s = document.createElement('script');
+        s.textContent = code;
+        s.dataset.spaInline = key;
+        document.head.appendChild(s);
+      }
+
+      // Minimal hash function
+      function simpleHash(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i) | 0;
+        return String(h);
+      }
+
       async function loadPage(pageName) {
         const contentDiv = document.getElementById("view-content");
 
@@ -364,47 +389,38 @@
           // اجمع كل السكربتات المحقونة داخل المحتوى
           const scripts = Array.from(contentDiv.querySelectorAll("script"));
 
+          // قائمة السكربتات العامة التي لا نعيد تحميلها (محملة مرة واحدة في index.html)
+          const globalScripts = [
+            'theme.js',
+            'navbar-loader.js',
+            'keyboard-navigation.js',
+            'notification-system.js'
+          ];
+
+          // فلترة السكربتات لإزالة العامة
+          const filteredScripts = scripts.filter(script => {
+            const src = script.src || '';
+            const isGlobal = globalScripts.some(globalSrc => src.includes(globalSrc));
+            if (isGlobal) {
+              console.log('Skipping global script:', src);
+              return false;
+            }
+            return true;
+          });
+
           // تنفيذ السكربتات بالتتابع
           let idx = 0;
           const runNextScript = () => {
-            if (idx >= scripts.length) {
+            if (idx >= filteredScripts.length) {
               document.getElementById("app-container").style.opacity = "1";
               showLoader(false);
               window.scrollTo({ top: 0, behavior: "smooth" });
               return;
             }
 
-            const oldScript = scripts[idx++];
-            const newScript = document.createElement("script");
-
-            // انقل السمات
-            if (oldScript.type) newScript.type = oldScript.type;
-
-            if (oldScript.src) {
-              // تحميل خارجي
-              newScript.src = oldScript.src;
-              newScript.onload = runNextScript;
-              newScript.onerror = () => {
-                console.warn(
-                  `Failed to load external script: ${oldScript.src}`,
-                );
-                runNextScript();
-              };
-              document.head.appendChild(newScript);
-            } else {
-              // سكربت inline
-              try {
-                const scriptContent =
-                  oldScript.textContent || oldScript.text || "";
-                if (scriptContent.trim()) {
-                  newScript.textContent = scriptContent;
-                  document.body.appendChild(newScript);
-                }
-              } catch (e) {
-                console.error("Injected script error:", e);
-              }
-              runNextScript();
-            }
+            const oldScript = filteredScripts[idx++];
+            appendScriptOnce(oldScript);
+            runNextScript();
           };
 
           runNextScript();
@@ -414,6 +430,9 @@
           showLoader(false);
           document.getElementById("app-container").style.opacity = "1";
         }
+
+        // Reinit theme features for new content
+        // Theme.js removed: No dark mode or theme switching
       }
     </script>
   </body>

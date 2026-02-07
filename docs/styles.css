@@ -1,6 +1,6 @@
-/* GeoTools Suite - Main Stylesheet with Dark Mode & Animations */
+/* GeoTools Suite - Main Stylesheet (Light Only) */
 
-/* ===== CSS Variables (Light & Dark Mode) ===== */
+/* ===== CSS Variables (Light Only) ===== */
 :root {
     /* Light mode colors */
     --primary: #4f46e5;
@@ -21,104 +21,9 @@
     --transition-slow: 0.5s ease;
 }
 
-/* Dark mode variables */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #0f172a;
-        --card-bg: #1e293b;
-        --text-main: #f1f5f9;
-        --text-muted: #cbd5e1;
-        --border: #334155;
-        --primary-light: #312e81;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
-    }
-}
+/* ===== Global Footer ===== */
 
-/* Manual dark mode class (for toggle button) */
-body.dark-mode {
-    --bg: #0f172a;
-    --card-bg: #1e293b;
-    --text-main: #f1f5f9;
-    --text-muted: #cbd5e1;
-    --border: #334155;
-    --primary-light: #312e81;
-}
-
-/* ===== Global Navbar Dark Mode ===== */
-body.dark-mode .navbar {
-    background: var(--card-bg);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-body.dark-mode .nav-logo {
-    color: var(--primary);
-}
-
-body.dark-mode .btn-nav-top {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border);
-}
-
-body.dark-mode .btn-nav-top:hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-/* ===== Global Footer Dark Mode ===== */
-body.dark-mode .footer {
-    background: var(--card-bg);
-    border-color: var(--border);
-    color: var(--text-muted);
-}
-
-/* ===== Global Button Dark Mode ===== */
-body.dark-mode button {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border);
-}
-
-body.dark-mode button:hover {
-    background: var(--primary-light);
-    border-color: var(--primary);
-    color: var(--primary);
-}
-
-/* ===== Input Fields Dark Mode ===== */
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border);
-}
-
-body.dark-mode input::placeholder,
-body.dark-mode textarea::placeholder {
-    color: var(--text-muted);
-}
-
-/* ===== Dialog/Modal Dark Mode ===== */
-body.dark-mode dialog {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border);
-}
-
-/* ===== Card Elements Dark Mode ===== */
-body.dark-mode .card,
-body.dark-mode .result-card,
-body.dark-mode .input-group {
-    background: var(--card-bg);
-    border-color: var(--border);
-    color: var(--text-main);
-}
-
-/* ===== Global Styles ===== */
+/* ===== Dialog/Modal ===== */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -330,57 +235,6 @@ textarea {
     }
 }
 
-/* ===== Dark Mode Toggle Button ===== */
-.dark-mode-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    box-shadow: var(--shadow-lg);
-    z-index: 999;
-    transition: all var(--transition-normal);
-}
-
-.dark-mode-toggle:hover {
-    transform: scale(1.1);
-    background: var(--primary-hover);
-}
-
-.dark-mode-toggle:active {
-    transform: scale(0.95);
-}
-
-/* Dark mode specific styling for toggle */
-body.dark-mode .dark-mode-toggle {
-    background: var(--primary);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-}
-
-body.dark-mode .dark-mode-toggle:hover {
-    background: var(--primary-hover);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.6);
-}
-
-@media (max-width: 768px) {
-    .dark-mode-toggle {
-        width: 45px;
-        height: 45px;
-        bottom: 15px;
-        right: 15px;
-        font-size: 20px;
-    }
-}
-
 /* ===== Lazy Loading Placeholder ===== */
 img[loading="lazy"] {
     background: linear-gradient(90deg, var(--border) 25%, var(--text-muted) 50%, var(--border) 75%);
@@ -423,7 +277,6 @@ input:focus-visible {
 @media print {
 
     .navbar,
-    .dark-mode-toggle,
     .footer {
         display: none;
     }

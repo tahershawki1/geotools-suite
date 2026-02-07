@@ -5,12 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coordinate Transformation - GeoTools Suite</title>
   <link rel="stylesheet" href="./styles.css" />
+  <!-- Theme.js removed: No dark mode or theme switching -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
-  <script src="./theme.js" defer></script>
-  <script src="./navbar-loader.js"></script>
-  <script src="./footer-loader.js"></script>
-  <script src="./keyboard-navigation.js"></script>
-  <script src="./notification-system.js"></script>
 </head>
 <body>
 
@@ -19,10 +15,10 @@
     max-width: 650px;
     width: 100%;
     margin: 0 auto;
-    background:#fff;
-    border:1px solid var(--border);
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border);
     border-radius: 24px;
-    overflow:hidden;
+    overflow: hidden;
     box-shadow: var(--shadow-lg);
     margin-top: 20px;
     display: flex;
@@ -141,5 +137,9 @@
   };
 })();
 </script>
+
+<div style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
+  <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
+</div>
 </body>
 </html>

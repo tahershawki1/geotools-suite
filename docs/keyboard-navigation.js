@@ -1,3 +1,4 @@
+// Theme.js removed: No dark mode or theme switching
 // Keyboard Navigation & Accessibility Handler
 (function initKeyboardNavigation() {
   // Enhance keyboard navigation for navbar and footer

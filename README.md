@@ -140,12 +140,6 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 | `Alt+H` | Jump to home page |
 | `Enter/Space` | Activate focused button |
 
-### Dark Mode API
-```javascript
-window.toggleDarkMode();
-const isDark = document.documentElement.classList.contains('dark-mode');
-```
-
 ---
 
 ## 🐛 Troubleshooting

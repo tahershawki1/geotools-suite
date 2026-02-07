@@ -1,3 +1,4 @@
+// Theme.js removed: No dark mode or theme switching
 // Unified Notification & Toast System
 (function initNotificationSystem() {
   // Create notification container
@@ -113,22 +114,10 @@
         border-left-color: #22c55e;
       }
 
-      body.dark-mode .notification.success {
-        background-color: #064e3b;
-        color: #bbf7d0;
-        border-left-color: #22c55e;
-      }
-
       /* Error Notification */
       .notification.error {
         background-color: #fef2f2;
         color: #991b1b;
-        border-left-color: #ef4444;
-      }
-
-      body.dark-mode .notification.error {
-        background-color: #7f1d1d;
-        color: #fecaca;
         border-left-color: #ef4444;
       }
 
@@ -139,22 +128,10 @@
         border-left-color: #f59e0b;
       }
 
-      body.dark-mode .notification.warning {
-        background-color: #78350f;
-        color: #fcd34d;
-        border-left-color: #f59e0b;
-      }
-
       /* Info Notification */
       .notification.info {
         background-color: #eff6ff;
         color: #1e3a8a;
-        border-left-color: #3b82f6;
-      }
-
-      body.dark-mode .notification.info {
-        background-color: #0c2a47;
-        color: #bfdbfe;
         border-left-color: #3b82f6;
       }
     `;

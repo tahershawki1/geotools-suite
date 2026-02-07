@@ -5,7 +5,7 @@ const urlsToCache = [
   '/docs/',
   '/docs/index.html',
   '/docs/styles.css',
-  '/docs/theme.js',
+  // Theme.js removed: No dark mode or theme switching
   '/docs/DLTM.html',
   '/docs/Service2.html',
   '/docs/Converter.html',

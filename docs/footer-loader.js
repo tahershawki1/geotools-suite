@@ -1,3 +1,4 @@
+// Theme.js removed: No dark mode or theme switching
 // Load unified footer in all pages
 (function loadUnifiedFooter() {
   // Check if footer already exists

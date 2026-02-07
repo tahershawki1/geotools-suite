@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dubai DLTM Converter - GeoTools Suite</title>
   <link rel="stylesheet" href="./styles.css" />
+  <!-- Theme.js removed: No dark mode or theme switching -->
   <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
   <script src="./vendor/leaflet/leaflet.js"></script>
-  <script src="./theme.js" defer></script>
-  <script src="./navbar-loader.js"></script>
-  <script src="./footer-loader.js"></script>
-  <script src="./keyboard-navigation.js"></script>
-  <script src="./notification-system.js"></script>
 </head>
 <body>
 
@@ -94,7 +90,7 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    background: #f8fafc;
+    background: var(--bg);
   }
   .batch-dropzone:hover {
     border-color: var(--primary);
@@ -114,7 +110,7 @@
     font-size: 13px;
   }
   th {
-    background: #f1f5f9;
+    background: var(--bg);
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid var(--border);
@@ -130,7 +126,7 @@
     border: none;
     border-radius: 12px;
     background: var(--primary);
-    color: #fff;
+    color: var(--card-bg);
     font-weight: 700;
     font-size: 16px;
     cursor: pointer;
@@ -142,7 +138,7 @@
   /* Results - New Layout */
   .result-card {
     margin-top: 25px;
-    background: #fff;
+    background: var(--card-bg);
     padding: 18px;
     border-radius: 16px;
     border: 1px solid var(--border);
@@ -183,7 +179,7 @@
     font-weight: 800;
     cursor: pointer;
     border: 1px solid var(--border);
-    background: #fff;
+    background: var(--card-bg);
     color: var(--text-main);
     transition: all 0.2s;
   }
@@ -207,7 +203,7 @@
   }
 
   .result-field {
-    background: #f8fafc;
+    background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 12px;
@@ -293,7 +289,7 @@
 
   .leaflet-container {
     font-family: "Cairo", sans-serif;
-    background: #ffffff !important;
+    background: var(--card-bg) !important;
     width: 100% !important;
     height: 100% !important;
   }
@@ -2148,5 +2144,9 @@ Or with commas/spaces/Tab"
     };
   })();
 </script>
+
+<div style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
+  <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
+</div>
 </body>
 </html>
