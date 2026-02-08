@@ -52,32 +52,35 @@ npx http-server
 
 ```
 geotools-suite/
-├── README.md                      # This file
-├── docs/
-│   ├── index.html                 # Dashboard (LTR)
-│   ├── pages/
-│   │   ├── file-converter.html     # File Converter (LTR)
-│   │   ├── dltm-converter.html     # Dubai DLTM Converter (RTL)
-│   │   ├── coordinate-transform.html # Coordinate Transform (RTL)
-│   │   └── area-calculator.html    # Area Calculator (RTL)
-│   ├── shared/
-│   │   ├── navbar.html             # Unified navigation bar component
-│   │   └── footer.html             # Unified footer component
-│   ├── navbar-loader.js           # Auto-loads navbar on all pages
-│   ├── footer-loader.js           # Auto-loads footer on all pages
-│   ├── keyboard-navigation.js     # Keyboard accessibility module
-│   ├── notification-system.js     # Toast notification system
-│   ├── theme.js                   # Dark mode & theme management
-│   ├── styles.css                 # Global styles & CSS variables
-│   ├── converter-export.js        # Export modal logic (File Converter)
-│   ├── service-worker.js          # PWA service worker
-│   ├── sample_batch.csv           # Sample data for batch testing
-│   └── vendor/
-│       ├── proj4.js               # Proj4js library (local)
-│       └── leaflet/               # Leaflet.js mapping library (local)
-│           ├── leaflet.js
-│           └── leaflet.css
+|-- README.md                      # This file
+|-- docs/
+|   |-- index.html                 # Dashboard (LTR)
+|   |-- pages/
+|   |   |-- file-converter.html     # File Converter (LTR)
+|   |   |-- dltm-converter.html     # Dubai DLTM Converter (RTL)
+|   |   |-- coordinate-transform.html # Coordinate Transform (RTL)
+|   |   |-- area-calculator.html    # Area Calculator (RTL)
+|   |   `-- js/
+|   |       `-- converter-export.js        # Export modal logic (File Converter)
+|   |-- shared/
+|   |   |-- navbar.html             # Unified navigation bar component
+|   |   |-- footer.html             # Unified footer component
+|   |   `-- js/
+|   |       |-- navbar-loader.js           # Auto-loads navbar on all pages
+|   |       |-- footer-loader.js           # Auto-loads footer on all pages
+|   |       |-- keyboard-navigation.js     # Keyboard accessibility module
+|   |       |-- notification-system.js     # Toast notification system
+|   |       `-- theme.js                   # Dark mode & theme management
+|   |-- styles.css                 # Global styles & CSS variables
+|   |-- service-worker.js          # PWA service worker
+|   |-- sample_batch.csv           # Sample data for batch testing
+|   `-- vendor/
+|       |-- proj4.js               # Proj4js library (local)
+|       `-- leaflet/
+|           |-- leaflet.js
+|           `-- leaflet.css
 ```
+
 
 ---
 
@@ -113,13 +116,13 @@ geotools-suite/
 
 ### Adding a New Page
 
-1. Create your HTML file in `docs/`
+1. Create your HTML file in `docs/pages/`
 2. Add these script tags in `<head>`:
 ```html
-<script src="./navbar-loader.js"></script>
-<script src="./footer-loader.js"></script>
-<script src="./keyboard-navigation.js"></script>
-<script src="./notification-system.js"></script>
+<script src="./shared/js/navbar-loader.js"></script>
+<script src="./shared/js/footer-loader.js"></script>
+<script src="./shared/js/keyboard-navigation.js"></script>
+<script src="./shared/js/notification-system.js"></script>
 ```
 3. Use CSS variables for consistent styling
 4. Add navigation button in `shared/navbar.html`
@@ -160,7 +163,7 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 ### Dark Mode Not Persisting?
 - Ensure localStorage is enabled in browser
 - Clear browser cache and retry
-- Check `theme.js` is loaded
+- Check `shared/js/theme.js` is loaded
 
 ### Navbar/Footer Missing?
 - Check browser console for fetch errors
@@ -210,3 +213,4 @@ All rights reserved © 2026 GeoTools Survey Suite
 ---
 
 **Last Updated:** February 7, 2026 | **Version:** 1.0.0 | **Status:** ✅ Production Ready
+

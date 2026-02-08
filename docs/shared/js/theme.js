@@ -62,7 +62,7 @@ class CachingManager {
       '/docs/',
       '/docs/index.html',
       '/docs/styles.css',
-      '/docs/theme.js',
+      '/docs/shared/js/theme.js',
       '/docs/vendor/leaflet/leaflet.css',
       '/docs/vendor/leaflet/leaflet.js'
     ];
