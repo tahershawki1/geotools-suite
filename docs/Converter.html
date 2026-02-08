@@ -237,7 +237,7 @@
       <div class="card-conv">
         <div class="row-conv">
           <div>
-            <label>Select File</label>
+            <label for="csvFile">Select File</label>
             <div class="file-picker">
               <label class="file-btn" for="csvFile">Choose File</label>
               <div class="file-name" id="fileName">No file selected</div>
@@ -266,7 +266,7 @@
               <strong>Note:</strong> This is an <strong>SDR</strong> file.
               <div style="margin-top: 10px; display: flex; gap: 10px">
                 <button type="button" class="chip" id="convertSdrBtn">
-                  Convert SDR → CSV
+                  Convert SDR -> CSV
                 </button>
                 <button
                   type="button"
@@ -292,18 +292,24 @@
             Show Map
           </button>
         </div>
-        <div id="status-conv"></div>
+        <div
+          id="status-conv"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-hidden="true"
+        ></div>
       </div>
     </form>
 
-    <div class="metrics-conv" id="metrics">
+    <div class="metrics-conv" id="metrics" aria-live="polite" aria-atomic="true">
       <div class="metric-item">
         <div class="num" id="pointsCount">0</div>
         <div class="lbl">Points</div>
       </div>
     </div>
 
-    <div class="map-wrap-conv" id="mapWrap">
+    <div class="map-wrap-conv" id="mapWrap" aria-label="Map preview area">
       <div class="north-arrow-conv" title="North">
         <svg width="20" height="40" viewBox="0 0 40 90">
           <path
@@ -318,7 +324,7 @@
         </svg>
         <span style="font-weight: 900; margin-left: 5px">N</span>
       </div>
-      <div id="map"></div>
+      <div id="map" role="region" aria-label="Coordinate preview map"></div>
     </div>
 
     <div
@@ -340,7 +346,7 @@
           color: var(--primary);
         "
       >
-        Preview SDR 📄
+        Preview SDR
       </button>
     </div>
 
@@ -370,13 +376,15 @@
         "
       >
         <strong>SDR File Preview (First 20 lines)</strong>
-        <span
-          style="cursor: pointer"
-          onclick="
-            document.getElementById('sdrPreviewWrap').style.display = 'none'
-          "
-          >✕</span
+        <button
+          id="closePreviewBtn"
+          type="button"
+          class="chip"
+          aria-label="Close SDR preview"
+          style="padding: 4px 8px"
         >
+          Close
+        </button>
       </div>
       <pre id="sdrPreviewText" style="margin: 0"></pre>
     </div>
@@ -387,7 +395,7 @@
       id="downloadBtn"
       style="display: none; margin-top: 12px; background: var(--secondary)"
     >
-      Download SDR File 💾
+      Download SDR File
     </button>
   </div>
 </div>
@@ -434,6 +442,8 @@
     const sdrNotice = document.getElementById("sdrNotice");
     const convertSdrBtn = document.getElementById("convertSdrBtn");
     const downloadCsvBtn = document.getElementById("downloadCsvBtn");
+    const sdrPreviewWrap = document.getElementById("sdrPreviewWrap");
+    const closePreviewBtn = document.getElementById("closePreviewBtn");
 
     document.getElementById("csvFile").addEventListener("change", function () {
       const f = this.files && this.files[0];
@@ -475,18 +485,21 @@
         if (!sdrResult) return alert("No SDR data to preview.");
         const lines = sdrResult.split("\n").slice(0, 20).join("\n");
         document.getElementById("sdrPreviewText").textContent = lines;
-        document.getElementById("sdrPreviewWrap").style.display = "block";
-        document
-          .getElementById("sdrPreviewWrap")
-          .scrollIntoView({ behavior: "smooth" });
+        sdrPreviewWrap.style.display = "block";
+        sdrPreviewWrap.scrollIntoView({ behavior: "smooth" });
       });
+
+    closePreviewBtn.addEventListener("click", function () {
+      sdrPreviewWrap.style.display = "none";
+    });
 
     document.getElementById("clearBtn").addEventListener("click", function () {
       if (pointsLayer) pointsLayer.clearLayers();
       if (measureLayer) measureLayer.clearLayers();
       lastBounds = null;
       document.getElementById("pointsCount").textContent = "0";
-      document.getElementById("sdrPreviewWrap").style.display = "none";
+      sdrPreviewWrap.style.display = "none";
+      setStatus("Map cleared.", "ok");
     });
 
     document
@@ -540,6 +553,7 @@
       const div = document.getElementById("status-conv");
       div.className = "";
       div.style.display = "block";
+      div.setAttribute("aria-hidden", "false");
       div.textContent = msg;
       if (type === "loading") div.classList.add("st-loading");
       else if (type === "error") div.classList.add("st-error");
@@ -547,7 +561,9 @@
     }
 
     function hideStatus() {
-      document.getElementById("status-conv").style.display = "none";
+      const div = document.getElementById("status-conv");
+      div.style.display = "none";
+      div.setAttribute("aria-hidden", "true");
     }
 
     function initMapIfNeeded() {
@@ -611,7 +627,8 @@
           const a = L.DomUtil.create("a", "", container);
           a.href = "#";
           a.title = "Zoom Extents";
-          a.innerHTML = "⤢";
+          a.setAttribute("aria-label", "Zoom to extents");
+          a.innerHTML = "Fit";
           a.style.display = "flex";
           a.style.alignItems = "center";
           a.style.justifyContent = "center";
@@ -631,7 +648,10 @@
 
     function run() {
       const file = document.getElementById("csvFile").files[0];
-      if (!file) return;
+      if (!file) {
+        setStatus("Please choose a file first.", "error");
+        return;
+      }
       const format = document.getElementById("coordFormat").value;
       setStatus("Reading file...", "loading");
       const reader = new FileReader();
@@ -713,7 +733,7 @@
           marker.bindTooltip(
             '<div class="wrap"><div class="num">' +
               escapeHtml(P) +
-              '</div><div class="arrow">▼</div></div>',
+              '</div><div class="arrow">v</div></div>',
             {
               permanent: true,
               direction: "top",
@@ -793,7 +813,7 @@
           marker.bindTooltip(
             '<div class="wrap"><div class="num">' +
               escapeHtml(pt.p) +
-              '</div><div class="arrow">▼</div></div>',
+              '</div><div class="arrow">v</div></div>',
             {
               permanent: true,
               direction: "top",
@@ -843,13 +863,18 @@
       const a = document.createElement("a");
       a.href = u;
       a.download = f;
+      document.body.appendChild(a);
       a.click();
+      a.remove();
+      URL.revokeObjectURL(u);
     }
   })();
 </script>
 
-<div style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
+<div class="standalone-footer" data-standalone-only="true" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
   <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
 </div>
 </body>
 </html>
+
+

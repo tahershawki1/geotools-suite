@@ -9,6 +9,8 @@
 
     const container = document.createElement('div');
     container.className = 'notification-container';
+    container.setAttribute('role', 'region');
+    container.setAttribute('aria-label', 'Notifications');
     container.setAttribute('aria-live', 'polite');
     container.setAttribute('aria-atomic', 'true');
     document.body.appendChild(container);
@@ -145,6 +147,8 @@
     const container = document.querySelector('.notification-container');
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
+    notification.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    notification.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
 
     let icon = 'ℹ️';
     if (type === 'success') icon = '✅';
@@ -199,4 +203,18 @@
   window.showInfo = function(message, title = 'Info', duration = 5000) {
     return showNotification(message, 'info', title, duration);
   };
+
+  if (!window.__GeoToolsAlertPatched) {
+    window.__GeoToolsAlertPatched = true;
+    const nativeAlert = typeof window.alert === 'function' ? window.alert.bind(window) : null;
+
+    window.alert = function(message) {
+      const text = typeof message === 'string' ? message : String(message);
+      if (typeof window.showInfo === 'function') {
+        window.showInfo(text, 'Notice', 6000);
+        return;
+      }
+      if (nativeAlert) nativeAlert(text);
+    };
+  }
 })();

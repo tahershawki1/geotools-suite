@@ -14,6 +14,11 @@
     --border: #e2e8f0;
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --danger: #dc2626;
+    --card: var(--card-bg);
+    --text: var(--text-main);
+    --muted: var(--text-muted);
+    --soft: #f1f5f9;
 
     /* Animation durations */
     --transition-fast: 0.15s ease;
@@ -330,10 +335,21 @@ input:focus-visible {
   text-decoration: none;
   color: inherit;
 }
+button.card {
+  width: 100%;
+  font: inherit;
+  font-family: inherit;
+  appearance: none;
+  background: var(--card-bg);
+}
 .card:hover {
   transform: translateY(-8px);
   box-shadow: var(--shadow-lg);
   border-color: var(--primary);
+}
+.card:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 4px;
 }
 .icon-box {
   width: 50px;

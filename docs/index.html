@@ -4,32 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoTools Suite</title>
-    <!-- Unified Navbar & Footer & Keyboard Navigation & Notifications Loaders -->
+
+    <!-- Unified shared modules -->
     <script src="./navbar-loader.js"></script>
     <script src="./footer-loader.js"></script>
     <script src="./keyboard-navigation.js"></script>
     <script src="./notification-system.js"></script>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Proj4js - Global for Transform tool -->
+    <!-- Global libraries for SPA tools -->
     <script src="./vendor/proj4.js"></script>
-
-    <!-- Leaflet (Global for map tools) -->
     <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
     <script src="./vendor/leaflet/leaflet.js"></script>
 
-    <!-- GeoTools Enhanced Styles -->
+    <!-- Global styles -->
     <link rel="stylesheet" href="./styles.css" />
-
-    <!-- Theme.js removed: No dark mode or theme switching -->
-    
   </head>
 
   <body>
-    <div id="loader">
+    <div
+      id="loader"
+      role="status"
+      aria-live="polite"
+      aria-hidden="true"
+      aria-label="Loading page content"
+    >
       <div class="loader-content">
         <div class="spinner"></div>
         <div class="loader-text">Loading...</div>
@@ -37,222 +40,339 @@
     </div>
 
     <div id="app-container">
-      <div id="view-content" class="dashboard-view">
-        <!-- DASHBOARD START -->
+      <main id="view-content" class="dashboard-view" tabindex="-1" aria-busy="false">
         <div class="header">
           <h1>GeoTools Survey Suite</h1>
           <p>Choose the service you want to use today</p>
         </div>
 
         <div class="grid">
-          <div class="card" onclick="loadPage('Converter')">
+          <button
+            class="card"
+            type="button"
+            onclick="loadPage('Converter')"
+            aria-label="Open File Converter tool"
+          >
             <div class="icon-box">🔄</div>
             <h2>File Converter (SDR)</h2>
             <p>
               Convert coordinate CSV/TXT files to SDR format for Sokkia devices,
               with map view feature.
             </p>
-          </div>
+          </button>
 
-          <div class="card" onclick="loadPage('DLTM')">
+          <button
+            class="card"
+            type="button"
+            onclick="loadPage('DLTM')"
+            aria-label="Open DLTM Converter tool"
+          >
             <div class="icon-box">📍</div>
             <h2>DLTM Converter (Dubai)</h2>
             <p>
               Convert Dubai local coordinates (DLTM) to global coordinates
               (Lat/Long) with high accuracy.
             </p>
-          </div>
+          </button>
 
-          <div class="card" onclick="loadPage('Service2')">
+          <button
+            class="card"
+            type="button"
+            onclick="loadPage('Service2')"
+            aria-label="Open Area Calculator tool"
+          >
             <div class="icon-box">📐</div>
             <h2>Area Calculator</h2>
             <p>
               Engineering tool for calculating areas based on coordinates or distances
               and angles.
             </p>
-          </div>
+          </button>
 
-          <div class="card" onclick="loadPage('Transform')">
+          <button
+            class="card"
+            type="button"
+            onclick="loadPage('Transform')"
+            aria-label="Open Coordinate Transformation tool"
+          >
             <div class="icon-box">🛰️</div>
             <h2>Coordinate Transformation</h2>
             <p>
               Convert coordinates between different systems UTM, WGS84 and others using
               Proj4js.
             </p>
-          </div>
+          </button>
         </div>
-        <!-- DASHBOARD END -->
-      </div>
-
-      <div class="footer">
-        <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
-      </div>
+      </main>
     </div>
 
     <script>
-      // بصمة نسخة للتأكد أنك ترى النسخة الجديدة على Pages
-      console.log("GeoTools SPA fetch-loader active - v2026-01-10");
+      console.log("GeoTools SPA fetch-loader active - v2026-02-08");
+
+      const appContainer = document.getElementById("app-container");
+      const contentDiv = document.getElementById("view-content");
+      const loaderElement = document.getElementById("loader");
+      const defaultMeta = {
+        lang: document.documentElement.lang || "en",
+        dir: document.documentElement.dir || "ltr",
+        title: document.title,
+      };
+
+      let dashboardHtml = "";
+      let leafletObserver = null;
+      let autoFieldCounter = 0;
 
       function showLoader(show) {
-        document.getElementById("loader").style.display = show
-          ? "flex"
-          : "none";
+        loaderElement.style.display = show ? "flex" : "none";
+        loaderElement.setAttribute("aria-hidden", show ? "false" : "true");
+        contentDiv.setAttribute("aria-busy", show ? "true" : "false");
       }
 
-      // حفظ محتوى الداشبورد الأصلي عند أول تحميل
-      let DASHBOARD_HTML = "";
-      window.addEventListener("DOMContentLoaded", () => {
-        const contentDiv = document.getElementById("view-content");
-        DASHBOARD_HTML = contentDiv.innerHTML;
-      });
+      function setDocumentMeta(meta) {
+        document.documentElement.lang = meta.lang || defaultMeta.lang;
+        document.documentElement.dir = meta.dir || defaultMeta.dir;
+        document.title = meta.title || defaultMeta.title;
+      }
 
-      // Helper functions for script management
-      function appendScriptOnce(scriptEl) {
-        const src = scriptEl.getAttribute('src');
-
-        // External script
-        if (src) {
-          const absSrc = new URL(src, location.href).href;
-          if (document.querySelector(`script[data-spa-src="${absSrc}"]`)) return;
-
-          const s = document.createElement('script');
-          s.src = absSrc;
-          s.async = false;
-          s.defer = false;
-          s.dataset.spaSrc = absSrc;
-          document.head.appendChild(s);
+      function notifyLoadError(message) {
+        if (typeof window.showError === "function") {
+          window.showError(message, "Error");
           return;
         }
-
-        // Inline script (avoid re-execution)
-        const code = scriptEl.textContent || '';
-        const key = 'inline:' + simpleHash(code);
-        if (document.querySelector(`script[data-spa-inline="${key}"]`)) return;
-
-        const s = document.createElement('script');
-        s.textContent = code;
-        s.dataset.spaInline = key;
-        document.head.appendChild(s);
+        console.error(message);
       }
 
-      // Minimal hash function
-      function simpleHash(str) {
-        let h = 0;
-        for (let i = 0; i < str.length; i++) h = ((h << 5) - h) + str.charCodeAt(i) | 0;
-        return String(h);
+      function ensureLabelAssociations(root) {
+        if (!root) return;
+        const labels = root.querySelectorAll("label:not([for])");
+
+        labels.forEach((label) => {
+          let control =
+            label.querySelector("input, select, textarea") ||
+            (label.nextElementSibling &&
+            /^(INPUT|SELECT|TEXTAREA)$/.test(label.nextElementSibling.tagName)
+              ? label.nextElementSibling
+              : null);
+
+          if (!control && label.parentElement) {
+            control = label.parentElement.querySelector("input, select, textarea");
+          }
+          if (!control) return;
+
+          if (!control.id) {
+            autoFieldCounter += 1;
+            control.id = "auto-field-" + autoFieldCounter;
+          }
+          label.setAttribute("for", control.id);
+        });
       }
 
-      async function loadPage(pageName) {
-        const contentDiv = document.getElementById("view-content");
+      function enhanceLeafletAccessibility(root) {
+        const scope = root || document;
 
-        // الرئيسية: ارجع للداشبورد بدون reload
-        if (!pageName) {
-          contentDiv.innerHTML = DASHBOARD_HTML;
-          document.getElementById("app-container").style.opacity = "1";
-          showLoader(false);
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          return;
-        }
+        scope.querySelectorAll(".leaflet-control-zoom-in").forEach((el) => {
+          if (!el.getAttribute("aria-label")) {
+            el.setAttribute("aria-label", "Zoom in");
+          }
+          el.setAttribute("role", "button");
+        });
 
-        // محاولة تنظيف أي خرائط أو عناصر سابقة قد تسبب تعارض
+        scope.querySelectorAll(".leaflet-control-zoom-out").forEach((el) => {
+          if (!el.getAttribute("aria-label")) {
+            el.setAttribute("aria-label", "Zoom out");
+          }
+          el.setAttribute("role", "button");
+        });
+
+        scope.querySelectorAll(".leaflet-container").forEach((el) => {
+          if (!el.getAttribute("aria-label")) {
+            el.setAttribute("aria-label", "Interactive map");
+          }
+        });
+
+        scope.querySelectorAll(".leaflet-popup-close-button").forEach((el) => {
+          if (!el.getAttribute("aria-label")) {
+            el.setAttribute("aria-label", "Close popup");
+          }
+        });
+      }
+
+      function installLeafletObserver() {
+        if (leafletObserver || typeof MutationObserver === "undefined") return;
+
+        leafletObserver = new MutationObserver(() => {
+          enhanceLeafletAccessibility(document);
+        });
+
+        leafletObserver.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      }
+
+      function removeMapArtifacts() {
         try {
           if (window.map && typeof window.map.remove === "function") {
-            try {
-              window.map.remove();
-            } catch (e) {}
-            try {
-              delete window.map;
-            } catch (e) {}
+            window.map.remove();
+            delete window.map;
           }
           if (window._map && typeof window._map.remove === "function") {
-            try {
-              window._map.remove();
-            } catch (e) {}
-            try {
-              delete window._map;
-            } catch (e) {}
+            window._map.remove();
+            delete window._map;
           }
-          // تنظيف أي عناصر خرائط متبقية
-          const mapElements = document.querySelectorAll(".leaflet-container");
-          for (const el of mapElements) {
-            try {
-              el.remove();
-            } catch (e) {}
+          document.querySelectorAll("#view-content .leaflet-container").forEach((el) => {
+            el.remove();
+          });
+        } catch (error) {
+          console.warn("Map cleanup warning:", error);
+        }
+      }
+
+      function parsePage(html) {
+        const parser = new DOMParser();
+        const parsed = parser.parseFromString(html, "text/html");
+        const nodes = [];
+
+        Array.from(parsed.body.childNodes).forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const el = node;
+            if (el.tagName === "SCRIPT") return;
+            if (el.matches(".standalone-footer,[data-standalone-only='true']")) return;
+            nodes.push(el.outerHTML);
+            return;
           }
-        } catch (e) {
-          /* ignore cleanup errors */
+          if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+            nodes.push(node.textContent);
+          }
+        });
+
+        return {
+          contentHtml: nodes.join("\n"),
+          scripts: Array.from(parsed.querySelectorAll("script")),
+          meta: {
+            lang: parsed.documentElement.getAttribute("lang") || defaultMeta.lang,
+            dir: parsed.documentElement.getAttribute("dir") || defaultMeta.dir,
+            title: parsed.title || defaultMeta.title,
+          },
+        };
+      }
+
+      function clearPageScripts() {
+        document
+          .querySelectorAll("script[data-spa-page-script='true']")
+          .forEach((script) => script.remove());
+      }
+
+      function isGlobalScript(src) {
+        const normalized = src.toLowerCase();
+        const ignored = [
+          "theme.js",
+          "navbar-loader.js",
+          "footer-loader.js",
+          "keyboard-navigation.js",
+          "notification-system.js",
+          "vendor/leaflet/leaflet.js",
+          "vendor/proj4.js",
+          "cdnjs.cloudflare.com/ajax/libs/proj4js",
+          "unpkg.com/leaflet",
+          "cdn.jsdelivr.net/npm/leaflet",
+        ];
+        return ignored.some((item) => normalized.includes(item));
+      }
+
+      function injectScript(scriptEl) {
+        return new Promise((resolve, reject) => {
+          const src = scriptEl.getAttribute("src");
+          const script = document.createElement("script");
+          script.dataset.spaPageScript = "true";
+          script.async = false;
+          script.defer = false;
+
+          if (src) {
+            script.src = new URL(src, location.href).href;
+            script.onload = resolve;
+            script.onerror = () => reject(new Error("Failed to load script: " + src));
+            document.body.appendChild(script);
+            return;
+          }
+
+          script.textContent = scriptEl.textContent || "";
+          document.body.appendChild(script);
+          resolve();
+        });
+      }
+
+      async function runPageScripts(scripts) {
+        clearPageScripts();
+        for (const scriptEl of scripts) {
+          const src = scriptEl.getAttribute("src");
+          if (src && isGlobalScript(src)) continue;
+          await injectScript(scriptEl);
+        }
+      }
+
+      function finishNavigation(activePage, meta) {
+        setDocumentMeta(meta || defaultMeta);
+        ensureLabelAssociations(contentDiv);
+        enhanceLeafletAccessibility(contentDiv);
+
+        if (window.GeoToolsTheme && typeof window.GeoToolsTheme.reinit === "function") {
+          window.GeoToolsTheme.reinit();
+        }
+        if (typeof window.updatePageIndicator === "function") {
+          window.updatePageIndicator(activePage || "home");
         }
 
+        appContainer.style.opacity = "1";
+        showLoader(false);
+        contentDiv.focus({ preventScroll: true });
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      window.loadPage = async function loadPage(pageName) {
+        if (!pageName) {
+          clearPageScripts();
+          contentDiv.innerHTML = dashboardHtml;
+          finishNavigation("home", defaultMeta);
+          return;
+        }
+
+        removeMapArtifacts();
         showLoader(true);
-        document.getElementById("app-container").style.opacity = "0.5";
+        appContainer.style.opacity = "0.5";
 
         try {
-          const url = `./${pageName}.html`;
+          const url = "./" + pageName + ".html";
           const res = await fetch(url, { cache: "no-cache" });
-
           if (!res.ok) {
-            throw new Error(`Failed to load ${url} (HTTP ${res.status})`);
+            throw new Error("Failed to load " + url + " (HTTP " + res.status + ")");
           }
 
           const html = await res.text();
+          const parsed = parsePage(html);
 
-          // تنظيف كامل للمحتوى القديم قبل الإدراج
           contentDiv.innerHTML = "";
-
-          // انتظر قليلاً للتأكد من انتهاء التنظيف
           await new Promise((resolve) => setTimeout(resolve, 10));
-
-          // ضع HTML جديد مباشرة (innerHTML يحافظ على السكربتات)
-          contentDiv.innerHTML = html;
-
-          // اجمع كل السكربتات المحقونة داخل المحتوى
-          const scripts = Array.from(contentDiv.querySelectorAll("script"));
-
-          // قائمة السكربتات العامة التي لا نعيد تحميلها (محملة مرة واحدة في index.html)
-          const globalScripts = [
-            'theme.js',
-            'navbar-loader.js',
-            'keyboard-navigation.js',
-            'notification-system.js'
-          ];
-
-          // فلترة السكربتات لإزالة العامة
-          const filteredScripts = scripts.filter(script => {
-            const src = script.src || '';
-            const isGlobal = globalScripts.some(globalSrc => src.includes(globalSrc));
-            if (isGlobal) {
-              console.log('Skipping global script:', src);
-              return false;
-            }
-            return true;
-          });
-
-          // تنفيذ السكربتات بالتتابع
-          let idx = 0;
-          const runNextScript = () => {
-            if (idx >= filteredScripts.length) {
-              document.getElementById("app-container").style.opacity = "1";
-              showLoader(false);
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              return;
-            }
-
-            const oldScript = filteredScripts[idx++];
-            appendScriptOnce(oldScript);
-            runNextScript();
-          };
-
-          runNextScript();
+          contentDiv.innerHTML = parsed.contentHtml;
+          await runPageScripts(parsed.scripts);
+          finishNavigation(pageName, parsed.meta);
         } catch (err) {
-          alert("Error loading page: " + err.message);
+          notifyLoadError("Error loading page: " + err.message);
           console.error("Page load error:", err);
+          appContainer.style.opacity = "1";
           showLoader(false);
-          document.getElementById("app-container").style.opacity = "1";
         }
+      };
 
-        // Reinit theme features for new content
-        // Theme.js removed: No dark mode or theme switching
-      }
+      window.addEventListener("DOMContentLoaded", () => {
+        dashboardHtml = contentDiv.innerHTML;
+        ensureLabelAssociations(contentDiv);
+        enhanceLeafletAccessibility(contentDiv);
+        installLeafletObserver();
+        if (typeof window.updatePageIndicator === "function") {
+          window.updatePageIndicator("home");
+        }
+      });
     </script>
   </body>
 </html>
