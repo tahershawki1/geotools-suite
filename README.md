@@ -13,10 +13,10 @@ GeoTools Survey Suite is a modern, accessible, browser-based application for sur
 | Tool | Description | Page |
 |------|-------------|------|
 | 🏠 **Dashboard** | Central hub with quick access to all tools | `index.html` |
-| 📄 **File Converter** | Convert CSV/TXT/SDR files with map display | `Converter.html` |
-| 🔄 **Dubai Converter** | DLTM ↔ WGS84 coordinate conversion (single & batch) | `DLTM.html` |
-| 🌍 **Coordinate Transform** | WGS84 ↔ UTM coordinate transformation | `Transform.html` |
-| 📐 **Area Calculator** | Polygon area & perimeter calculation with map | `Service2.html` |
+| 📄 **File Converter** | Convert CSV/TXT/SDR files with map display | `pages/file-converter.html` |
+| 🔄 **Dubai Converter** | DLTM ↔ WGS84 coordinate conversion (single & batch) | `pages/dltm-converter.html` |
+| 🌍 **Coordinate Transform** | WGS84 ↔ UTM coordinate transformation | `pages/coordinate-transform.html` |
+| 📐 **Area Calculator** | Polygon area & perimeter calculation with map | `pages/area-calculator.html` |
 
 ---
 
@@ -55,22 +55,25 @@ geotools-suite/
 ├── README.md                      # This file
 ├── docs/
 │   ├── index.html                 # Dashboard (LTR)
-│   ├── Converter.html             # File Converter (LTR)
-│   ├── DLTM.html                  # Dubai DLTM Converter (RTL)
-│   ├── Transform.html             # Coordinate Transform (RTL)
-│   ├── Service2.html              # Area Calculator (RTL)
-│   ├── navbar.html                # Unified navigation bar component
+│   ├── pages/
+│   │   ├── file-converter.html     # File Converter (LTR)
+│   │   ├── dltm-converter.html     # Dubai DLTM Converter (RTL)
+│   │   ├── coordinate-transform.html # Coordinate Transform (RTL)
+│   │   └── area-calculator.html    # Area Calculator (RTL)
+│   ├── shared/
+│   │   ├── navbar.html             # Unified navigation bar component
+│   │   └── footer.html             # Unified footer component
 │   ├── navbar-loader.js           # Auto-loads navbar on all pages
-│   ├── footer.html                # Unified footer component
 │   ├── footer-loader.js           # Auto-loads footer on all pages
 │   ├── keyboard-navigation.js     # Keyboard accessibility module
 │   ├── notification-system.js     # Toast notification system
 │   ├── theme.js                   # Dark mode & theme management
 │   ├── styles.css                 # Global styles & CSS variables
+│   ├── converter-export.js        # Export modal logic (File Converter)
 │   ├── service-worker.js          # PWA service worker
 │   ├── sample_batch.csv           # Sample data for batch testing
-│   ├── MAP_DEBUG.js               # Map debugging utility
 │   └── vendor/
+│       ├── proj4.js               # Proj4js library (local)
 │       └── leaflet/               # Leaflet.js mapping library (local)
 │           ├── leaflet.js
 │           └── leaflet.css
@@ -119,7 +122,7 @@ geotools-suite/
 <script src="./notification-system.js"></script>
 ```
 3. Use CSS variables for consistent styling
-4. Add navigation button in `navbar.html`
+4. Add navigation button in `shared/navbar.html`
 
 ### Using Notifications
 ```javascript
@@ -161,7 +164,7 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 
 ### Navbar/Footer Missing?
 - Check browser console for fetch errors
-- Verify `navbar.html` and `footer.html` exist
+- Verify `shared/navbar.html` and `shared/footer.html` exist
 - Ensure loader scripts are included in correct order
 
 ---

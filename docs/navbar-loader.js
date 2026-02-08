@@ -17,6 +17,28 @@
     return window.innerWidth <= 480;
   }
 
+  function getBasePath() {
+    return window.location.pathname.includes('/pages/') ? '..' : '.';
+  }
+
+  function resolvePagePath(page) {
+    const key = (page || '').toLowerCase();
+    const routes = {
+      '': 'index.html',
+      'home': 'index.html',
+      'file-converter': 'pages/file-converter.html',
+      'dltm-converter': 'pages/dltm-converter.html',
+      'coordinate-transform': 'pages/coordinate-transform.html',
+      'area-calculator': 'pages/area-calculator.html'
+    };
+    const target = routes[key] || `pages/${key}.html`;
+    return `${getBasePath()}/${target}`;
+  }
+
+  function resolveSharedPath(fileName) {
+    return `${getBasePath()}/shared/${fileName}`;
+  }
+
   function navigateToPage(page) {
     if (typeof window.loadPage === 'function') {
       const result = window.loadPage(page || '');
@@ -32,11 +54,7 @@
       return;
     }
 
-    if (!page) {
-      window.location.href = './index.html';
-      return;
-    }
-    window.location.href = './' + page + '.html';
+    window.location.href = resolvePagePath(page || '');
   }
 
   function setupNavbarButtonHandlers() {
@@ -121,10 +139,10 @@
     mobileMenu.setAttribute('aria-label', 'Main navigation');
     mobileMenu.innerHTML = `
       <button class="btn-nav-unified" type="button" data-page="" aria-label="Home - Main dashboard" role="menuitem">Home</button>
-      <button class="btn-nav-unified" type="button" data-page="Converter" aria-label="File Converter - Convert survey files" role="menuitem">File Converter</button>
-      <button class="btn-nav-unified" type="button" data-page="DLTM" aria-label="Dubai Converter - DLTM coordinate conversion" role="menuitem">Dubai Converter</button>
-      <button class="btn-nav-unified" type="button" data-page="Transform" aria-label="Coordinate Transformation - WGS84 and UTM conversion" role="menuitem">Coordinate Transformation</button>
-      <button class="btn-nav-unified" type="button" data-page="Service2" aria-label="Area Calculator - Calculate areas from coordinates" role="menuitem">Area Calculator</button>
+      <button class="btn-nav-unified" type="button" data-page="file-converter" aria-label="File Converter - Convert survey files" role="menuitem">File Converter</button>
+      <button class="btn-nav-unified" type="button" data-page="dltm-converter" aria-label="Dubai Converter - DLTM coordinate conversion" role="menuitem">Dubai Converter</button>
+      <button class="btn-nav-unified" type="button" data-page="coordinate-transform" aria-label="Coordinate Transformation - WGS84 and UTM conversion" role="menuitem">Coordinate Transformation</button>
+      <button class="btn-nav-unified" type="button" data-page="area-calculator" aria-label="Area Calculator - Calculate areas from coordinates" role="menuitem">Area Calculator</button>
     `;
 
     overlay.appendChild(mobileMenu);
@@ -295,7 +313,7 @@
     if (navbarExists()) return;
 
     try {
-      const response = await fetch('./navbar.html');
+      const response = await fetch(resolveSharedPath('navbar.html'));
       const navbarHTML = await response.text();
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = navbarHTML;
@@ -303,6 +321,11 @@
       const bodyTop = document.body.firstChild;
       while (tempDiv.firstChild) {
         document.body.insertBefore(tempDiv.firstChild, bodyTop);
+      }
+
+      const logo = document.querySelector('.nav-logo-unified');
+      if (logo) {
+        logo.setAttribute('href', resolvePagePath(''));
       }
 
       setupNavbarButtonHandlers();

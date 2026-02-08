@@ -6,13 +6,20 @@ const urlsToCache = [
   '/docs/index.html',
   '/docs/styles.css',
   // Theme.js removed: No dark mode or theme switching
-  '/docs/DLTM.html',
-  '/docs/Service2.html',
-  '/docs/Converter.html',
-  '/docs/Transform.html',
-  '/docs/MAP_DEBUG.js',
+  '/docs/pages/dltm-converter.html',
+  '/docs/pages/area-calculator.html',
+  '/docs/pages/file-converter.html',
+  '/docs/pages/coordinate-transform.html',
+  '/docs/shared/navbar.html',
+  '/docs/shared/footer.html',
+  '/docs/converter-export.js',
+  '/docs/navbar-loader.js',
+  '/docs/footer-loader.js',
+  '/docs/keyboard-navigation.js',
+  '/docs/notification-system.js',
   '/docs/vendor/leaflet/leaflet.css',
-  '/docs/vendor/leaflet/leaflet.js'
+  '/docs/vendor/leaflet/leaflet.js',
+  '/docs/vendor/proj4.js'
 ];
 
 // Install event - cache essential resources
