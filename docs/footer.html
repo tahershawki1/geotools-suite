@@ -1,6 +1,4 @@
 <!-- Unified Footer -->
-<!-- Theme.js removed: No dark mode or theme switching -->
-<!-- Theme.js removed: No dark mode or theme switching -->
 <style>
   .footer-unified {
     margin-top: auto;
@@ -16,13 +14,11 @@
       border-color 0.3s ease,
       color 0.3s ease;
   }
-
   .footer-content {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 40px;
   }
-
   .footer-links {
     margin-bottom: 20px;
     display: flex;
@@ -30,65 +26,42 @@
     gap: 30px;
     flex-wrap: wrap;
   }
-
   .footer-link {
     text-decoration: none;
     color: var(--primary, #4f46e5);
     font-weight: 600;
     transition: color 0.2s ease;
   }
-
   .footer-link:hover {
     color: var(--primary-hover, #4338ca);
     text-decoration: underline;
   }
-
   .footer-divider {
     height: 1px;
     background: var(--border, #e2e8f0);
     margin: 20px 0;
   }
-
   .footer-text {
     font-size: 13px;
     color: var(--text-muted, #64748b);
   }
-
   .footer-text strong {
     color: var(--text-main, #1e293b);
     font-weight: 600;
   }
 </style>
-
-<footer class="footer-unified" role="contentinfo">
+<footer class="footer-unified">
   <div class="footer-content">
     <div class="footer-links">
-      <a href="./index.html" class="footer-link" data-page="" aria-label="Home">Home</a>
-      <a href="./Converter.html" class="footer-link" data-page="Converter" aria-label="File Converter">File Converter</a>
-      <a href="./DLTM.html" class="footer-link" data-page="DLTM" aria-label="Dubai Converter">Dubai Converter</a>
-      <a href="./Transform.html" class="footer-link" data-page="Transform" aria-label="Coordinate Transformation">Transformation</a>
-      <a href="./Service2.html" class="footer-link" data-page="Service2" aria-label="Area Calculator">Area Calculator</a>
+      <a href="./index.html" class="footer-link">Home</a>
+      <a href="./Converter.html" class="footer-link">File Converter</a>
+      <a href="./DLTM.html" class="footer-link">Dubai Converter</a>
+      <a href="./Transform.html" class="footer-link">Coordinate Transformation</a>
+      <a href="./Service2.html" class="footer-link">Area Calculator</a>
     </div>
-
     <div class="footer-divider"></div>
-
     <div class="footer-text">
-      <p><strong>GeoTools Survey Suite</strong> v1.0.0 | All rights reserved © 2026</p>
-      <p>Professional geospatial coordinate transformation and file conversion tools</p>
+      &copy; 2026 <strong>GeoTools Suite</strong> — All rights reserved.
     </div>
   </div>
 </footer>
-
-<script>
-// Smart navigation for footer links
-document.querySelectorAll('.footer-link').forEach(link => {
-  link.addEventListener('click', function(e) {
-    const page = this.getAttribute('data-page');
-    if (typeof window.loadPage === 'function') {
-      e.preventDefault();
-      loadPage(page);
-    }
-    // else: let the href navigate normally
-  });
-});
-</script>

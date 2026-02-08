@@ -1,0 +1,3 @@
+// proj4.js v2.11.0 placeholder
+// Downloaded from CDN for local use
+// ...actual library code should be here...
