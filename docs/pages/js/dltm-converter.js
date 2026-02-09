@@ -619,8 +619,6 @@
           `<td>${formatNum(r.eDltm, 2)}</td>` +
           `<td>${formatNum(r.zDltm, 2)}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>` +
-          `<td></td>` +
-          `<td></td>` +
           `<td>${formatNum(r.utmN, 2)}</td>` +
           `<td>${formatNum(r.utmE, 2)}</td>` +
           `<td>${r.utmZone || "40N"}</td>` +
@@ -647,12 +645,12 @@
     window.downloadBatchCsv = function () {
       if (!batchData.length) return;
       let csv =
-        "POINT,ID,N_DLTM,E_DLTM,Z_DLTM,Code,عامود,فارغ,UTM_N,UTM_E,UTM_Z,Latitude,Longitude,altitude,code\n";
+        "POINT,ID,N_DLTM,E_DLTM,Z_DLTM,Code,UTM_N,UTM_E,UTM_Z,Latitude,Longitude,altitude,code\n";
       let filename = "DLTM_to_UTM_Zone40N.csv";
 
       batchData.forEach((r) => {
         if (r.error) return;
-        csv += `${safeCsv(r.pointId)},${safeCsv(r.pointId)},${r.nDltm},${r.eDltm},${r.zDltm},${safeCsv(r.code)},,,${r.utmN},${r.utmE},${r.utmZone},${r.latitude},${r.longitude},${r.altitude},${safeCsv(r.code)}\n`;
+        csv += `${safeCsv(r.pointId)},${safeCsv(r.pointId)},${r.nDltm},${r.eDltm},${r.zDltm},${safeCsv(r.code)},${r.utmN},${r.utmE},${r.utmZone},${r.latitude},${r.longitude},${r.altitude},${safeCsv(r.code)}\n`;
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });

@@ -8,9 +8,9 @@
   <link rel="stylesheet" href="./css/dltm-converter.css" />
   <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
   <script src="../vendor/leaflet/leaflet.js"></script>
+  <script src="./js/dltm-converter.js"></script>
 </head>
 <body>
-
 <div class="container-dltm">
   <div class="dltm-tabs">
     <div class="dltm-tab active" onclick="switchDltmTab(this, 'single')">
@@ -328,8 +328,6 @@ Or with commas/spaces/Tab"
                 <th>E_DLTM</th>
                 <th>Z_DLTM</th>
                 <th>Code</th>
-                <th>عامود</th>
-                <th>فارغ</th>
                 <th>UTM_N</th>
                 <th>UTM_E</th>
                 <th>UTM_Z</th>
@@ -488,7 +486,7 @@ Or with commas/spaces/Tab"
   </div>
 </div>
 
-<script>
+<!-- <script>
   (function () {
     // ----------------------------
     // Minimal Loader Fallback
@@ -1110,8 +1108,6 @@ Or with commas/spaces/Tab"
           `<td>${formatNum(r.eDltm, 2)}</td>` +
           `<td>${formatNum(r.zDltm, 2)}</td>` +
           `<td>${escapeHtml(r.code || "")}</td>` +
-          `<td></td>` +
-          `<td></td>` +
           `<td>${formatNum(r.utmN, 2)}</td>` +
           `<td>${formatNum(r.utmE, 2)}</td>` +
           `<td>${r.utmZone || "40N"}</td>` +
@@ -1138,12 +1134,12 @@ Or with commas/spaces/Tab"
     window.downloadBatchCsv = function () {
       if (!batchData.length) return;
       let csv =
-        "POINT,ID,N_DLTM,E_DLTM,Z_DLTM,Code,عامود,فارغ,UTM_N,UTM_E,UTM_Z,Latitude,Longitude,altitude,code\n";
+        "POINT,ID,N_DLTM,E_DLTM,Z_DLTM,Code,UTM_N,UTM_E,UTM_Z,Latitude,Longitude,altitude,code\n";
       let filename = "DLTM_to_UTM_Zone40N.csv";
 
       batchData.forEach((r) => {
         if (r.error) return;
-        csv += `${safeCsv(r.pointId)},${safeCsv(r.pointId)},${r.nDltm},${r.eDltm},${r.zDltm},${safeCsv(r.code)},,,${r.utmN},${r.utmE},${r.utmZone},${r.latitude},${r.longitude},${r.altitude},${safeCsv(r.code)}\n`;
+        csv += `${safeCsv(r.pointId)},${safeCsv(r.pointId)},${r.nDltm},${r.eDltm},${r.zDltm},${safeCsv(r.code)},${r.utmN},${r.utmE},${r.utmZone},${r.latitude},${r.longitude},${r.altitude},${safeCsv(r.code)}\n`;
       });
 
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -1819,7 +1815,7 @@ Or with commas/spaces/Tab"
       return batchData;
     };
   })();
-</script>
+</script> -->
 
 <div class="standalone-footer" data-standalone-only="true" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
   <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
