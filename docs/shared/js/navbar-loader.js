@@ -318,6 +318,13 @@
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = navbarHTML;
 
+      // Fix stylesheet path so it works from both / and /pages/.
+      const cssLink = tempDiv.querySelector('link[rel~="stylesheet"]');
+      if (cssLink) {
+        cssLink.href = resolveSharedPath('css/navbar.css');
+        cssLink.dataset.navbarStyle = 'true';
+      }
+
       const bodyTop = document.body.firstChild;
       while (tempDiv.firstChild) {
         document.body.insertBefore(tempDiv.firstChild, bodyTop);

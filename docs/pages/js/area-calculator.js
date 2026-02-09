@@ -1,102 +1,3 @@
-<!doctype html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="UTF-8" />
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Area Calculator - GeoTools Suite</title>
-    <!-- Global Styles & Theme -->
-    <link rel="stylesheet" href="../styles.css" />
-    <!-- Local Leaflet -->
-    <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
-    <script src="../vendor/leaflet/leaflet.js"></script>
-    <link rel="stylesheet" href="./css/area-calculator.css" />
-    
-  </head>
-
-  <body>
-    <div class="wrap">
-      <div class="card">
-        <h2>Enter Points</h2>
-
-        <textarea
-          id="coordsInput"
-          placeholder="Each line = one point
-
-          Accepted examples:
-          N, E
-          N E
-          1, N, E
-          1 N E
-
-          Supports: comma, semicolon, spaces, or Tab"
-        ></textarea>
-
-        <div class="row">
-          <button id="btnDraw" type="button">Draw & Calculate</button>
-          <button id="btnImport" type="button" class="secondary">
-            Import CSV/TXT
-          </button>
-          <button id="btnClear" type="button" class="danger">Clear</button>
-          <input id="fileInput" type="file" accept=".csv,.txt" />
-        </div>
-
-        <div class="row select-row">
-          <label style="margin: 0">Polygon split method:</label>
-          <select
-            id="splitMethod"
-          >
-            <option value="auto">Auto (smart — prefers ID if present)</option>
-            <option value="id">By ID column</option>
-            <option value="duplicates">Closing duplicate point</option>
-            <option value="gaps">Large gaps only (&gt;1000m)</option>
-          </select>
-        </div>
-
-        <div class="hint">
-          <div>
-            • Works offline (no tiles). A grid is drawn to help reading.
-          </div>
-          <div>
-            • Treat coordinates (N,E) in meters or any linear unit; area output is unit².
-          </div>
-          <div>
-            • If points do not appear: Leaflet likely failed to load (check vendor/leaflet path) or page isn’t under docs/.
-          </div>
-          <div style="direction: ltr; margin-top: 8px">
-            Quick test sample:<br />
-            3000, 5000<br />
-            3050, 5080<br />
-            2980, 5120<br />
-            2950, 5030
-          </div>
-        </div>
-
-        <div id="message" class="msg"></div>
-
-        <div class="results" id="areaResults">
-          <div class="result-item">
-            <span>Points:</span>
-            <span class="result-val"><span id="res-count">0</span></span>
-          </div>
-          <div class="result-item">
-            <span>Area:</span>
-            <span class="result-val"><span id="res-area">0</span></span>
-          </div>
-          <div class="result-item">
-            <span>Perimeter:</span>
-            <span class="result-val"><span id="res-perimeter">0</span></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card map-card">
-        <div id="map"></div>
-      </div>
-    </div>
-
-    <!-- Leaflet already included in the document head; avoid duplicate loading -->
-    <script>
       (function () {
         // --- Hard stop if Leaflet not loaded ---
         if (typeof L === "undefined") {
@@ -300,8 +201,42 @@
         setTimeout(() => map.invalidateSize(), 0);
         window.addEventListener("resize", () => map.invalidateSize());
 
-        // Marker cards should remain constant size on zoom.
-        // No extra resize logic is needed; Leaflet keeps divIcons a fixed pixel size.
+        // Update card sizes to fit polygon interior in pixel space
+        function updateCardSizes() {
+          try {
+            popupLayers.forEach((obj) => {
+              const marker = obj.marker;
+              const pts = obj.pts;
+              const el = marker && marker.getElement && marker.getElement();
+              if (!el) return;
+              const inner = el.firstElementChild || el;
+              // compute pixel bounding box of polygon points
+              const ptsPx = pts.map((p) => map.latLngToLayerPoint([p.N, p.E]));
+              const xs = ptsPx.map((p) => p.x);
+              const ys = ptsPx.map((p) => p.y);
+              const w = Math.max(
+                40,
+                Math.abs(Math.max(...xs) - Math.min(...xs)),
+              );
+              const h = Math.max(
+                24,
+                Math.abs(Math.max(...ys) - Math.min(...ys)),
+              );
+              inner.style.width = w + "px";
+              inner.style.height = h + "px";
+              inner.style.overflow = "hidden";
+              inner.style.display = "flex";
+              inner.style.alignItems = "center";
+              inner.style.justifyContent = "center";
+              // keep marker centered
+              el.style.transform = "translate(-50%,-50%)";
+            });
+          } catch (e) {
+            /*ignore*/
+          }
+        }
+        map.on("zoomend", updateCardSizes);
+        map.on("moveend", updateCardSizes);
 
         // Layers
         let gridLayer = null;
@@ -309,21 +244,6 @@
         let lineLayer = null;
         let polyLayer = null;
         let popupLayers = [];
-
-        function centerCardMarker(marker) {
-          if (!marker) return;
-          const align = () => {
-            const el = marker.getElement && marker.getElement();
-            if (!el) return;
-            const w = el.offsetWidth || 0;
-            const h = el.offsetHeight || 0;
-            // Center the divIcon over its coordinate without scaling on zoom
-            el.style.marginLeft = -(w / 2) + "px";
-            el.style.marginTop = -(h / 2) + "px";
-          };
-          marker.on("add", () => setTimeout(align, 0));
-          setTimeout(align, 0);
-        }
 
         function clearDraw() {
           if (pointsLayer) {
@@ -549,9 +469,7 @@
             const marker = L.marker([centroid.N, centroid.E], {
               icon,
               interactive: false,
-            });
-            centerCardMarker(marker);
-            marker.addTo(map);
+            }).addTo(map);
             // track marker with associated polygon points so we can size it later
             popupLayers.push({ marker: marker, pts: polyPts });
 
@@ -829,10 +747,4 @@
 
         showMsg('Ready. Enter your points then click "Draw & Calculate".', "");
       })();
-    </script>
-
-<div class="standalone-footer" data-standalone-only="true" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
-  <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
-</div>
-  </body>
-</html>
+    

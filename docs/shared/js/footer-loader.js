@@ -60,6 +60,13 @@
       // Insert footer at the very end of body
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = footerHTML;
+
+      // Fix stylesheet path so it works from both / and /pages/.
+      const cssLink = tempDiv.querySelector('link[rel~="stylesheet"]');
+      if (cssLink) {
+        cssLink.href = resolveSharedPath('css/footer.css');
+        cssLink.dataset.footerStyle = 'true';
+      }
       
       // Insert all children of tempDiv at the end of body
       while (tempDiv.firstChild) {

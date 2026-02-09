@@ -60,19 +60,33 @@ geotools-suite/
 |   |   |-- dltm-converter.html     # Dubai DLTM Converter (RTL)
 |   |   |-- coordinate-transform.html # Coordinate Transform (RTL)
 |   |   |-- area-calculator.html    # Area Calculator (RTL)
+|   |   |-- css/
+|   |   |   |-- file-converter.css
+|   |   |   |-- dltm-converter.css
+|   |   |   |-- coordinate-transform.css
+|   |   |   `-- area-calculator.css
 |   |   `-- js/
-|   |       `-- converter-export.js        # Export modal logic (File Converter)
+|   |       |-- converter-export.js        # Export modal logic (File Converter)
+|   |       |-- file-converter.js
+|   |       |-- dltm-converter.js
+|   |       |-- coordinate-transform.js
+|   |       `-- area-calculator.js
 |   |-- shared/
 |   |   |-- navbar.html             # Unified navigation bar component
 |   |   |-- footer.html             # Unified footer component
+|   |   |-- css/
+|   |   |   |-- navbar.css
+|   |   |   `-- footer.css
 |   |   `-- js/
 |   |       |-- navbar-loader.js           # Auto-loads navbar on all pages
 |   |       |-- footer-loader.js           # Auto-loads footer on all pages
 |   |       |-- keyboard-navigation.js     # Keyboard accessibility module
 |   |       |-- notification-system.js     # Toast notification system
-|   |       `-- theme.js                   # Dark mode & theme management
+|   |       |-- app-shell.js               # SPA loader for index.html
+|   |       |-- theme.js                   # Dark mode & theme management
+|   |       `-- service-worker.js          # Service worker logic
 |   |-- styles.css                 # Global styles & CSS variables
-|   |-- service-worker.js          # PWA service worker
+|   |-- service-worker.js          # Service worker bootstrap (keeps scope at /docs/)
 |   |-- sample_batch.csv           # Sample data for batch testing
 |   `-- vendor/
 |       |-- proj4.js               # Proj4js library (local)
@@ -80,6 +94,9 @@ geotools-suite/
 |           |-- leaflet.js
 |           `-- leaflet.css
 ```
+
+
+
 
 
 ---

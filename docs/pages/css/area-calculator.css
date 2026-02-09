@@ -1,0 +1,231 @@
+/* Area Calculator - External CSS */
+
+:root {
+  --ac-primary: #2563eb;
+  --ac-primary-dark: #1d4ed8;
+  --ac-bg: #eef2ff;
+  --ac-card: rgba(255, 255, 255, 0.92);
+  --ac-border: #d9e1ec;
+  --ac-text: #111827;
+  --ac-muted: #6b7280;
+  --ac-shadow: 0 18px 50px rgba(15, 23, 42, 0.14);
+}
+
+/* SPA container overrides */
+.dashboard-view { max-width: 1300px !important; }
+#app-container { justify-content: flex-start !important; align-items: stretch !important; }
+
+.wrap {
+  max-width: 1200px;
+  width: 100%;
+  margin: 24px auto 32px;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: 430px 1fr;
+  gap: 18px;
+}
+
+.wrap > .card,
+.wrap > .map-card {
+  background: var(--ac-card);
+  border: 1px solid var(--ac-border);
+  border-radius: 18px;
+  box-shadow: var(--ac-shadow);
+  backdrop-filter: blur(8px);
+}
+
+.wrap > .card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  cursor: default;
+  align-items: stretch;
+  text-align: left;
+  text-decoration: none;
+  transition: none;
+}
+
+.wrap > .card:hover {
+  transform: none !important;
+  box-shadow: var(--ac-shadow);
+  border-color: var(--ac-border);
+}
+
+.wrap > .card h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ac-text);
+  text-align: center;
+}
+
+.wrap textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  background: #fff;
+  color: var(--ac-text);
+  border: 1px solid var(--ac-border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  line-height: 1.55;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.wrap .row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.wrap button {
+  background: linear-gradient(135deg, var(--ac-primary), #3b82f6);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.25);
+  min-height: auto;
+}
+
+.wrap button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(37, 99, 235, 0.3);
+}
+
+.wrap button.secondary {
+  background: linear-gradient(135deg, #10b981, #22c55e);
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.25);
+}
+
+.wrap button.danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.25);
+}
+
+#fileInput { display: none; }
+
+.wrap .hint {
+  padding: 12px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid var(--ac-border);
+  color: var(--ac-muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.wrap .msg {
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: rgba(37, 99, 235, 0.08);
+  font-size: 13px;
+  display: none;
+}
+.wrap .msg.warn {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.12);
+}
+.wrap .msg.err {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.12);
+}
+
+.wrap .results {
+  display: none;
+  gap: 10px;
+}
+
+.wrap .result-item {
+  flex: 1;
+  min-width: 140px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid var(--ac-border);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+.wrap .result-item span:first-child {
+  color: var(--ac-muted);
+  font-weight: 700;
+}
+.wrap .result-val {
+  font-weight: 900;
+  direction: ltr;
+  color: var(--ac-text);
+}
+
+.wrap > .map-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  min-height: 620px;
+}
+
+#map {
+  flex: 1;
+  min-height: 520px;
+  border-radius: 16px;
+  border: 1px solid var(--ac-border);
+  background: #f8fafc;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.wrap .select-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  border: 1px solid var(--ac-border);
+  font-size: 13px;
+}
+.wrap .select-row select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .wrap {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .wrap > .map-card { order: 2; min-height: 480px; }
+  .wrap > .card { order: 1; }
+}
+
+/* Leaflet tweaks */
+.leaflet-container { background: #f8fafc !important; border-radius: 12px; }
+.leaflet-control { background: #fff !important; border: 1px solid var(--ac-border) !important; border-radius: 8px !important; box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12); }
+.leaflet-control-zoom-in, .leaflet-control-zoom-out { background-color: #fff !important; color: #0f172a !important; border-bottom: 1px solid var(--ac-border) !important; }
+.leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover { background-color: #f1f5f9 !important; }
+
+/* Polygon summary cards */
+.leaflet-div-icon.polygon-card {
+  width: auto !important;
+  height: auto !important;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
