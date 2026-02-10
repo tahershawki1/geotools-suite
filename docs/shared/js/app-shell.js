@@ -22,12 +22,27 @@
       const persistentStyles = new Set();
       const persistentScripts = new Set();
 
-      // Helper to seed persistent sets with and without /docs prefix for GitHub Pages paths.
+      const basePrefix = (() => {
+        if (location.protocol === "file:") return "";
+        const parts = (location.pathname || "").split("/").filter(Boolean);
+        if (!parts.length) return "";
+        const first = parts[0].toLowerCase();
+        if (first === "docs") return "/docs";
+        if (first === "pages" || first === "shared" || first === "vendor") return "";
+        if (first.includes(".")) return "";
+        return "/" + first;
+      })();
+
+      // Helper to seed persistent sets with repo-prefix and /docs prefix for GitHub Pages paths.
       function seedPersistent(set, items) {
         items.forEach((item) => {
           const value = item.toLowerCase();
           set.add(value);
           set.add(("/docs" + value).toLowerCase());
+          if (basePrefix) {
+            set.add((basePrefix + value).toLowerCase());
+            set.add((basePrefix + "/docs" + value).toLowerCase());
+          }
         });
       }
 
