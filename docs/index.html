@@ -1,13 +1,15 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GeoTools Suite</title>
 
-    <!-- Unified shared modules -->
+        <!-- Unified shared modules (registry-driven navigation/dashboard) -->
+    <script src="./shared/js/tools-registry.js"></script>
+    <script src="./shared/js/dashboard.js"></script>
+    <script src="./shared/js/crs-registry.js"></script>
     <script src="./shared/js/navbar-loader.js"></script>
-    <script src="./shared/js/footer-loader.js"></script>
     <script src="./shared/js/keyboard-navigation.js"></script>
     <script src="./shared/js/notification-system.js"></script>
 
@@ -22,6 +24,7 @@
     <script src="./vendor/leaflet/leaflet.js"></script>
 
     <!-- Global styles -->
+    <link rel="stylesheet" href="./shared/css/theme.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
 
@@ -46,66 +49,16 @@
           <p>Choose the service you want to use today</p>
         </div>
 
-        <div class="grid">
-          <button
-            class="card"
-            type="button"
-            onclick="loadPage('file-converter')"
-            aria-label="Open File Converter tool"
-          >
-            <div class="icon-box">🔄</div>
-            <h2>File Converter (SDR)</h2>
-            <p>
-              Convert coordinate CSV/TXT files to SDR format for Sokkia devices,
-              with map view feature.
-            </p>
-          </button>
-
-          <button
-            class="card"
-            type="button"
-            onclick="loadPage('dltm-converter')"
-            aria-label="Open DLTM Converter tool"
-          >
-            <div class="icon-box">📍</div>
-            <h2>DLTM Converter (Dubai)</h2>
-            <p>
-              Convert Dubai local coordinates (DLTM) to global coordinates
-              (Lat/Long) with high accuracy.
-            </p>
-          </button>
-
-          <button
-            class="card"
-            type="button"
-            onclick="loadPage('area-calculator')"
-            aria-label="Open Area Calculator tool"
-          >
-            <div class="icon-box">📐</div>
-            <h2>Area Calculator</h2>
-            <p>
-              Engineering tool for calculating areas based on coordinates or distances
-              and angles.
-            </p>
-          </button>
-
-          <button
-            class="card"
-            type="button"
-            onclick="loadPage('coordinate-transform')"
-            aria-label="Open Coordinate Transformation tool"
-          >
-            <div class="icon-box">🛰️</div>
-            <h2>Coordinate Transformation</h2>
-            <p>
-              Convert coordinates between different systems UTM, WGS84 and others using
-              Proj4js.
-            </p>
-          </button>
-        </div>
+        <div class="grid" data-tools-grid></div>
       </main>
     </div>
 
     <script src="./shared/js/app-shell.js"></script>
+    <div class="legal-line" aria-label="Copyright notice">© 2026 GeoTools Suite — All rights reserved.</div>
   </body>
 </html>
+
+
+
+
+

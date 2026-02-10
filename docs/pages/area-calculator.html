@@ -90,8 +90,14 @@
         </div>
       </div>
 
-      <div class="card map-card">
+      <div class="card map-card" style="position: relative;">
         <div id="map"></div>
+        <div id="north-arrow" title="اتجاه الشمال">
+          <svg width="38" height="60" viewBox="0 0 38 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="19,4 34,40 19,32 4,40" fill="#fff" stroke="#222" stroke-width="2"/>
+            <text x="19" y="55" text-anchor="middle" font-size="18" fill="#222" font-family="Arial">N</text>
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -238,6 +244,22 @@
         // --- Leaflet map (planar / CRS.Simple) ---
         let map = null;
 
+        function attachNorthArrow() {
+          if (!map) return;
+          const arrow = document.getElementById("north-arrow");
+          if (!arrow) return;
+          const container = map.getContainer();
+          if (arrow.parentElement !== container) {
+            container.appendChild(arrow);
+          }
+          arrow.style.position = "absolute";
+          arrow.style.top = "12px";
+          arrow.style.right = "12px";
+          arrow.style.zIndex = "1000";
+          arrow.style.pointerEvents = "none";
+          arrow.style.userSelect = "none";
+        }
+
         function initializeMap() {
           if (map) return;
 
@@ -259,6 +281,7 @@
             attributionControl: false,
             zoomControl: true,
           });
+          attachNorthArrow();
 
           // إعادة حساب الحجم
           setTimeout(() => {

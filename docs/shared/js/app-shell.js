@@ -12,18 +12,76 @@
       let dashboardHtml = "";
       let leafletObserver = null;
       let autoFieldCounter = 0;
-      const PAGE_STYLE_ATTR = "data-spa-page-style";
-      const PAGE_ROUTES = {
-        "file-converter": "./pages/file-converter.html",
-        "dltm-converter": "./pages/dltm-converter.html",
-        "coordinate-transform": "./pages/coordinate-transform.html",
-        "area-calculator": "./pages/area-calculator.html",
-      };
+
+      // Attribute flags for page-injected assets (removed on navigation)
+      const PAGE_STYLE_ATTR = "data-spa";
+      const PAGE_STYLE_VALUE = "page-style";
+      const PAGE_SCRIPT_VALUE = "page-script";
+
+      // Persistent assets stay across navigations; normalized lowercase for comparison.
+      const persistentStyles = new Set();
+      const persistentScripts = new Set();
+
+      // Helper to seed persistent sets with and without /docs prefix for GitHub Pages paths.
+      function seedPersistent(set, items) {
+        items.forEach((item) => {
+          const value = item.toLowerCase();
+          set.add(value);
+          set.add(("/docs" + value).toLowerCase());
+        });
+      }
+
+      seedPersistent(persistentStyles, [
+        "/shared/css/theme.css",
+        "/styles.css",
+        "/vendor/leaflet/leaflet.css",
+        "/shared/css/navbar.css",
+      ]);
+
+      seedPersistent(persistentScripts, [
+        "/vendor/leaflet/leaflet.js",
+        "/vendor/proj4.js",
+        "/shared/js/tools-registry.js",
+        "/shared/js/crs-registry.js",
+        "/shared/js/navbar-loader.js",
+        "/shared/js/keyboard-navigation.js",
+        "/shared/js/notification-system.js",
+        "/shared/js/ui-dialogs.js",
+        "/shared/js/dashboard.js",
+      ]);
+
+      // Normalizes URL to pathname for comparison against persistent sets.
+      function normalizeUrl(value) {
+        if (!value) return "";
+        try {
+          const u = new URL(value, location.href);
+          return u.pathname.toLowerCase();
+        } catch (_) {
+          return String(value || "").toLowerCase();
+        }
+      }
 
       function showLoader(show) {
         loaderElement.style.display = show ? "flex" : "none";
         loaderElement.setAttribute("aria-hidden", show ? "false" : "true");
         contentDiv.setAttribute("aria-busy", show ? "true" : "false");
+      }
+
+      // Resolve page URL using GeoToolsRegistry as the single source of truth.
+      function resolvePageUrl(pageName) {
+        const key = String(pageName || "").toLowerCase();
+        if (!key || key === "home") {
+          return "./index.html";
+        }
+
+        const registry = window.GeoToolsRegistry;
+        const entry = registry && typeof registry.getById === "function" ? registry.getById(key) : null;
+        if (entry && entry.pagePath) {
+          return entry.pagePath.startsWith(".") ? entry.pagePath : `./${entry.pagePath}`;
+        }
+
+        // Fallback legacy path pattern to avoid hard failures.
+        return `./pages/${key}.html`;
       }
 
       function setDocumentMeta(meta) {
@@ -143,7 +201,7 @@
 
         parsed.querySelectorAll("link[rel~='stylesheet']").forEach((link) => {
           const href = link.getAttribute("href");
-          if (!href) return;
+          if (!href || isPersistentStyleHref(href)) return; // Skip globals
           styles.push({
             href: resolveHref(href),
             media: link.getAttribute("media") || "",
@@ -161,6 +219,7 @@
           if (node.nodeType === Node.ELEMENT_NODE) {
             const el = node;
             if (el.tagName === "SCRIPT" || el.tagName === "LINK" || el.tagName === "STYLE") return;
+            if (el.tagName === "FOOTER") return; // Skip any embedded footers to keep single legal line
             if (el.matches(".standalone-footer,[data-standalone-only='true']")) return;
             nodes.push(el.outerHTML);
             return;
@@ -184,16 +243,20 @@
 
       function clearPageScripts() {
         document
-          .querySelectorAll("script[data-spa-page-script='true']")
-          .forEach((script) => script.remove());
+          .querySelectorAll(`script[${PAGE_STYLE_ATTR}='${PAGE_SCRIPT_VALUE}']`)
+          .forEach((script) => {
+            script.remove();
+          });
       }
 
       function clearPageStyles() {
         document
           .querySelectorAll(
-            `link[${PAGE_STYLE_ATTR}='true'], style[${PAGE_STYLE_ATTR}='true']`,
+            `link[${PAGE_STYLE_ATTR}='${PAGE_STYLE_VALUE}'], style[${PAGE_STYLE_ATTR}='${PAGE_STYLE_VALUE}']`,
           )
-          .forEach((node) => node.remove());
+          .forEach((node) => {
+            node.remove();
+          });
       }
 
       function applyPageStyles(styles) {
@@ -204,6 +267,10 @@
 
         styles.forEach((style) => {
           if (style.href) {
+            if (isPersistentStyleHref(style.href)) {
+              return; // persistent global already present
+            }
+
             const existing = Array.from(
               document.querySelectorAll("link[rel~='stylesheet']"),
             ).find((link) => link.href === style.href);
@@ -219,7 +286,7 @@
             link.rel = "stylesheet";
             link.href = style.href;
             if (style.media) link.media = style.media;
-            link.setAttribute(PAGE_STYLE_ATTR, "true");
+            link.setAttribute(PAGE_STYLE_ATTR, PAGE_STYLE_VALUE);
 
             // Wait for external CSS to load before rendering
             const p = new Promise((resolve) => {
@@ -235,7 +302,7 @@
           if (style.inline) {
             const styleEl = document.createElement("style");
             styleEl.textContent = style.inline;
-            styleEl.setAttribute(PAGE_STYLE_ATTR, "true");
+            styleEl.setAttribute(PAGE_STYLE_ATTR, PAGE_STYLE_VALUE);
             document.head.appendChild(styleEl);
           }
         });
@@ -271,11 +338,19 @@
         return ignored.some((item) => normalized.includes(item));
       }
 
+      function isPersistentStyleHref(href) {
+        return persistentStyles.has(normalizeUrl(href));
+      }
+
+      function isPersistentScriptSrc(src) {
+        return persistentScripts.has(normalizeUrl(src));
+      }
+
       function injectScript(scriptEl, baseUrl) {
         return new Promise((resolve, reject) => {
           const src = scriptEl.getAttribute("src");
           const script = document.createElement("script");
-          script.dataset.spaPageScript = "true";
+          script.setAttribute(PAGE_STYLE_ATTR, PAGE_SCRIPT_VALUE);
           script.async = false;
           script.defer = false;
 
@@ -298,7 +373,16 @@
         clearPageScripts();
         for (const scriptEl of scripts) {
           const src = scriptEl.getAttribute("src");
-          if (src && isGlobalScript(src)) continue;
+          if (src && (isGlobalScript(src) || isPersistentScriptSrc(src))) continue;
+
+          if (src) {
+            // Avoid duplicate injection when same src already in DOM.
+            const normalizedSrc = new URL(src, baseUrl || location.href).href;
+            const exists = Array.from(document.querySelectorAll("script")).some(
+              (s) => normalizeUrl(s.src) === normalizeUrl(normalizedSrc),
+            );
+            if (exists) continue;
+          }
           await injectScript(scriptEl, baseUrl);
         }
       }
@@ -314,7 +398,13 @@
         if (typeof window.updatePageIndicator === "function") {
           window.updatePageIndicator(activePage || "home");
         }
+        if (activePage === "home" && typeof window.renderDashboardCards === "function") {
+          window.renderDashboardCards();
+        }
 
+        // Apply lightweight fade-in for page transitions.
+        appContainer.classList.add("page-fade-in");
+        setTimeout(() => appContainer.classList.remove("page-fade-in"), 220);
         appContainer.style.opacity = "1";
         showLoader(false);
         contentDiv.focus({ preventScroll: true });
@@ -336,10 +426,7 @@
         appContainer.style.opacity = "0.5";
 
         try {
-          const url = PAGE_ROUTES[normalizedPage];
-          if (!url) {
-            throw new Error("Unknown page: " + pageName);
-          }
+          const url = resolvePageUrl(normalizedPage);
           const res = await fetch(url, { cache: "no-cache" });
           if (!res.ok) {
             throw new Error("Failed to load " + url + " (HTTP " + res.status + ")");
@@ -371,5 +458,6 @@
         if (typeof window.updatePageIndicator === "function") {
           window.updatePageIndicator("home");
         }
+        
       });
     

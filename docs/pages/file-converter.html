@@ -1,702 +1,147 @@
-<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en" dir="ltr">
-<head>
-    <!-- Theme.js removed: No dark mode or theme switching -->
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>File Converter - GeoTools Suite</title>
-  <link rel="stylesheet" href="../styles.css" />
-  <link rel="stylesheet" href="./css/file-converter.css" />
-  <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
-  <script src="../vendor/leaflet/leaflet.js"></script>
-
-</head>
-<body>
-
-<div class="container-converter">
-  <div class="content-conv">
-    <form id="converterForm">
-      <div class="card-conv">
-        <div class="row-conv">
-          <div>
-            <label for="csvFile">Upload CSV/TXT File</label>
-            <label class="batch-dropzone-conv" for="csvFile">
-              <svg width="38" height="38" viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  fill="none"
-                  stroke="#475467"
-                  stroke-width="1.5"
-                />
-                <path d="M14 2v6h6" fill="none" stroke="#475467" stroke-width="1.5" />
-                <path
-                  d="M12 17v-6m0 0-2 2m2-2 2 2"
-                  fill="none"
-                  stroke="#111827"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <h3>Click to Upload CSV File</h3>
-              <p>File must contain columns (E, N) and optionally (PointID, Code)</p>
-              <div class="file-name" id="fileName">No file selected</div>
-              <input
-                type="file"
-                id="csvFile"
-                name="csvFile"
-                accept=".csv,.txt,text/plain"
-              />
-            </label>
-
-            <div
-              id="sdrNotice"
-              style="
-                display: none;
-                margin-top: 10px;
-                padding: 10px 12px;
-                border-radius: 12px;
-                border: 1px solid #fde68a;
-                background: #fffbeb;
-                color: #92400e;
-                font-size: 13px;
-              "
-            >
-              <strong>Note:</strong> This is an <strong>SDR</strong> file.
-              <div style="margin-top: 10px; display: flex; gap: 10px">
-                <button type="button" class="chip" id="convertSdrBtn">
-                  Convert SDR -> CSV
-                </button>
-                <button
-                  type="button"
-                  class="chip"
-                  id="downloadCsvBtn"
-                  style="display: none"
-                >
-                  Download CSV
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label for="coordFormat">File Column Order</label>
-            <select id="coordFormat">
-              <option value="NEZ">P, N, E, Z, Code (default)</option>
-              <option value="ENZ">P, E, N, Z, Code</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn-conv" id="convertBtn">
-            Show Map
-          </button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Converter - GeoTools Suite</title>
+    <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./css/file-converter.css" />
+    <script src="../vendor/leaflet/leaflet.js"></script>
+    <script src="../vendor/proj4.js"></script>
+    <script src="../shared/js/crs-registry.js"></script>
+    <script src="./js/converter-export.js"></script>
+  </head>
+  <body>
+    <div class="container-converter surface">
+      <header class="conv-header">
+        <div>
+          <p class="eyebrow">Multi-file + live preview</p>
+          <h1>File Converter (CSV / TXT / SDR)</h1>
+          <p class="sub">
+            Upload one or more files, auto-detect order, pick CRS, and see
+            points immediately on the map.
+          </p>
         </div>
-        <div
-          id="status-conv"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          aria-hidden="true"
-        ></div>
-      </div>
-    </form>
+      </header>
 
-    <div class="metrics-conv" id="metrics" aria-live="polite" aria-atomic="true">
-      <div class="metric-item">
-        <div class="num" id="pointsCount">0</div>
-        <div class="lbl">Points</div>
-      </div>
-    </div>
-
-    <div class="map-wrap-conv" id="mapWrap" aria-label="Map preview area">
-      <div class="north-arrow-conv" title="North">
-        <svg width="20" height="40" viewBox="0 0 40 90">
-          <path
-            d="M20 5 L33 28 L26 28 L26 85 L14 85 L14 28 L7 28 Z"
-            fill="#111827"
-          />
-          <path
-            d="M20 10 L29 27 L24 27 L24 82 L16 82 L16 27 L11 27 Z"
-            fill="#ffffff"
-            opacity="0.25"
-          />
-        </svg>
-        <span style="font-weight: 900; margin-left: 5px">N</span>
-      </div>
-      <div id="map" role="region" aria-label="Coordinate preview map"></div>
-    </div>
-
-    <div
-      id="mapTools"
-      style="display: none; gap: 8px; margin-top: 10px; flex-wrap: wrap"
-    >
-      <button class="chip" type="button" id="fitBtn">Zoom Extents</button>
-      <button class="chip" type="button" id="measureBtn">
-        Measure Distance
-      </button>
-      <button class="chip" type="button" id="clearBtn">Clear Map</button>
-      <button
-        class="chip"
-        type="button"
-        id="previewBtn"
-        style="
-          background: var(--primary-light);
-          border-color: var(--primary);
-          color: var(--primary);
-        "
+      <section
+        class="controls-panel surface"
+        aria-label="Upload and parsing controls"
       >
-        Preview SDR
-      </button>
-    </div>
+        <div class="control-col">
+          <label class="control-label">Upload CSV/TXT (multiple)</label>
+          <label class="dropzone" for="csvFiles">
+            <span class="drop-icon">📁</span>
+            <div>
+              <strong>Drop or click to select files</strong>
+              <p>
+                Accepts CSV / TXT with columns (Point, Easting, Northing, Code)
+              </p>
+            </div>
+            <input
+              type="file"
+              id="csvFiles"
+              name="csvFiles"
+              accept=".csv,.txt,text/plain"
+              multiple
+            />
+          </label>
+        </div>
+        <div class="control-col">
+          <label class="control-label">Column order</label>
+          <select id="orderSelect">
+            <option value="P,N,E,CODE">Point, Northing, Easting, Code</option>
+            <option value="P,E,N,CODE">Point, Easting, Northing, Code</option>
+            <option value="N,E">Northing, Easting</option>
+            <option value="E,N">Easting, Northing</option>
+          </select>
+          <div class="hint" id="orderHint">Auto-detected: pending</div>
+          <label class="control-label" style="margin-top: 16px"
+            >Coordinate Reference System</label
+          >
+          <div id="crsWarning" class="crs-warning-text" aria-live="polite"></div>
+          <select id="crsSelect"></select>
+          <button id="clearAllBtn" type="button" class="clear-all-btn">مسح الكل</button>
+        </div>
+      </section>
 
-    <div
-      id="sdrPreviewWrap"
-      style="
-        display: none;
-        margin-top: 15px;
-        background: #1e293b;
-        color: #cbd5e1;
-        border-radius: 12px;
-        padding: 15px;
-        font-family: monospace;
-        font-size: 12px;
-        overflow-x: auto;
-        border: 1px solid #334155;
-      "
-    >
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 10px;
-          color: #fff;
-          font-size: 13px;
-          font-family: &quot;Cairo&quot;, sans-serif;
-        "
+      <section class="manual-panel surface" aria-label="Manual point entry">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Manual points</p>
+            <h3>Paste points here</h3>
+            <p class="sub">
+              Auto parses (250ms debounce) and renders instantly.
+            </p>
+          </div>
+          <div class="badge">
+            Manual color: <span class="swatch" id="manualSwatch"></span>
+          </div>
+        </div>
+        <textarea
+          id="manualInput"
+          placeholder="P1, 2768000, 499000, TR1"
+        ></textarea>
+      </section>
+
+      <section
+        class="secondary-panel surface"
+        aria-label="Preview and file list"
       >
-        <strong>SDR File Preview (First 20 lines)</strong>
-        <button
-          id="closePreviewBtn"
-          type="button"
-          class="chip"
-          aria-label="Close SDR preview"
-          style="padding: 4px 8px"
-        >
-          Close
-        </button>
-      </div>
-      <pre id="sdrPreviewText" style="margin: 0"></pre>
+        <div class="preview-col">
+          <label class="control-label">Preview (first 20 rows)</label>
+          <div id="previewBox" class="preview-box" aria-live="polite">
+            No file selected yet.
+          </div>
+        </div>
+        <div class="filelist-col">
+          <label class="control-label">Files</label>
+          <div id="fileList" class="file-list" aria-live="polite"></div>
+        </div>
+      </section>
+
+
+
+      <!-- Move toolbar inside map area -->
+      <section class="map-panel surface" style="position:relative;">
+          <div id="north-arrow" title="NORTH">
+            <svg width="38" height="60" viewBox="0 0 38 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="19,4 34,40 19,32 4,40" fill="#fff" stroke="#222" stroke-width="2"/>
+              <text x="19" y="55" text-anchor="middle" font-size="18" fill="#222" font-family="Arial">N</text>
+            </svg>
+          </div>
+          <div class="map-controls" style="position:absolute;top:18px;left:18px;z-index:1000;display:flex;flex-direction:column;gap:8px;">
+            <button id="zoomInBtn" type="button" title="Zoom In" class="map-icon-btn zoom-btn">+
+            </button>
+            <button id="zoomOutBtn" type="button" title="Zoom Out" class="map-icon-btn zoom-btn">-
+            </button>
+            <button id="zoomExtBtn" type="button" title="Zoom Extent" class="map-icon-btn zoom-btn">⤢
+            </button>
+          </div>
+          <div
+            id="map"
+            class="map-area"
+            role="region"
+            aria-label="Points map"
+          ></div>
+          <div class="map-bottom-toolbar">
+            <button id="mapModeBtn" type="button" class="map-bottom-btn" aria-pressed="false">
+              🌐 خريطة عالمية
+            </button>
+            <button id="measureBtn" type="button" class="map-bottom-btn" aria-pressed="false">
+              📏 قياس المسافة
+            </button>
+            <span id="measureTotal" class="measure-total"></span>
+          </div>
+      </section>
+
+      <section class="actions-panel surface">
+        <button id="exportBtn" type="button" class="export-btn">Export to Files</button>
+        <div id="status" role="status" aria-live="polite"></div>
+      </section>
     </div>
 
-    <button
-      type="button"
-      class="btn-conv btn-green"
-      id="exportBtn"
-      style="display: none; margin-top: 12px; background: var(--secondary)"
-    >
-      Export Points
-    </button>
-  </div>
-</div>
-
-<script src="./js/converter-export.js"></script>
-<script>
-  window.API_BASE = window.API_BASE ?? "https://worker.geotools.workers.dev";
-
-  (function () {
-    let map = null;
-    let pointsLayer = null;
-    let measureLayer = null;
-    let lastBounds = null;
-    let sdrResult = null;
-    let currentInputIsSdr = false;
-    let isMeasuring = false;
-    let measurePoints = [];
-    let measureLine = null;
-
-    // SDR -> CSV state
-    let loadedFileText = "";
-    let csvFromSdr = "";
-    const pointAnchorIcon = L.divIcon({
-      className: "pt-anchor-marker",
-      html: "",
-      iconSize: [1, 1],
-      iconAnchor: [0, 0],
-    });
-
-    const sdrNotice = document.getElementById("sdrNotice");
-    const convertSdrBtn = document.getElementById("convertSdrBtn");
-    const downloadCsvBtn = document.getElementById("downloadCsvBtn");
-    const sdrPreviewWrap = document.getElementById("sdrPreviewWrap");
-    const closePreviewBtn = document.getElementById("closePreviewBtn");
-    const exportBtn = document.getElementById("exportBtn");
-    let exportController = null;
-
-    if (window.ConverterExport && typeof window.ConverterExport.createExporter === "function") {
-      exportController = window.ConverterExport.createExporter({
-        apiBase: window.API_BASE,
-        getSourceText: function () {
-          return loadedFileText;
-        },
-        getSourceIsSdr: function () {
-          return currentInputIsSdr;
-        },
-        getCoordFormat: function () {
-          return document.getElementById("coordFormat").value;
-        },
-        getBaseName: function () {
-          const file = document.getElementById("csvFile").files[0];
-          return file ? file.name : "points";
-        },
-        setStatus: setStatus,
-        hideStatus: hideStatus,
-        getReturnFocusEl: function () {
-          return document.getElementById("exportBtn");
-        },
-        onSdrReady: function (sdr) {
-          sdrResult = sdr;
-        },
-      });
-    }
-
-    document.getElementById("csvFile").addEventListener("change", function () {
-      const f = this.files && this.files[0];
-      document.getElementById("fileName").textContent = f
-        ? f.name
-        : "No file selected";
-      sdrNotice.style.display = "none";
-      downloadCsvBtn.style.display = "none";
-      csvFromSdr = "";
-      loadedFileText = "";
-      sdrResult = null;
-      currentInputIsSdr = false;
-      if (exportController && typeof exportController.resetCache === "function") {
-        exportController.resetCache();
-      }
-    });
-
-    document
-      .getElementById("converterForm")
-      .addEventListener("submit", function (e) {
-        e.preventDefault();
-        run();
-      });
-
-    document.getElementById("fitBtn").addEventListener("click", zoomExtents);
-
-    document
-      .getElementById("measureBtn")
-      .addEventListener("click", function () {
-        isMeasuring = !isMeasuring;
-        this.style.background = isMeasuring ? "var(--primary-light)" : "";
-        this.style.borderColor = isMeasuring ? "var(--primary)" : "";
-        if (!isMeasuring) {
-          if (measureLayer) measureLayer.clearLayers();
-          measurePoints = [];
-        } else {
-          setStatus("Click on the map to start measuring.", "ok");
-        }
-      });
-
-    document
-      .getElementById("previewBtn")
-      .addEventListener("click", function () {
-        const previewContent = currentInputIsSdr
-          ? loadedFileText
-          : sdrResult || (exportController && exportController.getCachedSdr());
-
-        if (!previewContent) {
-          setStatus(
-            "No SDR preview available yet. Export SDR first from Export Points.",
-            "error",
-          );
-          return;
-        }
-
-        const lines = previewContent.split("\n").slice(0, 20).join("\n");
-        document.getElementById("sdrPreviewText").textContent = lines;
-        sdrPreviewWrap.style.display = "block";
-        sdrPreviewWrap.scrollIntoView({ behavior: "smooth" });
-      });
-
-    closePreviewBtn.addEventListener("click", function () {
-      sdrPreviewWrap.style.display = "none";
-    });
-
-    document.getElementById("clearBtn").addEventListener("click", function () {
-      if (pointsLayer) pointsLayer.clearLayers();
-      if (measureLayer) measureLayer.clearLayers();
-      lastBounds = null;
-      document.getElementById("pointsCount").textContent = "0";
-      sdrPreviewWrap.style.display = "none";
-      setStatus("Map cleared.", "ok");
-    });
-
-    exportBtn.addEventListener("click", function () {
-      if (!exportController) {
-        setStatus("Export module failed to load. Please refresh and try again.", "error");
-        return;
-      }
-      exportController.open();
-    });
-
-    convertSdrBtn.addEventListener("click", function () {
-      const file = document.getElementById("csvFile").files[0];
-      if (!file) {
-        setStatus("Please select an SDR file first.", "error");
-        return;
-      }
-      if (!loadedFileText) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          loadedFileText = String(e.target.result || "");
-          doSdrToCsvConversion();
-        };
-        reader.readAsText(file);
-      } else {
-        doSdrToCsvConversion();
-      }
-    });
-
-    function doSdrToCsvConversion() {
-      try {
-        csvFromSdr = convertSdrTextToCsv(loadedFileText);
-        if (!csvFromSdr.trim()) {
-          setStatus("No 08KI point lines found in this SDR.", "error");
-          return;
-        }
-        downloadCsvBtn.style.display = "inline-block";
-        setStatus("SDR converted to CSV successfully.", "ok");
-      } catch (err) {
-        setStatus("Conversion failed: " + err.message, "error");
-      }
-    }
-
-    downloadCsvBtn.addEventListener("click", function () {
-      if (!csvFromSdr) return;
-      downloadText(csvFromSdr, "output.csv", "text/csv");
-    });
-
-    function setStatus(msg, type) {
-      const div = document.getElementById("status-conv");
-      div.className = "";
-      div.style.display = "block";
-      div.setAttribute("aria-hidden", "false");
-      div.textContent = msg;
-      if (type === "loading") div.classList.add("st-loading");
-      else if (type === "error") div.classList.add("st-error");
-      else div.classList.add("st-ok");
-    }
-
-    function hideStatus() {
-      const div = document.getElementById("status-conv");
-      div.style.display = "none";
-      div.setAttribute("aria-hidden", "true");
-    }
-
-    function initMapIfNeeded() {
-      if (map) return;
-      map = L.map("map", {
-        crs: L.CRS.Simple,
-        minZoom: -10,
-        zoomSnap: 0.25,
-        zoomDelta: 0.25,
-        attributionControl: false,
-        zoomControl: true,
-      });
-      map.zoomControl.setPosition("topleft");
-      pointsLayer = L.layerGroup().addTo(map);
-      measureLayer = L.layerGroup().addTo(map);
-      addZoomExtentsControl();
-
-      map.on("click", function (e) {
-        if (!isMeasuring) return;
-        measurePoints.push(e.latlng);
-        L.circleMarker(e.latlng, { radius: 3, color: "red" }).addTo(
-          measureLayer,
-        );
-
-        if (measurePoints.length > 1) {
-          const p1 = measurePoints[measurePoints.length - 2];
-          const p2 = measurePoints[measurePoints.length - 1];
-          const dist = Math.sqrt(
-            Math.pow(p2.lat - p1.lat, 2) + Math.pow(p2.lng - p1.lng, 2),
-          );
-
-          L.polyline([p1, p2], {
-            color: "red",
-            weight: 2,
-            dashArray: "5, 5",
-          }).addTo(measureLayer);
-          L.marker([(p1.lat + p2.lat) / 2, (p1.lng + p2.lng) / 2], {
-            icon: L.divIcon({
-              className: "measure-label",
-              html: `<span style="background:white; border:1px solid red; padding:2px 4px; border-radius:4px; font-size:10px; color:red; font-weight:bold;">${dist.toFixed(2)}m</span>`,
-              iconSize: [40, 20],
-            }),
-          }).addTo(measureLayer);
-        }
-      });
-    }
-
-    function zoomExtents() {
-      if (!map || !lastBounds) return;
-      map.fitBounds(lastBounds.pad(0.1));
-    }
-
-    function addZoomExtentsControl() {
-      const ZoomExtControl = L.Control.extend({
-        options: { position: "topleft" },
-        onAdd: function () {
-          const container = L.DomUtil.create(
-            "div",
-            "leaflet-control leaflet-bar",
-          );
-          const a = L.DomUtil.create("a", "", container);
-          a.href = "#";
-          a.title = "Zoom Extents";
-          a.setAttribute("aria-label", "Zoom to extents");
-          a.innerHTML = "Fit";
-          a.style.display = "flex";
-          a.style.alignItems = "center";
-          a.style.justifyContent = "center";
-          a.style.width = "36px";
-          a.style.height = "36px";
-          L.DomEvent.disableClickPropagation(container);
-          L.DomEvent.on(a, "click", L.DomEvent.stop).on(
-            a,
-            "click",
-            zoomExtents,
-          );
-          return container;
-        },
-      });
-      map.addControl(new ZoomExtControl());
-    }
-
-    function run() {
-      const file = document.getElementById("csvFile").files[0];
-      if (!file) {
-        setStatus("Please choose a file first.", "error");
-        return;
-      }
-      const format = document.getElementById("coordFormat").value;
-      setStatus("Reading file...", "loading");
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        const content = String(ev.target.result || "");
-        initMapIfNeeded();
-        document.getElementById("mapWrap").style.display = "block";
-        document.getElementById("mapTools").style.display = "flex";
-        document.getElementById("metrics").style.display = "flex";
-        document.getElementById("exportBtn").style.display = "block";
-
-        loadedFileText = content;
-        currentInputIsSdr = content.includes("08KI");
-        sdrResult = null;
-        if (exportController && typeof exportController.resetCache === "function") {
-          exportController.resetCache();
-        }
-
-        if (currentInputIsSdr) {
-          sdrResult = content;
-          sdrNotice.style.display = "block";
-          const pts = parseSdrToPoints(content);
-          drawPoints(pts);
-          hideStatus();
-        } else {
-          sdrNotice.style.display = "none";
-          drawPointsFromCsv(normalizeLines(content), format);
-          setStatus("Map loaded. Use Export Points to download required formats.", "ok");
-        }
-        setTimeout(() => map.invalidateSize(), 100);
-      };
-      reader.readAsText(file);
-    }
-
-    function normalizeLines(text) {
-      return (text || "")
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n")
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
-
-    function drawPointsFromCsv(csvLines, format) {
-      pointsLayer.clearLayers();
-      lastBounds = null;
-      let minE = Infinity,
-        minN = Infinity,
-        maxE = -Infinity,
-        maxN = -Infinity,
-        plotted = 0;
-      const delim = detectDelimiter(csvLines[0] || "");
-      const startIndex = looksLikeHeader(csvLines[0] || "") ? 1 : 0;
-
-      for (let i = startIndex; i < csvLines.length; i++) {
-        const cols = splitDelimitedLine(csvLines[i], delim);
-        const P = (cols[0] ?? "").trim();
-        // Fixed: Handle column order correctly
-        // For format 'ENZ': cols[0]=ID, cols[1]=E, cols[2]=N
-        // For format 'NEZ': cols[0]=ID, cols[1]=N, cols[2]=E
-        let E = format === "NEZ" ? cols[2] : cols[1];
-        let N = format === "NEZ" ? cols[1] : cols[2];
-        const n = parseFloat(N),
-          e = parseFloat(E);
-        if (!isFinite(n) || !isFinite(e)) continue;
-
-        minE = Math.min(minE, e);
-        maxE = Math.max(maxE, e);
-        minN = Math.min(minN, n);
-        maxN = Math.max(maxN, n);
-
-        const marker = L.marker([n, e], { icon: pointAnchorIcon }).addTo(
-          pointsLayer,
-        );
-        if (P) {
-          marker.bindTooltip(buildPointTooltip(P), {
-            permanent: true,
-            direction: "top",
-            offset: [0, -6],
-            className: "pt-label",
-            opacity: 1,
-          });
-        }
-        plotted++;
-      }
-      document.getElementById("pointsCount").textContent = plotted;
-      if (plotted > 0) {
-        lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]);
-        map.fitBounds(lastBounds.pad(0.1));
-      }
-    }
-
-    function looksLikeHeader(line) {
-      return /point|pnt|name|id|north|east|level|code/i.test(line);
-    }
-    function detectDelimiter(line) {
-      const counts = { ",": 0, ";": 0, "\t": 0 };
-      for (let char of line) if (counts.hasOwnProperty(char)) counts[char]++;
-      return Object.keys(counts).reduce((a, b) =>
-        counts[a] > counts[b] ? a : b,
-      );
-    }
-    function splitDelimitedLine(line, delim) {
-      const res = [];
-      let cur = "",
-        inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') inQuotes = !inQuotes;
-        else if (!inQuotes && ch === delim) {
-          res.push(cur);
-          cur = "";
-        } else cur += ch;
-      }
-      res.push(cur);
-      return res;
-    }
-
-    function buildPointTooltip(pointName) {
-      return (
-        '<div class="pt-label-wrap"><div class="pt-label-num">' +
-        escapeHtml(pointName) +
-        '</div><span class="pt-pin" aria-hidden="true"></span></div>'
-      );
-    }
-
-    function parseSdrToPoints(sdrText) {
-      const lines = sdrText.replace(/\r/g, "").split("\n");
-      const pts = [];
-      for (const line of lines) {
-        if (!line.startsWith("08KI")) continue;
-        const p = line.slice(4, 20).trim(),
-          nS = line.slice(20, 36).trim(),
-          eS = line.slice(36, 52).trim();
-        const n = parseFloatSmart(nS),
-          e = parseFloatSmart(eS);
-        if (isFinite(n) && isFinite(e)) pts.push({ p, n, e });
-      }
-      return pts;
-    }
-
-    function drawPoints(points) {
-      pointsLayer.clearLayers();
-      lastBounds = null;
-      let minE = Infinity,
-        minN = Infinity,
-        maxE = -Infinity,
-        maxN = -Infinity;
-      for (const pt of points) {
-        minE = Math.min(minE, pt.e);
-        maxE = Math.max(maxE, pt.e);
-        minN = Math.min(minN, pt.n);
-        maxN = Math.max(maxN, pt.n);
-        const marker = L.marker([pt.n, pt.e], { icon: pointAnchorIcon }).addTo(
-          pointsLayer,
-        );
-        if (pt.p)
-          marker.bindTooltip(buildPointTooltip(pt.p), {
-            permanent: true,
-            direction: "top",
-            offset: [0, -6],
-            className: "pt-label",
-          });
-      }
-      document.getElementById("pointsCount").textContent = points.length;
-      if (points.length) {
-        lastBounds = L.latLngBounds([minN, minE], [maxN, maxE]);
-        map.fitBounds(lastBounds.pad(0.1));
-      }
-    }
-
-    function convertSdrTextToCsv(sdrText) {
-      const lines = sdrText.replace(/\r/g, "").split("\n");
-      const out = ["P,N,E,Z,Code"];
-      for (const line of lines) {
-        if (!line.startsWith("08KI")) continue;
-        out.push(
-          [
-            line.slice(4, 20).trim(),
-            line.slice(20, 36).trim(),
-            line.slice(36, 52).trim(),
-            line.slice(52, 68).trim(),
-            line.slice(68, 84).trim(),
-          ].join(","),
-        );
-      }
-      return out.join("\n") + "\n";
-    }
-
-    function parseFloatSmart(v) {
-      let s = String(v).replace(/\s+/g, "");
-      return s.includes(",") ? parseFloat(s.replace(/,/g, ".")) : parseFloat(s);
-    }
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    }
-    function downloadText(c, f, m) {
-      const b = new Blob([c], { type: m });
-      const u = URL.createObjectURL(b);
-      const a = document.createElement("a");
-      a.href = u;
-      a.download = f;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(u);
-    }
-  })();
-</script>
-
-<div class="standalone-footer" data-standalone-only="true" style="text-align: center; padding: 20px; margin-top: 40px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 14px;">
-  <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
-</div>
-</body>
+    <script src="./js/file-converter.js"></script>
+  </body>
 </html>
-
-

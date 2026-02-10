@@ -21,22 +21,64 @@
     return window.location.pathname.includes('/pages/') ? '..' : '.';
   }
 
+  // Resolve page path using the registry; falls back to legacy pattern.
   function resolvePagePath(page) {
     const key = (page || '').toLowerCase();
-    const routes = {
-      '': 'index.html',
-      'home': 'index.html',
-      'file-converter': 'pages/file-converter.html',
-      'dltm-converter': 'pages/dltm-converter.html',
-      'coordinate-transform': 'pages/coordinate-transform.html',
-      'area-calculator': 'pages/area-calculator.html'
-    };
-    const target = routes[key] || `pages/${key}.html`;
+    const home = 'index.html';
+    const registry = window.GeoToolsRegistry;
+    const hit = registry && typeof registry.getById === 'function' ? registry.getById(key) : null;
+    const target = key === '' || key === 'home'
+      ? home
+      : hit && hit.pagePath
+        ? hit.pagePath
+        : `pages/${key}.html`;
     return `${getBasePath()}/${target}`;
   }
 
   function resolveSharedPath(fileName) {
     return `${getBasePath()}/shared/${fileName}`;
+  }
+
+  // Retrieve ordered tools list from registry or fallback static.
+  function getToolsList() {
+    if (window.GeoToolsRegistry && typeof window.GeoToolsRegistry.list === 'function') {
+      return window.GeoToolsRegistry.list();
+    }
+    return [
+      { id: '', title: 'Home', pagePath: 'index.html' },
+      { id: 'file-converter', title: 'File Converter', pagePath: 'pages/file-converter.html' },
+      { id: 'coordinate-tools', title: 'Coordinate Tools', pagePath: 'pages/coordinate-tools.html' },
+      { id: 'area-calculator', title: 'Area Calculator', pagePath: 'pages/area-calculator.html' }
+    ];
+  }
+
+  /**
+   * Build navigation buttons for desktop or mobile container.
+   */
+  function buildMenuItems(container, isMobile) {
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Home first
+    const homeBtn = document.createElement('button');
+    homeBtn.className = 'btn-nav-unified';
+    homeBtn.type = 'button';
+    homeBtn.setAttribute('data-page', '');
+    homeBtn.setAttribute('aria-label', 'Home - Main dashboard');
+    if (isMobile) homeBtn.setAttribute('role', 'menuitem');
+    homeBtn.textContent = 'Home';
+    container.appendChild(homeBtn);
+
+    getToolsList().forEach((tool) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-nav-unified';
+      btn.type = 'button';
+      btn.setAttribute('data-page', tool.id);
+      btn.setAttribute('aria-label', `${tool.title} navigation`);
+      if (isMobile) btn.setAttribute('role', 'menuitem');
+      btn.textContent = tool.title;
+      container.appendChild(btn);
+    });
   }
 
   function navigateToPage(page) {
@@ -137,17 +179,10 @@
     mobileMenu.id = 'mobile-main-menu';
     mobileMenu.setAttribute('role', 'menu');
     mobileMenu.setAttribute('aria-label', 'Main navigation');
-    mobileMenu.innerHTML = `
-      <button class="btn-nav-unified" type="button" data-page="" aria-label="Home - Main dashboard" role="menuitem">Home</button>
-      <button class="btn-nav-unified" type="button" data-page="file-converter" aria-label="File Converter - Convert survey files" role="menuitem">File Converter</button>
-      <button class="btn-nav-unified" type="button" data-page="dltm-converter" aria-label="Dubai Converter - DLTM coordinate conversion" role="menuitem">Dubai Converter</button>
-      <button class="btn-nav-unified" type="button" data-page="coordinate-transform" aria-label="Coordinate Transformation - WGS84 and UTM conversion" role="menuitem">Coordinate Transformation</button>
-      <button class="btn-nav-unified" type="button" data-page="area-calculator" aria-label="Area Calculator - Calculate areas from coordinates" role="menuitem">Area Calculator</button>
-    `;
-
     overlay.appendChild(mobileMenu);
     document.body.appendChild(overlay);
 
+    buildMenuItems(mobileMenu, true);
     setupNavbarButtonHandlers();
   }
 
@@ -334,6 +369,8 @@
       if (logo) {
         logo.setAttribute('href', resolvePagePath(''));
       }
+
+      buildMenuItems(document.querySelector('.nav-links-unified'), false);
 
       setupNavbarButtonHandlers();
       if (typeof window.updatePageIndicator === 'function') {

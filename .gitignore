@@ -22,3 +22,8 @@ build/
 node_modules/
 venv/
 __pycache__/
+
+# Local-only admin generator
+docs/_admin-generator/
+# Backup snapshots (local only)
+docs/_backup/
