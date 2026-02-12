@@ -1,0 +1,32 @@
+[
+  {
+    "key": "epsg4326",
+    "label": "WGS84 (EPSG:4326)",
+    "type": "geographic",
+    "proj4": "EPSG:4326"
+  },
+  {
+    "key": "utm39n",
+    "label": "UTM Zone 39N (WGS84)",
+    "type": "projected",
+    "proj4": "+proj=utm +zone=39 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+  },
+  {
+    "key": "utm40n",
+    "label": "UTM Zone 40N (WGS84)",
+    "type": "projected",
+    "proj4": "+proj=utm +zone=40 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+  },
+  {
+    "key": "dltm",
+    "label": "Dubai Local Transverse Mercator (DLTM)",
+    "type": "projected",
+    "adapter": "dltm"
+  },
+  {
+    "key": "me-crs",
+    "label": "Middle East CRS (placeholder)",
+    "type": "projected",
+    "proj4": "+proj=tmerc +lat_0=0 +lon_0=44 +k=1 +x_0=500000 +y_0=0 +ellps=WGS84 +units=m +no_defs"
+  }
+]

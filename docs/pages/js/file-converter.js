@@ -67,29 +67,46 @@
   function init() {
     // Show manual color swatch.
     if (el.manualSwatch) el.manualSwatch.style.background = manualColor;
-    populateCrs();
+    if (window.GeoCRS && typeof window.GeoCRS.ready === "function") {
+      window.GeoCRS.ready()
+        .then(() => populateCrs(false))
+        .catch(() => populateCrs(false));
+    } else {
+      populateCrs(false);
+    }
     // Set default map mode to local
     state.mode = "local";
     bindEvents();
     initMap();
     updateMapModeButton();
     initExportController();
+
+    document.addEventListener("geocrs:updated", () => {
+      const previous = el.crsSelect ? el.crsSelect.value : "";
+      populateCrs(true, previous);
+    });
   }
 
   // Populate CRS dropdown from shared GeoCRS registry.
-  function populateCrs() {
+  function populateCrs(preserveSelection, previousValue) {
     if (!window.GeoCRS || typeof window.GeoCRS.list !== "function") {
       console.warn("GeoCRS registry missing; CRS list not populated.");
       return;
     }
     const list = window.GeoCRS.list();
+    const previous =
+      preserveSelection && previousValue !== undefined
+        ? previousValue
+        : preserveSelection && el.crsSelect
+          ? el.crsSelect.value
+          : "";
     el.crsSelect.innerHTML = "";
     // Add placeholder option
     const placeholder = document.createElement("option");
     placeholder.value = "";
     placeholder.textContent = "Please select a coordinate system";
     placeholder.disabled = true;
-    placeholder.selected = true;
+    placeholder.selected = !previous;
     el.crsSelect.appendChild(placeholder);
     list.forEach((crs) => {
       const opt = document.createElement("option");
@@ -97,8 +114,13 @@
       opt.textContent = crs.label;
       el.crsSelect.appendChild(opt);
     });
-    state.crs = "";
-    el.crsSelect.value = "";
+    if (previous && list.some((crs) => crs.key === previous)) {
+      el.crsSelect.value = previous;
+      state.crs = previous;
+    } else {
+      state.crs = "";
+      el.crsSelect.value = "";
+    }
   }
 
   // Wire up all event handlers with debouncing for manual input.

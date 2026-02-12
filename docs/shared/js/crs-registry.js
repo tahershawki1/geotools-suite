@@ -2,41 +2,97 @@
 (function () {
   if (!window) return;
 
-  // Internal CRS definitions; proj4 strings where applicable.
-  const defs = {
-    epsg4326: {
+  const DEFAULT_DEFS = [
+    {
       key: "epsg4326",
       label: "WGS84 (EPSG:4326)",
       proj4: "EPSG:4326",
       type: "geographic",
     },
-    utm39n: {
+    {
       key: "utm39n",
       label: "UTM Zone 39N (WGS84)",
       proj4: "+proj=utm +zone=39 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
       type: "projected",
     },
-    utm40n: {
+    {
       key: "utm40n",
       label: "UTM Zone 40N (WGS84)",
       proj4: "+proj=utm +zone=40 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
       type: "projected",
     },
-    dltm: {
+    {
       key: "dltm",
       label: "Dubai Local Transverse Mercator (DLTM)",
-      proj4: null, // handled via custom math below
+      proj4: null,
       type: "projected",
+      adapter: "dltm",
     },
-    "me-crs": {
+    {
       key: "me-crs",
       label: "Middle East CRS (placeholder)",
       proj4: "+proj=tmerc +lat_0=0 +lon_0=44 +k=1 +x_0=500000 +y_0=0 +ellps=WGS84 +units=m +no_defs",
       type: "projected",
     },
-  };
+  ];
 
-  // -------- DLTM core math (ported from existing tool) --------
+  const defs = {};
+  let readyPromise = null;
+
+  function normalizeKey(value) {
+    return String(value || "").toLowerCase().trim();
+  }
+
+  function seedDefaults() {
+    DEFAULT_DEFS.forEach((def) => {
+      if (!def || !def.key) return;
+      defs[normalizeKey(def.key)] = { ...def, key: normalizeKey(def.key) };
+    });
+  }
+
+  seedDefaults();
+
+  function resolveDataUrl() {
+    const base = document.currentScript?.src || location.href;
+    return new URL("../data/crs-defs.json", base).href;
+  }
+
+  async function loadJson(url, silent) {
+    try {
+      const res = await fetch(url, { cache: "no-cache" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("CRS JSON must be an array");
+      applyDefs(data);
+      return true;
+    } catch (err) {
+      if (!silent) console.warn("CRS registry load failed:", err);
+      return false;
+    }
+  }
+
+  function applyDefs(list) {
+    if (!Array.isArray(list)) return;
+    list.forEach((item) => {
+      if (!item || !item.key) return;
+      const key = normalizeKey(item.key);
+      defs[key] = {
+        key,
+        label: item.label || key,
+        type: item.type || "projected",
+        proj4: item.proj4 || null,
+        adapter: item.adapter || null,
+      };
+    });
+  }
+
+  function ensureProj4() {
+    if (!window.proj4) {
+      throw new Error("Proj4 is required but not loaded (vendor/proj4.js).");
+    }
+  }
+
+  // -------- DLTM adapter math --------
   const a = 6378137.0;
   const invF = 298.257223563;
   const f = 1 / invF;
@@ -162,11 +218,34 @@
     return { x: easting, y: northing };
   }
 
-  // -------- Utility helpers --------
-  function ensureProj4() {
-    if (!window.proj4) {
-      throw new Error("Proj4 is required but not loaded (vendor/proj4.js).");
+  const adapters = {
+    dltm: {
+      toWgs84(coord) {
+        const wgs = convertDLTMtoWGS84(coord.x, coord.y);
+        return { x: wgs.x, y: wgs.y };
+      },
+      fromWgs84(coord) {
+        const r = convertWGS84toDLTM(coord.y, coord.x);
+        return { x: r.x, y: r.y };
+      },
+    },
+  };
+
+  function convertWithProj4(from, to, coord) {
+    ensureProj4();
+    const fromDef = defs[from];
+    const toDef = defs[to];
+    if (!fromDef || !toDef || !fromDef.proj4 || !toDef.proj4) {
+      throw new Error("Unsupported proj4 conversion pair.");
     }
+    if (fromDef.proj4 && !proj4.defs(from)) {
+      proj4.defs(from, fromDef.proj4);
+    }
+    if (toDef.proj4 && !proj4.defs(to)) {
+      proj4.defs(to, toDef.proj4);
+    }
+    const res = proj4(fromDef.proj4, toDef.proj4, [coord.x, coord.y]);
+    return { x: res[0], y: res[1] };
   }
 
   function detectOrderFromDigits(row) {
@@ -219,50 +298,63 @@
     return point;
   }
 
-  function convertWithProj4(from, to, coord) {
-    ensureProj4();
-    const fromDef = defs[from];
-    const toDef = defs[to];
-    if (!fromDef || !toDef || !fromDef.proj4 || !toDef.proj4) {
-      throw new Error("Unsupported proj4 conversion pair.");
-    }
-    // Define dynamically to keep registry light.
-    if (fromDef.proj4 && !proj4.defs[from]) {
-      proj4.defs(from, fromDef.proj4);
-    }
-    if (toDef.proj4 && !proj4.defs[to]) {
-      proj4.defs(to, toDef.proj4);
-    }
-    const res = proj4(fromDef.proj4, toDef.proj4, [coord.x, coord.y]);
-    return { x: res[0], y: res[1] };
+  function dispatchUpdated() {
+    window.dispatchEvent(new CustomEvent("geocrs:updated"));
   }
 
-  // -------- Public API --------
+  async function initLoad() {
+    const ok = await loadJson(resolveDataUrl(), true);
+    if (!ok) seedDefaults();
+    dispatchUpdated();
+  }
+
+  readyPromise = initLoad();
+
   window.GeoCRS = {
+    ready() {
+      return readyPromise || Promise.resolve();
+    },
+    async reload() {
+      const url = resolveDataUrl() + "?v=" + Date.now();
+      await loadJson(url, false);
+      dispatchUpdated();
+    },
     list() {
       return Object.values(defs);
     },
     get(key) {
-      return defs[String(key || "").toLowerCase()] || null;
+      return defs[normalizeKey(key)] || null;
     },
     register(key, def) {
-      defs[String(key || "").toLowerCase()] = def;
+      defs[normalizeKey(key)] = { ...def, key: normalizeKey(key) };
+      dispatchUpdated();
     },
-    convert({ from, to, coord, options }) {
-      const src = String(from || "").toLowerCase();
-      const dst = String(to || "").toLowerCase();
+    convert({ from, to, coord }) {
+      const src = normalizeKey(from);
+      const dst = normalizeKey(to);
       if (src === dst) return { x: coord.x, y: coord.y };
 
-      if (src === "dltm" && dst === "epsg4326") {
-        const wgs = convertDLTMtoWGS84(coord.x, coord.y);
-        return { x: wgs.x, y: wgs.y, meta: { note: "DLTM → WGS84 (custom math)" } };
+      const srcDef = defs[src];
+      const dstDef = defs[dst];
+      if (!srcDef || !dstDef) throw new Error("Unknown CRS.");
+
+      const srcAdapter = srcDef.adapter && adapters[srcDef.adapter];
+      const dstAdapter = dstDef.adapter && adapters[dstDef.adapter];
+
+      if (srcAdapter && dst === "epsg4326") {
+        const res = srcAdapter.toWgs84(coord);
+        return { x: res.x, y: res.y, meta: { note: "adapter → WGS84" } };
       }
-      if (src === "epsg4326" && dst === "dltm") {
-        const r = convertWGS84toDLTM(coord.y, coord.x); // coord.x=lon coord.y=lat
-        return { x: r.x, y: r.y, meta: { note: "WGS84 → DLTM (custom math)" } };
+      if (dstAdapter && src === "epsg4326") {
+        const res = dstAdapter.fromWgs84(coord);
+        return { x: res.x, y: res.y, meta: { note: "WGS84 → adapter" } };
+      }
+      if (srcAdapter && dstAdapter) {
+        const wgs = srcAdapter.toWgs84(coord);
+        const res = dstAdapter.fromWgs84(wgs);
+        return { x: res.x, y: res.y, meta: { note: "adapter → adapter via WGS84" } };
       }
 
-      // Proj4 path for everything else.
       const result = convertWithProj4(src, dst, coord);
       return { x: result.x, y: result.y, meta: { note: "proj4" } };
     },

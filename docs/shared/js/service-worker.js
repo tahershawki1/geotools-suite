@@ -18,6 +18,7 @@ const urlsToCache = [
   '/docs/shared/css/footer.css',
   '/docs/shared/navbar.html',
   '/docs/shared/footer.html',
+  '/docs/shared/data/crs-defs.json',
   '/docs/pages/js/converter-export.js',
   '/docs/pages/js/file-converter.js',
   '/docs/pages/js/dltm-converter.js',
