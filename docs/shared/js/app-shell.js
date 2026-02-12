@@ -216,7 +216,7 @@
 
         parsed.querySelectorAll("link[rel~='stylesheet']").forEach((link) => {
           const href = link.getAttribute("href");
-          if (!href || isPersistentStyleHref(href)) return; // Skip globals
+          if (!href) return;
           styles.push({
             href: resolveHref(href),
             media: link.getAttribute("media") || "",
@@ -282,9 +282,6 @@
 
         styles.forEach((style) => {
           if (style.href) {
-            if (isPersistentStyleHref(style.href)) {
-              return; // persistent global already present
-            }
 
             const existing = Array.from(
               document.querySelectorAll("link[rel~='stylesheet']"),
