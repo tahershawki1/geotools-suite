@@ -81,7 +81,7 @@
     updateMapModeButton();
     initExportController();
 
-    document.addEventListener("geocrs:updated", () => {
+    window.addEventListener("geocrs:updated", () => {
       const previous = el.crsSelect ? el.crsSelect.value : "";
       populateCrs(true, previous);
     });

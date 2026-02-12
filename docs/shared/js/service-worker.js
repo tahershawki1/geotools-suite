@@ -30,6 +30,7 @@ const urlsToCache = [
   '/docs/shared/js/notification-system.js',
   '/docs/shared/js/app-shell.js',
   '/docs/shared/js/service-worker.js',
+  '/docs/shared/data/crs-defs.json',
   '/docs/service-worker.js',
   '/docs/vendor/leaflet/leaflet.css',
   '/docs/vendor/leaflet/leaflet.js',
