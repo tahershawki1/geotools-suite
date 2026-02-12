@@ -11,7 +11,6 @@
     "#2B9348", "#80B918", "#FFBE0B", "#5E60CE", "#4D908E",
   ];
 
-
   const manualColor = "#111827";
   const state = {
     map: null,
@@ -572,6 +571,16 @@
       .map((row) => {
         const parts = row.split(/[,,\s;]+/).filter(Boolean);
         let tokens = (order || "P,N,E,CODE").split(/[, ]+/).filter(Boolean);
+        // Fallback ذكي إذا كان هناك 3 أعمدة فقط ولم يتم التعرف على الترتيب
+        if (parts.length === 3 && (!tokens || tokens.length < 3 || tokens[0] !== "P")) {
+          // العمود الأول Point، الباقي أرقام
+          const val1 = parseFloat(parts[1]);
+          const val2 = parseFloat(parts[2]);
+          // الأكبر غالبًا Northing
+          let e = val1, n = val2;
+          if (val1 < val2) { e = val1; n = val2; } else { e = val2; n = val1; }
+          return { id: parts[0], e, n, z: null, code: null, raw: row, tokens: ["P","E","N"] };
+        }
         if (parts.length >= 5) {
           const codeIdx = tokens.findIndex((t) => t.trim().toUpperCase() === "CODE");
           const hasZ = tokens.some((t) => t.trim().toUpperCase() === "Z");
