@@ -1,24 +1,33 @@
 <link rel="stylesheet" href="./css/navbar.css" />
-<!-- Unified Navigation Bar -->
-<!-- Theme.js removed: No dark mode or theme switching -->
-
-
-<nav class="navbar-unified" role="navigation" aria-label="Main navigation">
-  <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
-    <span>🌐</span> GeoTools Suite
-  </a>
-
-  <div class="nav-links-container">
-    <button class="nav-scroll-arrow left" aria-label="Scroll left">‹</button>
-    <div class="nav-links-unified">
-      <button class="btn-nav-unified" data-page="" aria-label="Home - Main dashboard">Home</button>
-      <button class="btn-nav-unified" data-page="file-converter" aria-label="File Converter - Convert survey files">File Converter</button>
-      <button class="btn-nav-unified" data-page="dltm-converter" aria-label="Dubai Converter - DLTM coordinate conversion">Dubai Converter</button>
-      <button class="btn-nav-unified" data-page="coordinate-transform" aria-label="Coordinate Transformation - WGS84 and UTM conversion">Coordinate Transformation</button>
-      <button class="btn-nav-unified" data-page="area-calculator" aria-label="Area Calculator - Calculate areas from coordinates">Area Calculator</button>
-    </div>
-    <button class="nav-scroll-arrow right" aria-label="Scroll right">›</button>
+<!-- Unified App Shell (top header + left sidebar) -->
+<header class="navbar-unified" role="banner" aria-label="GeoTools top bar">
+  <div class="nav-brand-wrap">
+    <button class="hamburger-menu" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobile-main-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
+      <span class="nav-logo-mark" aria-hidden="true"></span>
+      <span class="nav-logo-text">GeoTools Cloud</span>
+    </a>
   </div>
-</nav>
 
+  <div class="nav-top-actions">
+    <button type="button" class="top-icon-btn" aria-label="Open app menu">
+      <span class="top-grid-icon" aria-hidden="true"></span>
+    </button>
+    <span class="top-user-name">Taher Shawki</span>
+    <button type="button" class="top-signout-btn">SIGN OUT</button>
+  </div>
+</header>
 
+<div class="shell-unified">
+  <aside class="sidebar-unified" id="mobile-main-menu" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-head">
+      <p class="sidebar-title">Workspace</p>
+      <p class="sidebar-subtitle">Pages</p>
+    </div>
+    <div class="nav-links-unified"></div>
+  </aside>
+  <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+  <section class="shell-main-slot" id="shell-main-slot"></section>
+</div>

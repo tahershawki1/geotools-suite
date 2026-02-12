@@ -1,5 +1,5 @@
 // Service Worker for GeoTools Suite
-const CACHE_NAME = 'geotools-v1';
+const CACHE_NAME = 'geotools-v9';
 const urlsToCache = [
   '/',
   '/docs/',

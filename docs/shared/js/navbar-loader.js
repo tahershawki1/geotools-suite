@@ -1,37 +1,40 @@
-// Load unified navbar in all pages
+// Load unified app shell (top header + sidebar) in SPA pages.
 (function loadUnifiedNavbar() {
+  const MOBILE_BREAKPOINT = 980;
   const state = window.__GeoToolsNavbar || {
-    mobileInit: false,
-    resizeBound: false,
     mobileEventsBound: false,
-    lastMobileState: null,
-    lastFocusedElement: null
+    resizeBound: false,
+    lastFocusedElement: null,
   };
   window.__GeoToolsNavbar = state;
 
   function navbarExists() {
-    return document.querySelector('.navbar-unified') !== null;
+    return document.querySelector(".navbar-unified") !== null;
   }
 
   function isMobileViewport() {
-    return window.innerWidth <= 480;
+    return window.innerWidth <= MOBILE_BREAKPOINT;
   }
 
   function getBasePath() {
-    return window.location.pathname.includes('/pages/') ? '..' : '.';
+    const path = window.location.pathname || "";
+    if (path.includes("/pages/") || path.includes("/_admin-generator/")) {
+      return "..";
+    }
+    return ".";
   }
 
-  // Resolve page path using the registry; falls back to legacy pattern.
   function resolvePagePath(page) {
-    const key = (page || '').toLowerCase();
-    const home = 'index.html';
+    const key = String(page || "").toLowerCase();
+    const home = "index.html";
     const registry = window.GeoToolsRegistry;
-    const hit = registry && typeof registry.getById === 'function' ? registry.getById(key) : null;
-    const target = key === '' || key === 'home'
-      ? home
-      : hit && hit.pagePath
-        ? hit.pagePath
-        : `pages/${key}.html`;
+    const hit = registry && typeof registry.getById === "function" ? registry.getById(key) : null;
+    const target =
+      key === "" || key === "home"
+        ? home
+        : hit && hit.pagePath
+          ? hit.pagePath
+          : `pages/${key}.html`;
     return `${getBasePath()}/${target}`;
   }
 
@@ -39,325 +42,215 @@
     return `${getBasePath()}/shared/${fileName}`;
   }
 
-  // Retrieve ordered tools list from registry or fallback static.
   function getToolsList() {
-    if (window.GeoToolsRegistry && typeof window.GeoToolsRegistry.list === 'function') {
+    if (window.GeoToolsRegistry && typeof window.GeoToolsRegistry.list === "function") {
       return window.GeoToolsRegistry.list();
     }
     return [
-      { id: '', title: 'Home', pagePath: 'index.html' },
-      { id: 'file-converter', title: 'File Converter', pagePath: 'pages/file-converter.html' },
-      { id: 'coordinate-tools', title: 'Coordinate Tools', pagePath: 'pages/coordinate-tools.html' },
-      { id: 'area-calculator', title: 'Area Calculator', pagePath: 'pages/area-calculator.html' }
+      { id: "file-converter", title: "File Converter", pagePath: "pages/file-converter.html" },
+      { id: "coordinate-tools", title: "Coordinate Tools", pagePath: "pages/coordinate-tools.html" },
+      { id: "dltm-converter", title: "DLTM Converter", pagePath: "pages/dltm-converter.html" },
+      { id: "coordinate-transform", title: "Coordinate Transform", pagePath: "pages/coordinate-transform.html" },
+      { id: "area-calculator", title: "Area Calculator", pagePath: "pages/area-calculator.html" },
     ];
   }
 
-  /**
-   * Build navigation buttons for desktop or mobile container.
-   */
+  function normalizePageName(value) {
+    if (!value || value === "index" || value === "/") return "home";
+    return String(value).toLowerCase();
+  }
+
+  function iconForPage(id) {
+    const key = normalizePageName(id);
+    if (key === "home") return "HM";
+    if (key === "file-converter") return "FC";
+    if (key === "coordinate-tools") return "CT";
+    if (key === "dltm-converter") return "DL";
+    if (key === "coordinate-transform") return "TR";
+    if (key === "area-calculator") return "AR";
+    return "PG";
+  }
+
+  function createNavButton(item, isMobile) {
+    const btn = document.createElement("button");
+    btn.className = "btn-nav-unified";
+    btn.type = "button";
+    btn.setAttribute("data-page", item.id || "");
+    btn.setAttribute("aria-label", `${item.title} navigation`);
+    if (isMobile) btn.setAttribute("role", "menuitem");
+
+    const icon = document.createElement("span");
+    icon.className = "nav-item-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = iconForPage(item.id);
+
+    const label = document.createElement("span");
+    label.className = "nav-item-label";
+    label.textContent = item.title;
+
+    btn.appendChild(icon);
+    btn.appendChild(label);
+    return btn;
+  }
+
   function buildMenuItems(container, isMobile) {
     if (!container) return;
-    container.innerHTML = '';
+    container.innerHTML = "";
 
-    // Home first
-    const homeBtn = document.createElement('button');
-    homeBtn.className = 'btn-nav-unified';
-    homeBtn.type = 'button';
-    homeBtn.setAttribute('data-page', '');
-    homeBtn.setAttribute('aria-label', 'Home - Main dashboard');
-    if (isMobile) homeBtn.setAttribute('role', 'menuitem');
-    homeBtn.textContent = 'Home';
-    container.appendChild(homeBtn);
+    const homeItem = { id: "", title: "Maps" };
+    container.appendChild(createNavButton(homeItem, isMobile));
 
-    getToolsList().forEach((tool) => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-nav-unified';
-      btn.type = 'button';
-      btn.setAttribute('data-page', tool.id);
-      btn.setAttribute('aria-label', `${tool.title} navigation`);
-      if (isMobile) btn.setAttribute('role', 'menuitem');
-      btn.textContent = tool.title;
-      container.appendChild(btn);
-    });
+    getToolsList()
+      .filter((tool) => normalizePageName(tool.id) !== "home")
+      .forEach((tool) => {
+        container.appendChild(createNavButton(tool, isMobile));
+      });
+  }
+
+  function openSidebar() {
+    document.body.classList.add("sidebar-open");
+    const hamburger = document.querySelector(".hamburger-menu");
+    if (hamburger) {
+      hamburger.classList.add("active");
+      hamburger.setAttribute("aria-expanded", "true");
+    }
+  }
+
+  function closeSidebar(restoreFocus) {
+    document.body.classList.remove("sidebar-open");
+    const hamburger = document.querySelector(".hamburger-menu");
+    if (hamburger) {
+      hamburger.classList.remove("active");
+      hamburger.setAttribute("aria-expanded", "false");
+      if (restoreFocus && state.lastFocusedElement && state.lastFocusedElement.focus) {
+        state.lastFocusedElement.focus();
+      }
+    }
   }
 
   function navigateToPage(page) {
-    if (typeof window.loadPage === 'function') {
-      const result = window.loadPage(page || '');
-      if (result && typeof result.then === 'function') {
+    if (typeof window.loadPage === "function") {
+      const result = window.loadPage(page || "");
+      if (result && typeof result.then === "function") {
         result.finally(() => {
-          if (typeof window.updatePageIndicator === 'function') {
-            window.updatePageIndicator(page || 'home');
+          if (typeof window.updatePageIndicator === "function") {
+            window.updatePageIndicator(page || "home");
           }
         });
-      } else if (typeof window.updatePageIndicator === 'function') {
-        window.updatePageIndicator(page || 'home');
+      } else if (typeof window.updatePageIndicator === "function") {
+        window.updatePageIndicator(page || "home");
       }
       return;
     }
-
-    window.location.href = resolvePagePath(page || '');
+    window.location.href = resolvePagePath(page || "");
   }
 
   function setupNavbarButtonHandlers() {
-    const buttons = document.querySelectorAll('.btn-nav-unified:not([data-nav-bound="true"])');
+    const buttons = document.querySelectorAll(".btn-nav-unified:not([data-nav-bound='true'])");
     buttons.forEach((btn) => {
-      btn.dataset.navBound = 'true';
-      btn.addEventListener('click', function () {
-        const page = this.getAttribute('data-page') || '';
-        const isMobileItem = this.closest('.mobile-menu');
-
+      btn.dataset.navBound = "true";
+      btn.addEventListener("click", function () {
+        const page = this.getAttribute("data-page") || "";
+        const shouldClose = isMobileViewport();
         navigateToPage(page);
-        if (isMobileItem) {
-          closeMobileMenu(true);
+        if (shouldClose) {
+          closeSidebar(false);
         }
       });
     });
   }
 
-  function normalizePageName(value) {
-    if (!value || value === 'index') return 'home';
-    return String(value).toLowerCase();
-  }
-
   window.updatePageIndicator = function (activePage) {
-    const navButtons = document.querySelectorAll('.btn-nav-unified');
-    const currentFromPath = window.location.pathname.split('/').pop().replace('.html', '');
+    const navButtons = document.querySelectorAll(".btn-nav-unified");
+    const currentFromPath = window.location.pathname.split("/").pop().replace(".html", "");
     const currentPage = normalizePageName(activePage || currentFromPath);
 
     navButtons.forEach((btn) => {
-      btn.removeAttribute('aria-current');
-      btn.style.borderBottom = 'none';
-      btn.style.color = '';
-    });
-
-    navButtons.forEach((btn) => {
-      const btnPage = normalizePageName(btn.getAttribute('data-page'));
-      if (btnPage !== currentPage) return;
-      btn.setAttribute('aria-current', 'page');
-      btn.style.borderBottom = '3px solid var(--primary, #4f46e5)';
-      btn.style.color = 'var(--primary, #4f46e5)';
+      const btnPage = normalizePageName(btn.getAttribute("data-page"));
+      if (btnPage === currentPage) {
+        btn.setAttribute("aria-current", "page");
+      } else {
+        btn.removeAttribute("aria-current");
+      }
     });
   };
 
-  function createHamburgerMenu() {
-    const navbar = document.querySelector('.navbar-unified');
-    if (!navbar) return;
-
-    if (!isMobileViewport()) {
-      const existing = document.querySelector('.hamburger-menu');
-      if (existing) existing.remove();
-      return;
+  function mountShellContent() {
+    const slot = document.getElementById("shell-main-slot");
+    const appContainer = document.getElementById("app-container");
+    const legalLine = document.querySelector(".legal-line");
+    if (slot && appContainer && appContainer.parentElement !== slot) {
+      slot.appendChild(appContainer);
     }
-
-    if (document.querySelector('.hamburger-menu')) return;
-
-    const hamburger = document.createElement('button');
-    hamburger.className = 'hamburger-menu';
-    hamburger.type = 'button';
-    hamburger.setAttribute('aria-label', 'Toggle navigation menu');
-    hamburger.setAttribute('aria-expanded', 'false');
-    hamburger.setAttribute('aria-controls', 'mobile-main-menu');
-    hamburger.innerHTML = '<span></span><span></span><span></span>';
-    navbar.appendChild(hamburger);
-  }
-
-  function createMobileMenu() {
-    if (!isMobileViewport()) {
-      const existing = document.querySelector('.mobile-menu-overlay');
-      if (existing) existing.remove();
-      return;
+    if (slot && legalLine && legalLine.parentElement !== slot) {
+      slot.appendChild(legalLine);
     }
-
-    if (document.querySelector('.mobile-menu-overlay')) return;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'mobile-menu-overlay';
-
-    const mobileMenu = document.createElement('div');
-    mobileMenu.className = 'mobile-menu';
-    mobileMenu.id = 'mobile-main-menu';
-    mobileMenu.setAttribute('role', 'menu');
-    mobileMenu.setAttribute('aria-label', 'Main navigation');
-    overlay.appendChild(mobileMenu);
-    document.body.appendChild(overlay);
-
-    buildMenuItems(mobileMenu, true);
-    setupNavbarButtonHandlers();
+    document.body.classList.add("shell-mounted");
   }
 
-  function openMobileMenu() {
-    const hamburger = document.querySelector('.hamburger-menu');
-    const overlay = document.querySelector('.mobile-menu-overlay');
-    const menu = document.querySelector('.mobile-menu');
-    if (!hamburger || !overlay || !menu) return;
-
-    state.lastFocusedElement = document.activeElement;
-    hamburger.classList.add('active');
-    hamburger.setAttribute('aria-expanded', 'true');
-    overlay.classList.add('active');
-    menu.classList.add('active');
-
-    const firstMenuItem = menu.querySelector('.btn-nav-unified');
-    if (firstMenuItem) firstMenuItem.focus();
-  }
-
-  function closeMobileMenu(restoreFocus) {
-    const hamburger = document.querySelector('.hamburger-menu');
-    const overlay = document.querySelector('.mobile-menu-overlay');
-    const menu = document.querySelector('.mobile-menu');
-    if (!hamburger || !overlay || !menu) return;
-
-    hamburger.classList.remove('active');
-    hamburger.setAttribute('aria-expanded', 'false');
-    overlay.classList.remove('active');
-    menu.classList.remove('active');
-
-    if (restoreFocus && state.lastFocusedElement && state.lastFocusedElement.focus) {
-      state.lastFocusedElement.focus();
-    }
-  }
-
-  function isMobileMenuOpen() {
-    const overlay = document.querySelector('.mobile-menu-overlay');
-    return !!(overlay && overlay.classList.contains('active'));
-  }
-
-  function trapFocusInsideMobileMenu(e) {
-    if (!isMobileMenuOpen() || e.key !== 'Tab') return;
-
-    const menu = document.querySelector('.mobile-menu');
-    if (!menu) return;
-    const focusable = Array.from(menu.querySelectorAll('.btn-nav-unified'));
-    if (focusable.length === 0) return;
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-      return;
-    }
-    if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  }
-
-  function bindMobileMenuEventsOnce() {
+  function bindMobileEventsOnce() {
     if (state.mobileEventsBound) return;
     state.mobileEventsBound = true;
 
-    document.addEventListener('click', (e) => {
-      const hamburger = document.querySelector('.hamburger-menu');
-      const overlay = document.querySelector('.mobile-menu-overlay');
-      if (!hamburger || !overlay) return;
-
-      if (e.target.closest('.hamburger-menu')) {
+    document.addEventListener("click", (e) => {
+      const hamburger = document.querySelector(".hamburger-menu");
+      const backdrop = document.querySelector("[data-sidebar-backdrop]");
+      if (hamburger && e.target.closest(".hamburger-menu")) {
         e.preventDefault();
-        if (isMobileMenuOpen()) closeMobileMenu(false);
-        else openMobileMenu();
+        state.lastFocusedElement = document.activeElement;
+        if (document.body.classList.contains("sidebar-open")) {
+          closeSidebar(false);
+        } else {
+          openSidebar();
+        }
         return;
       }
-
-      if (e.target === overlay) {
-        closeMobileMenu(true);
+      if (backdrop && e.target === backdrop) {
+        closeSidebar(true);
       }
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (!isMobileMenuOpen()) return;
-      if (e.key === 'Escape') {
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("sidebar-open")) {
         e.preventDefault();
-        closeMobileMenu(true);
-        return;
+        closeSidebar(true);
       }
-      trapFocusInsideMobileMenu(e);
     });
   }
 
-  function setupScrollArrows() {
-    const leftArrow = document.querySelector('.nav-scroll-arrow.left');
-    const rightArrow = document.querySelector('.nav-scroll-arrow.right');
-    const navLinks = document.querySelector('.nav-links-unified');
-    const navContainer = document.querySelector('.nav-links-container');
-    if (!leftArrow || !rightArrow || !navLinks || !navContainer) return;
-    if (navContainer.dataset.scrollBound === 'true') return;
-
-    function updateArrows() {
-      const scrollLeft = navLinks.scrollLeft;
-      const scrollWidth = navLinks.scrollWidth;
-      const clientWidth = navLinks.clientWidth;
-      const needsScroll = scrollWidth > clientWidth;
-
-      if (!needsScroll) {
-        navContainer.classList.remove('has-scroll');
-        return;
-      }
-
-      navContainer.classList.add('has-scroll');
-      leftArrow.style.opacity = scrollLeft > 0 ? '1' : '0.3';
-      rightArrow.style.opacity = scrollLeft < scrollWidth - clientWidth - 1 ? '1' : '0.3';
-    }
-
-    navContainer.dataset.scrollBound = 'true';
-    leftArrow.addEventListener('click', () => {
-      navLinks.scrollBy({ left: -120, behavior: 'smooth' });
-    });
-    rightArrow.addEventListener('click', () => {
-      navLinks.scrollBy({ left: 120, behavior: 'smooth' });
-    });
-    navLinks.addEventListener('scroll', updateArrows);
-    window.addEventListener('resize', updateArrows);
-    updateArrows();
-  }
-
-  function syncMobileMenu() {
-    createHamburgerMenu();
-    createMobileMenu();
-    setupNavbarButtonHandlers();
-
+  function syncViewportMode() {
     if (!isMobileViewport()) {
-      closeMobileMenu(false);
+      closeSidebar(false);
     }
-
-    state.lastMobileState = isMobileViewport();
   }
 
-  function setupMobileMenu() {
-    if (!state.mobileInit) {
-      state.mobileInit = true;
-      bindMobileMenuEventsOnce();
-      setupScrollArrows();
+  function ensureShellReady() {
+    buildMenuItems(document.querySelector(".nav-links-unified"), false);
+    setupNavbarButtonHandlers();
+    mountShellContent();
+    if (typeof window.updatePageIndicator === "function") {
+      window.updatePageIndicator("home");
     }
-
-    syncMobileMenu();
-
-    if (!state.resizeBound) {
-      state.resizeBound = true;
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(syncMobileMenu, 120);
-      });
-    }
+    bindMobileEventsOnce();
+    syncViewportMode();
   }
 
   async function loadNavbar() {
-    if (navbarExists()) return;
+    if (navbarExists()) {
+      ensureShellReady();
+      return;
+    }
 
     try {
-      const response = await fetch(resolveSharedPath('navbar.html'));
+      const response = await fetch(resolveSharedPath("navbar.html"));
       const navbarHTML = await response.text();
-      const tempDiv = document.createElement('div');
+      const tempDiv = document.createElement("div");
       tempDiv.innerHTML = navbarHTML;
 
-      // Fix stylesheet path so it works from both / and /pages/.
-      const cssLink = tempDiv.querySelector('link[rel~="stylesheet"]');
+      const cssLink = tempDiv.querySelector("link[rel~='stylesheet']");
       if (cssLink) {
-        cssLink.href = resolveSharedPath('css/navbar.css');
-        cssLink.dataset.navbarStyle = 'true';
+        cssLink.href = resolveSharedPath("css/navbar.css");
+        cssLink.dataset.navbarStyle = "true";
       }
 
       const bodyTop = document.body.firstChild;
@@ -365,28 +258,31 @@
         document.body.insertBefore(tempDiv.firstChild, bodyTop);
       }
 
-      const logo = document.querySelector('.nav-logo-unified');
+      const logo = document.querySelector(".nav-logo-unified");
       if (logo) {
-        logo.setAttribute('href', resolvePagePath(''));
+        logo.setAttribute("href", resolvePagePath(""));
       }
 
-      buildMenuItems(document.querySelector('.nav-links-unified'), false);
+      ensureShellReady();
 
-      setupNavbarButtonHandlers();
-      if (typeof window.updatePageIndicator === 'function') {
-        window.updatePageIndicator();
+      if (!state.resizeBound) {
+        state.resizeBound = true;
+        let resizeTimer;
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(syncViewportMode, 120);
+        });
       }
-      setupMobileMenu();
     } catch (error) {
-      console.warn('Failed to load navbar:', error);
+      console.warn("Failed to load navbar:", error);
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!navbarExists()) loadNavbar();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      loadNavbar();
     });
-  } else if (!navbarExists()) {
+  } else {
     loadNavbar();
   }
 })();

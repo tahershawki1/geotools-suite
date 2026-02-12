@@ -3,6 +3,7 @@
       const appContainer = document.getElementById("app-container");
       const contentDiv = document.getElementById("view-content");
       const loaderElement = document.getElementById("loader");
+      const loaderText = document.getElementById("loader-text");
       const defaultMeta = {
         lang: document.documentElement.lang || "en",
         dir: document.documentElement.dir || "ltr",
@@ -12,11 +13,24 @@
       let dashboardHtml = "";
       let leafletObserver = null;
       let autoFieldCounter = 0;
+      let loaderFailSafeTimer = null;
+      let loaderHideTimer = null;
+      let navigationRunId = 0;
+      let loaderState = {
+        session: 0,
+        visible: false,
+        pending: false,
+      };
+
+      const LOADER_HIDE_DELAY_MS = 2000;
+      const LOADER_HIDE_ANIM_MS = 180;
+      const LOADER_FAILSAFE_MS = 20000;
 
       // Attribute flags for page-injected assets (removed on navigation)
       const PAGE_STYLE_ATTR = "data-spa";
       const PAGE_STYLE_VALUE = "page-style";
       const PAGE_SCRIPT_VALUE = "page-script";
+      const LEGACY_PAGE_LOADER_SELECTOR = "#page-loader";
 
       // Persistent assets stay across navigations; normalized lowercase for comparison.
       const persistentStyles = new Set();
@@ -76,10 +90,159 @@
         }
       }
 
-      function showLoader(show) {
-        loaderElement.style.display = show ? "flex" : "none";
-        loaderElement.setAttribute("aria-hidden", show ? "false" : "true");
-        contentDiv.setAttribute("aria-busy", show ? "true" : "false");
+      function clearLegacyPageLoaders(scope) {
+        const root = scope && typeof scope.querySelectorAll === "function" ? scope : document;
+        root.querySelectorAll(LEGACY_PAGE_LOADER_SELECTOR).forEach((node) => node.remove());
+      }
+
+      function clearLoaderTimers() {
+        if (loaderFailSafeTimer) {
+          clearTimeout(loaderFailSafeTimer);
+          loaderFailSafeTimer = null;
+        }
+        if (loaderHideTimer) {
+          clearTimeout(loaderHideTimer);
+          loaderHideTimer = null;
+        }
+      }
+
+      function revealLoader(session) {
+        if (session !== loaderState.session || !loaderState.pending || loaderState.visible) return;
+        loaderState.visible = true;
+        if (!loaderElement) return;
+        loaderElement.style.display = "flex";
+        loaderElement.setAttribute("aria-hidden", "false");
+        requestAnimationFrame(() => {
+          if (session !== loaderState.session || !loaderState.visible) return;
+          loaderElement.classList.add("is-visible");
+        });
+      }
+
+      function resolveLoaderLabel(pageName) {
+        const key = String(pageName || "").toLowerCase();
+        if (!key || key === "home") return "Welcome. Preparing your workspace...";
+        const registry = window.GeoToolsRegistry;
+        const entry = registry && typeof registry.getById === "function" ? registry.getById(key) : null;
+        return entry && entry.title
+          ? `Welcome back. Loading ${entry.title}...`
+          : "Welcome back. Loading your page...";
+      }
+
+      function showLoader(show, options) {
+        const opts = options || {};
+        const navigation = Boolean(opts.navigation);
+
+        if (show) {
+          clearLoaderTimers();
+          const currentlyVisible = !!(loaderElement && loaderElement.classList.contains("is-visible"));
+          loaderState = {
+            session: loaderState.session + 1,
+            visible: currentlyVisible,
+            pending: true,
+          };
+
+          if (loaderText) {
+            loaderText.textContent = String(opts.label || "Welcome. Preparing your workspace...");
+          }
+
+          if (contentDiv) {
+            contentDiv.setAttribute("aria-busy", "true");
+          }
+
+          if (navigation) {
+            const session = loaderState.session;
+            loaderFailSafeTimer = setTimeout(() => {
+              if (session !== loaderState.session || !loaderState.visible) return;
+              console.warn("Loader fail-safe triggered; forcing loader hide.");
+              showLoader(false, { session, force: true });
+              appContainer.style.opacity = "1";
+              notifyLoadError("Page load timed out. Please try again.");
+            }, LOADER_FAILSAFE_MS);
+          }
+
+          const session = loaderState.session;
+          if (!loaderState.visible) {
+            revealLoader(session);
+          }
+          return;
+        }
+
+        if (!loaderState.visible && !loaderState.pending) {
+          if (loaderElement) {
+            loaderElement.classList.remove("is-visible");
+            loaderElement.style.display = "none";
+            loaderElement.setAttribute("aria-hidden", "true");
+          }
+          if (contentDiv) {
+            contentDiv.setAttribute("aria-busy", "false");
+          }
+          return;
+        }
+
+        const session = loaderState.session;
+        if (opts.session && Number(opts.session) !== session) {
+          return;
+        }
+
+        clearLoaderTimers();
+        loaderState.pending = false;
+
+        if (!loaderState.visible) {
+          if (contentDiv) {
+            contentDiv.setAttribute("aria-busy", "false");
+          }
+          if (loaderElement) {
+            loaderElement.classList.remove("is-visible");
+            loaderElement.style.display = "none";
+            loaderElement.setAttribute("aria-hidden", "true");
+          }
+          if (loaderText) {
+            loaderText.textContent = "Welcome. Preparing your workspace...";
+          }
+          return;
+        }
+
+        if (!opts.force) {
+          loaderHideTimer = setTimeout(() => {
+            showLoader(false, { session, force: true });
+          }, LOADER_HIDE_DELAY_MS);
+          return;
+        }
+
+        loaderState.visible = false;
+
+        if (contentDiv) {
+          contentDiv.setAttribute("aria-busy", "false");
+        }
+        if (loaderElement) {
+          loaderElement.classList.remove("is-visible");
+          loaderElement.setAttribute("aria-hidden", "true");
+          loaderHideTimer = setTimeout(() => {
+            if (session !== loaderState.session || loaderState.visible || loaderState.pending) return;
+            loaderElement.style.display = "none";
+          }, LOADER_HIDE_ANIM_MS);
+        }
+        if (loaderText) {
+          loaderText.textContent = "Welcome. Preparing your workspace...";
+        }
+      }
+
+      let initialLoadPending = false;
+      let initialLoaderSession = 0;
+
+      // Show loader on first site entry (home) immediately.
+      if (contentDiv && contentDiv.classList.contains("dashboard-view")) {
+        initialLoadPending = true;
+        showLoader(true, { navigation: true, label: resolveLoaderLabel("home") });
+        initialLoaderSession = loaderState.session;
+        appContainer.style.opacity = "0.5";
+      }
+
+      function completeInitialLoad() {
+        if (!initialLoadPending) return;
+        initialLoadPending = false;
+        appContainer.style.opacity = "1";
+        showLoader(false, { session: initialLoaderSession });
       }
 
       // Resolve page URL using GeoToolsRegistry as the single source of truth.
@@ -225,6 +388,9 @@
 
         parsed.querySelectorAll("style").forEach((styleEl) => {
           const text = styleEl.textContent || "";
+          if (/#page-loader|spin-loader/.test(text)) {
+            return;
+          }
           if (text.trim()) {
             styles.push({ inline: text });
           }
@@ -236,6 +402,7 @@
             if (el.tagName === "SCRIPT" || el.tagName === "LINK" || el.tagName === "STYLE") return;
             if (el.tagName === "FOOTER") return; // Skip any embedded footers to keep single legal line
             if (el.matches(".standalone-footer,[data-standalone-only='true']")) return;
+            if (el.matches(LEGACY_PAGE_LOADER_SELECTOR)) return;
             nodes.push(el.outerHTML);
             return;
           }
@@ -401,6 +568,7 @@
 
       function finishNavigation(activePage, meta) {
         setDocumentMeta(meta || defaultMeta);
+        clearLegacyPageLoaders(document);
         ensureLabelAssociations(contentDiv);
         enhanceLeafletAccessibility(contentDiv);
 
@@ -424,37 +592,46 @@
       }
 
       window.loadPage = async function loadPage(pageName) {
+        clearLegacyPageLoaders(document);
+        const runId = ++navigationRunId;
         const normalizedPage = String(pageName || "").toLowerCase();
+        showLoader(true, { navigation: true, label: resolveLoaderLabel(normalizedPage) });
+        appContainer.style.opacity = "0.5";
+        removeMapArtifacts();
+
         if (!normalizedPage || normalizedPage === "home") {
           clearPageScripts();
           clearPageStyles();
           contentDiv.innerHTML = dashboardHtml;
+          if (runId !== navigationRunId) return;
           finishNavigation("home", defaultMeta);
           return;
         }
 
-        removeMapArtifacts();
-        showLoader(true);
-        appContainer.style.opacity = "0.5";
-
         try {
           const url = resolvePageUrl(normalizedPage);
           const res = await fetch(url, { cache: "no-cache" });
+          if (runId !== navigationRunId) return;
           if (!res.ok) {
             throw new Error("Failed to load " + url + " (HTTP " + res.status + ")");
           }
 
           const html = await res.text();
+          if (runId !== navigationRunId) return;
           const absoluteUrl = new URL(url, location.href).href;
           const parsed = parsePage(html, absoluteUrl);
 
           contentDiv.innerHTML = "";
           await new Promise((resolve) => setTimeout(resolve, 10));
+          if (runId !== navigationRunId) return;
           contentDiv.innerHTML = parsed.contentHtml;
           await applyPageStyles(parsed.styles);
+          if (runId !== navigationRunId) return;
           await runPageScripts(parsed.scripts, absoluteUrl);
+          if (runId !== navigationRunId) return;
           finishNavigation(normalizedPage, parsed.meta);
         } catch (err) {
+          if (runId !== navigationRunId) return;
           notifyLoadError("Error loading page: " + err.message);
           console.error("Page load error:", err);
           appContainer.style.opacity = "1";
@@ -470,6 +647,13 @@
         if (typeof window.updatePageIndicator === "function") {
           window.updatePageIndicator("home");
         }
-        
+
+        if (initialLoadPending) {
+          if (document.readyState === "complete") {
+            completeInitialLoad();
+          } else {
+            window.addEventListener("load", completeInitialLoad, { once: true });
+          }
+        }
       });
     

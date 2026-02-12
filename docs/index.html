@@ -37,14 +37,21 @@
       aria-label="Loading page content"
     >
       <div class="loader-content">
-        <div class="spinner"></div>
-        <div class="loader-text">Loading...</div>
+        <div class="loader-spinner" aria-hidden="true"></div>
+        <div class="loader-title">Welcome to GeoTools Suite</div>
+        <div id="loader-text" class="loader-text">Preparing your workspace...</div>
       </div>
     </div>
 
     <div id="app-container">
       <main id="view-content" class="dashboard-view" tabindex="-1" aria-busy="false">
         <div class="header">
+          <div class="welcome-banner" role="note" aria-label="Welcome message">
+            <span class="welcome-badge">Welcome</span>
+            <p class="welcome-copy">
+              Welcome to GeoTools Suite. Your professional geospatial workspace is ready.
+            </p>
+          </div>
           <h1>GeoTools Survey Suite</h1>
           <p>Choose the service you want to use today</p>
         </div>
