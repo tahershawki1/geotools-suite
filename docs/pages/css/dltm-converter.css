@@ -1,4 +1,4 @@
-  .container-dltm {
+﻿  .container-dltm {
     max-width: 900px;
     width: 100%;
     margin: 0 auto;
@@ -314,7 +314,7 @@
     height: 100% !important;
   }
 
-  /* تحسين الماركر والنقاط */
+  /* Improve marker and points */
   .leaflet-marker-icon {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
   }
@@ -323,7 +323,7 @@
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
   }
 
-  /* تحسين أدوات الخريطة */
+  /* Improve map controls */
   .leaflet-control {
     background: #fff !important;
     border-radius: 8px;
@@ -353,3 +353,4 @@
     background: #fff;
     border: 1px solid #ccc;
   }
+

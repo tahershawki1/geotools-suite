@@ -13,7 +13,7 @@
     if (type === 'wgsToUtm') {
       const lat = parseFloat(document.getElementById('inp-lat').value);
       const lon = parseFloat(document.getElementById('inp-lon').value);
-      if(isNaN(lat) || isNaN(lon)) return alert('يرجى إدخال قيم صحيحة');
+      if(isNaN(lat) || isNaN(lon)) return alert('Please enter valid values');
       
       const zone = Math.floor((lon + 180) / 6) + 1;
       const utmProj = `+proj=utm +zone=${zone} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`;
@@ -28,7 +28,7 @@
       const e = parseFloat(document.getElementById('inp-utm-e').value);
       const n = parseFloat(document.getElementById('inp-utm-n').value);
       const z = parseInt(document.getElementById('inp-utm-z').value);
-      if(isNaN(e) || isNaN(n) || isNaN(z)) return alert('يرجى إدخال قيم صحيحة');
+      if(isNaN(e) || isNaN(n) || isNaN(z)) return alert('Please enter valid values');
       
       const utmProj = `+proj=utm +zone=${z} +ellps=WGS84 +datum=WGS84 +units=m +no_defs`;
       const result = proj4(utmProj, 'EPSG:4326', [e, n]);
@@ -45,6 +45,6 @@
 
   window.copyTransformRes = function() {
     const text = document.getElementById('res-content-trans').innerText;
-    navigator.clipboard.writeText(text).then(() => alert('تم النسخ!'));
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
   };
 })();

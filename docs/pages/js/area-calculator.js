@@ -1,11 +1,11 @@
-      (function () {
+﻿      (function () {
         // --- Hard stop if Leaflet not loaded ---
         if (typeof L === "undefined") {
           const el = document.getElementById("message");
           el.className = "msg err";
           el.style.display = "block";
           el.textContent =
-            "Leaflet لم يتم تحميله. تأكد أن الملف pages/area-calculator.html داخل مجلد docs وأن المسار docs/vendor/leaflet/leaflet.js موجود.";
+            "Leaflet is not loaded. Ensure pages/area-calculator.html is inside docs and docs/vendor/leaflet/leaflet.js exists.";
           return;
         }
 
@@ -79,7 +79,7 @@
             if (nums.length === 2) {
               [N, E] = nums;
             } else if (nums.length >= 3) {
-              // يوجد عمود ID في البداية => id, N, E
+              // ID column exists at the beginning => id, N, E
               id = nums[0];
               N = nums[nums.length - 2];
               E = nums[nums.length - 1];
@@ -145,7 +145,7 @@
           const mapEl = document.getElementById("map");
           if (!mapEl) return;
 
-          // تنظيف أي معرفات قديمة
+          // Clean old map identifiers
           if (mapEl._leaflet_id) {
             try {
               delete mapEl._leaflet_id;
@@ -161,7 +161,7 @@
             zoomControl: true,
           });
 
-          // إعادة حساب الحجم
+          // Recalculate map size
           setTimeout(() => {
             try {
               map.invalidateSize(true);
@@ -170,7 +170,7 @@
             }
           }, 50);
 
-          // مستمع resize
+          // Resize listener
           if (!window._service2MapResizeListener) {
             window._service2MapResizeListener = true;
             window.addEventListener("resize", () => {
@@ -294,7 +294,7 @@
             ]);
           }
 
-          return L.polyline(lines, { weight: 1, opacity: 0.35 }); // كانت 0.25
+          return L.polyline(lines, { weight: 1, opacity: 0.35 }); // was 0.25
         }
 
         function setGridToBounds(bounds) {
@@ -369,7 +369,7 @@
           hideMsg();
           clearDraw();
 
-          // تقسيم النقاط إلى مضلعات متعددة
+          // Split points into multiple polygons
           const polygons = splitPolygonsAtClosingPoint(ptsInput);
 
           if (polygons.length === 0 || ptsInput.length < 2) {
@@ -378,7 +378,7 @@
             return;
           }
 
-          // عرض كل مضلع بلون مختلف
+          // Render each polygon with a different color
           const colors = [
             "#FF6B6B",
             "#4ECDC4",
@@ -397,7 +397,7 @@
             const latlngs = toLatLngs(polyPts);
             const color = colors[polyIdx % colors.length];
 
-            // الماركرات
+            // Markers
             latlngs.forEach((ll, idx) => {
               const m = L.circleMarker(ll, {
                 radius: 6,
@@ -412,7 +412,7 @@
               m.addTo(pointsLayer);
             });
 
-            // الخط المغلق
+            // Closed polyline
             const closed = latlngs.slice();
             closed.push(latlngs[0]);
             L.polyline(closed, {
@@ -421,7 +421,7 @@
               color: color,
             }).addTo(pointsLayer);
 
-            // المضلع (مساحة)
+            // Polygon (area)
             if (polyPts.length >= 3) {
               L.polygon(latlngs, {
                 weight: 2,
@@ -430,15 +430,15 @@
               }).addTo(pointsLayer);
             }
 
-            // حساب الإحصائيات
+            // Calculate statistics
             const stats = computeAreaPerimeter(polyPts);
             totalArea += stats.area;
             totalPerimeter += stats.perimeter;
 
-            // حساب مركز المضلع لعرض البطاقة
+            // Calculate polygon centroid for card display
             const centroid = computePolygonCentroid(polyPts);
 
-            // إنشاء بطاقة HTML
+            // Create HTML card
             const cardHTML = `
         <div style="
           background: ${color}dd;
@@ -460,7 +460,7 @@
         </div>
       `;
 
-            // إضافة البطاقة على الخريطة كـ marker مع divIcon (ثابتة الحجم، لا تتغير مع الزووم)
+            // Add card on the map as marker with divIcon (fixed size, does not scale with zoom)
             const icon = L.divIcon({
               className: "polygon-card",
               html: cardHTML,
@@ -473,20 +473,20 @@
             // track marker with associated polygon points so we can size it later
             popupLayers.push({ marker: marker, pts: polyPts });
 
-            // تحديث الحدود
+            // Update bounds
             if (!allBounds) allBounds = L.latLngBounds(latlngs);
             else allBounds.extend(latlngs);
           });
 
           pointsLayer.addTo(map);
 
-          // عرض النتائج
+          // Show results
           if (allBounds) {
             map.fitBounds(allBounds.pad(0.2));
             setGridToBounds(allBounds.pad(0.2));
           }
 
-          // إظهار الإجمالي والتفاصيل
+          // Show total and details
           document.getElementById("res-count").innerText = String(
             ptsInput.length,
           );
@@ -513,7 +513,7 @@
           }
         }
 
-        // دالة جديدة: تقسيم النقاط إلى مضلعات متعددة
+        // New function: split points into multiple polygons
         function splitPolygonsAtClosingPoint(pts) {
           const method =
             document.getElementById("splitMethod")?.value || "auto";
@@ -554,12 +554,12 @@
             } else {
               const firstPt = currentPolygon[0];
 
-              // البحث عن نقطة متطابقة مع البداية
+              // Look for a point matching the starting point
               if (
                 pointsEqual(currentPt, firstPt, 0.01) &&
                 currentPolygon.length > 2
               ) {
-                // حفظ المضلع بدون النقطة الأخيرة (المكررة)
+                // Save polygon without the last duplicated point
                 polygons.push(currentPolygon);
                 currentPolygon = [currentPt];
               } else {
@@ -578,7 +578,7 @@
         function splitByGaps(pts) {
           const polygons = [];
           let currentPolygon = [];
-          const gapThreshold = 1000; // متر
+          const gapThreshold = 1000; // meters
 
           for (let i = 0; i < pts.length; i++) {
             const currentPt = pts[i];
@@ -591,7 +591,7 @@
               const distE = Math.abs(currentPt.E - prevPt.E);
               const distance = Math.sqrt(distN * distN + distE * distE);
 
-              // إذا كانت الفجوة كبيرة جداً
+              // If the gap is very large
               if (distance > gapThreshold && currentPolygon.length >= 2) {
                 polygons.push(currentPolygon);
                 currentPolygon = [currentPt];
@@ -611,7 +611,7 @@
         function splitByAuto(pts) {
           const polygons = [];
           let currentPolygon = [];
-          const gapThreshold = 1000; // متر
+          const gapThreshold = 1000; // meters
 
           for (let i = 0; i < pts.length; i++) {
             const currentPt = pts[i];
@@ -622,12 +622,12 @@
               const firstPt = currentPolygon[0];
               const prevPt = currentPolygon[currentPolygon.length - 1];
 
-              // الحالة 1: نقطة متطابقة مع البداية
+              // Case 1: point matches start point
               const isDuplicate =
                 pointsEqual(currentPt, firstPt, 0.01) &&
                 currentPolygon.length > 2;
 
-              // الحالة 2: فجوة كبيرة
+              // Case 2: large gap
               const distN = Math.abs(currentPt.N - prevPt.N);
               const distE = Math.abs(currentPt.E - prevPt.E);
               const distance = Math.sqrt(distN * distN + distE * distE);
@@ -651,7 +651,7 @@
         }
 
         function splitByIdReset(pts) {
-          // الفصل حسب عمود ID: عندما ينخفض ID من قيمة أعلى للقيمة 1، يكون هناك مضلع جديد
+          // Split by ID column: when ID drops from higher values to 1, start a new polygon
           const polygons = [];
           let currentPolygon = [];
 
@@ -663,11 +663,11 @@
             } else {
               const prevPt = currentPolygon[currentPolygon.length - 1];
 
-              // التحقق من انخفاض ID (إشارة لبداية مضلع جديد)
+              // Check ID drop (signal for new polygon start)
               const prevId = prevPt.id !== undefined ? prevPt.id : 1;
               const currId = currentPt.id !== undefined ? currentPt.id : 1;
 
-              // إذا كان ID أقل من السابق بكثير أو انخفض للـ 1 أو 2، فهو مضلع جديد
+              // If ID is much lower than previous or drops to 1/2, treat it as a new polygon
               if (currId < prevId * 0.5 || (currId <= 2 && prevId > 5)) {
                 polygons.push(currentPolygon);
                 currentPolygon = [currentPt];
@@ -748,3 +748,5 @@
         showMsg('Ready. Enter your points then click "Draw & Calculate".', "");
       })();
     
+
+

@@ -1,7 +1,7 @@
-  (function () {
+﻿  (function () {
     // ----------------------------
     // Minimal Loader Fallback
-    // (Index.html عندك فيه showLoader بالفعل)
+    // (Index.html already includes showLoader)
     // ----------------------------
     function safeShowLoader(show) {
       try {
@@ -312,11 +312,11 @@
           E: N,
           N: E,
           swapped: true,
-          warn: "يبدو أن East/North مقلوبين، تم التبديل تلقائيًا.",
+          warn: "East/North seems swapped; values were switched automatically.",
         };
       const warn =
         !E_ok || !N_ok
-          ? "تحذير: الإحداثيات خارج النطاق المتوقع. تأكد من النظام/القيم."
+          ? "Warning: coordinates are outside expected range. Verify CRS/values."
           : "";
       return { E, N, swapped: false, warn };
     }
@@ -381,20 +381,20 @@
     window.runSingleDltm = function () {
       const e = parseFloat(document.getElementById("inp-e").value);
       const n = parseFloat(document.getElementById("inp-n").value);
-      if (isNaN(e) || isNaN(n)) return alert("أدخل إحداثيات صحيحة");
+      if (isNaN(e) || isNaN(n)) return alert("Enter valid coordinates");
 
       saveLastInputs();
 
       const btn = document.getElementById("btn-convert-single");
       btn.disabled = true;
-      btn.innerText = "جاري التحويل...";
+      btn.innerText = "Converting...";
 
       // Local compute (no backend)
       const v = validateAndMaybeSwap(e, n);
       const res = convertDLTMtoWGS84(v.E, v.N);
 
       btn.disabled = false;
-      btn.innerText = "تحويل الآن ✨";
+      btn.innerText = "Convert Now ✨";
 
       if (!res.success) return alert("Error: " + res.error);
 
@@ -509,7 +509,7 @@
           }
         });
 
-        if (!rows.length) return alert("لم يتم العثور على بيانات صالحة");
+        if (!rows.length) return alert("No valid data found");
         safeShowLoader(true);
 
         // Convert DLTM to WGS84 and then to UTM Zone 40N
@@ -638,7 +638,7 @@
 
       const okCount = results.filter((r) => !r.error).length;
       document.getElementById("batchCount").innerText =
-        okCount + " نقاط تم تحويلها";
+        okCount + " points converted";
       document.getElementById("batchResultsWrap").style.display = "block";
     }
 
@@ -664,7 +664,7 @@
 
     window.runBatchFromPaste = function () {
       const text = (document.getElementById("batchPaste").value || "").trim();
-      if (!text) return alert("الصق الإحداثيات أولاً");
+      if (!text) return alert("Paste coordinates first");
       const direction =
         document.querySelector("input[name='batch-direction']:checked")
           ?.value || "dltm-to-wgs";
@@ -687,7 +687,7 @@
         if (Number.isFinite(val1) && Number.isFinite(val2))
           rows.push([val1, val2, pId, code]);
       }
-      if (!rows.length) return alert("لم يتم العثور على صفوف صالحة");
+      if (!rows.length) return alert("No valid rows found");
       safeShowLoader(true);
 
       let results;
@@ -831,7 +831,7 @@
     function destroyMapIfAny() {
       try {
         if (_map) {
-          _map.remove(); // يحل مشكلة "Map container is already initialized"
+          _map.remove(); // Fixes "Map container is already initialized" issue
           _map = null;
           _marker = null;
         }
@@ -842,16 +842,16 @@
     }
 
     function ensureMap() {
-      // لو الصفحة اتعمل لها reload داخل SPA وفضلت نفس الـ id
+      // If the page reloads inside SPA and keeps the same id
       if (_map) return;
 
       const mapEl = document.getElementById("map");
       if (!mapEl) return;
 
-      // لو Leaflet شايف إن الكونتينر متأثر من تهيئة قديمة
+      // If Leaflet sees the container affected by previous initialization
       if (mapEl._leaflet_id) {
         destroyMapIfAny();
-        // امسح الـ leaflet id القديم
+        // Clear old leaflet id
         try {
           delete mapEl._leaflet_id;
         } catch {}
@@ -871,7 +871,7 @@
       const box = document.getElementById("mapBox");
       if (box) box.style.display = "block";
 
-      // مهم جدًا: انتظر frame واحدة بعد إظهار الـ div
+      // Important: wait one frame after showing the div
       requestAnimationFrame(() => {
         ensureMap();
         if (!_map) return;
@@ -880,7 +880,7 @@
 
         if (_marker) _map.removeLayer(_marker);
 
-        // استخدام ماركر SVG مدمج بدلاً من الاعتماد على CDN خارجي
+        // Use embedded SVG marker instead of relying on external CDN
         const markerIcon = L.divIcon({
           html: `<svg width="40" height="50" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
             <path d="M 20 0 C 8.954 0 0 8.954 0 20 C 0 35 20 50 20 50 S 40 35 40 20 C 40 8.954 31.046 0 20 0 Z" fill="#FF0000" stroke="#FFF" stroke-width="2"/>
@@ -895,16 +895,16 @@
         _marker = L.marker([lat, lon], { icon: markerIcon })
           .addTo(_map)
           .bindPopup(
-            `<div style="font-family: Cairo, sans-serif; color: #333;"><b>📍 النقطة</b><br/>Lat: ${lat.toFixed(6)}<br/>Lon: ${lon.toFixed(6)}</div>`,
+            `<div style="font-family: Cairo, sans-serif; color: #333;"><b>📍 Point</b><br/>Lat: ${lat.toFixed(6)}<br/>Lon: ${lon.toFixed(6)}</div>`,
             {
               className: "custom-popup",
             },
           );
 
-        // فتح البوب أب للماركر تلقائياً
+        // Open marker popup automatically
         _marker.openPopup();
 
-        // الأهم: اجبار Leaflet يعيد حساب المقاسات
+        // Most important: force Leaflet to recalculate sizes
         setTimeout(() => {
           try {
             _map.invalidateSize(true);
@@ -914,13 +914,13 @@
     }
 
     window.openGoogleMapsLink = function () {
-      if (!_lastLatLon) return alert("لا توجد نقطة للعرض");
+      if (!_lastLatLon) return alert("No point available to display");
       const url = `https://www.google.com/maps?q=${_lastLatLon.lat},${_lastLatLon.lon}`;
       window.open(url, "_blank");
     };
 
     window.downloadSingleKml = function () {
-      if (!_lastLatLon) return alert("لا توجد نقطة للتصدير");
+      if (!_lastLatLon) return alert("No point available to export");
       const { lat, lon } = _lastLatLon;
       const kml = `<?xml version="1.0" encoding="UTF-8"?>
   <kml xmlns="http://www.opengis.net/kml/2.2">
@@ -949,36 +949,36 @@
         const lon = parseFloat(document.getElementById("inp-lon").value);
         const lat = parseFloat(document.getElementById("inp-lat").value);
         if (isNaN(lat) || isNaN(lon))
-          return alert("أدخل Latitude/Longitude صحيحين");
+          return alert("Enter valid Latitude/Longitude");
         saveLastInputs();
         const r = convertWGS84toDLTM(lat, lon);
-        if (!r.success) return alert("خطأ: " + r.error);
+        if (!r.success) return alert("Error: " + r.error);
         document.getElementById("res-dltm-e").innerText = r.easting.toFixed(3);
         document.getElementById("res-dltm-n").innerText = r.northing.toFixed(3);
         const note = document.getElementById("reverse-note");
         if (note) {
           note.style.display = "block";
           note.innerText =
-            "تم التحويل من WGS84 باستخدام باراميترات DLTM (lon0=55°20′, FE=500000, k0=1.0).";
+            "Converted from WGS84 using DLTM parameters (lon0=55°20′, FE=500000, k0=1.0).";
         }
         document.getElementById("reverse-box").style.display = "block";
       } else {
-        // تحويل من UTM
+        // Convert from UTM
         const zone = document.getElementById("inp-utm-zone").value.trim();
         const utmE = parseFloat(document.getElementById("inp-utm-e").value);
         const utmN = parseFloat(document.getElementById("inp-utm-n").value);
         if (!zone || isNaN(utmE) || isNaN(utmN))
-          return alert("أدخل UTM Zone, Easting, Northing صحيحة");
+          return alert("Enter valid UTM Zone, Easting, and Northing");
 
         saveLastInputs();
         const r = convertUTMtoDLTM(zone, utmE, utmN);
-        if (!r.success) return alert("خطأ: " + r.error);
+        if (!r.success) return alert("Error: " + r.error);
         document.getElementById("res-dltm-e").innerText = r.easting.toFixed(3);
         document.getElementById("res-dltm-n").innerText = r.northing.toFixed(3);
         const note = document.getElementById("reverse-note");
         if (note) {
           note.style.display = "block";
-          note.innerText = "تم التحويل من UTM إلى DLTM.";
+          note.innerText = "Converted from UTM to DLTM.";
         }
         document.getElementById("reverse-box").style.display = "block";
       }
@@ -994,7 +994,7 @@
           ? `Easting: ${e}\nNorthing: ${n}`
           : `Longitude: ${lon}\nLatitude: ${lat}`;
       const ok = await copyTextSmart(text);
-      alert(ok ? "تم النسخ ✅" : "تعذر النسخ ❌");
+      alert(ok ? "Copied ✅" : "Copy failed ❌");
     };
 
     window.showOnMapFromWgs = function () {
@@ -1006,14 +1006,14 @@
         const lon = parseFloat(document.getElementById("inp-lon").value);
         const lat = parseFloat(document.getElementById("inp-lat").value);
         if (isNaN(lat) || isNaN(lon))
-          return alert("أدخل Latitude/Longitude صحيحين");
+          return alert("Enter valid Latitude/Longitude");
         showPointOnMap(lat, lon);
       } else {
         const zone = document.getElementById("inp-utm-zone").value.trim();
         const utmE = parseFloat(document.getElementById("inp-utm-e").value);
         const utmN = parseFloat(document.getElementById("inp-utm-n").value);
         if (!zone || isNaN(utmE) || isNaN(utmN))
-          return alert("أدخل UTM Zone, Easting, Northing صحيحة");
+          return alert("Enter valid UTM Zone, Easting, and Northing");
         const wgs = convertUTMtoWGS84(zone, utmE, utmN);
         if (!wgs.success) return alert("Error: " + wgs.error);
         showPointOnMap(wgs.latitude, wgs.longitude);
@@ -1143,10 +1143,10 @@
       document.getElementById("inp-utm-zone").value = "";
       document.getElementById("inp-utm-e").value = "";
       document.getElementById("inp-utm-n").value = "";
-      alert("تم حذف البيانات المحفوظة ✨");
+      alert("Saved data cleared ✨");
     };
 
-    // التبديل بين نوع المدخل في التحويل العكسي
+    // Switch input type for reverse conversion
     window.switchReverseInputType = function (type) {
       const wgs84Inputs = document.getElementById("wgs84-inputs");
       const utmInputs = document.getElementById("utm-inputs");
@@ -1162,7 +1162,7 @@
       localStorage.setItem("dltm_lastInputType", type);
     };
 
-    // دالة تحويل من UTM إلى WGS84
+    // Function to convert UTM to WGS84
     function convertUTMtoWGS84(zone, easting, northing) {
       try {
         const a = 6378137.0;
@@ -1172,7 +1172,7 @@
         const e2 = (a * a - b * b) / (a * a);
         const ep2 = (a * a - b * b) / (b * b);
 
-        // استخراج hemisphere من zone (e.g., "40N" → hemisphere = "N")
+        // Extract hemisphere from zone (e.g., "40N" -> hemisphere = "N")
         const hemMatch = zone.match(/([NSEW])$/i);
         const hemisphere = hemMatch ? hemMatch[1].toUpperCase() : "N";
         const zoneNum = parseInt(zone.match(/\d+/)[0]);
@@ -1239,7 +1239,7 @@
       }
     }
 
-    // دالة تحويل من UTM إلى DLTM
+    // Function to convert UTM to DLTM
     function convertUTMtoDLTM(zone, easting, northing) {
       try {
         const wgs = convertUTMtoWGS84(zone, easting, northing);
@@ -1251,7 +1251,7 @@
       }
     }
 
-    // تحديث حفظ البيانات
+    // Update save logic
     window.saveLastInputs = function () {
       const e = document.getElementById("inp-e").value;
       const n = document.getElementById("inp-n").value;
@@ -1278,7 +1278,7 @@
       localStorage.setItem("dltm_lastUtmN", utmN);
     };
 
-    // تحديث تحميل البيانات
+    // Update load logic
     window.loadLastInputs = function () {
       const e = localStorage.getItem("dltm_lastE");
       const n = localStorage.getItem("dltm_lastN");
@@ -1302,7 +1302,7 @@
       document.getElementById("out-format").value = format;
       document.getElementById("out-prec").value = precision;
 
-      // تبديل نوع المدخل في التحويل العكسي
+      // Switch reverse conversion input type
       document.querySelector(
         `input[name='rev-input-type'][value='${inputType}']`,
       ).checked = true;
@@ -1314,15 +1314,18 @@
 
     // Test function for batch conversion
     window.testBatchConversion = function () {
-      // استخدام البيانات المحملة من الملف أو من الجدول
+      // Use data loaded from file or table
       if (!batchData || batchData.length === 0) {
         console.log("❌ No data loaded. Please upload a CSV file first.");
         return;
       }
 
-      console.log("✓ اختبار معالجة البيانات المحملة:", batchData.length, "صف");
+      console.log("✓ Loaded data processing test:", batchData.length, "rows");
       console.table(batchData);
 
       return batchData;
     };
   })();
+
+
+

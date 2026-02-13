@@ -190,7 +190,7 @@
   }
 
   const CRS_WARNING_MESSAGE = "Please select a coordinate system";
-  const MEASURE_HINT_MESSAGE = "اضغط على الخريطة لبدء القياس.";
+  const MEASURE_HINT_MESSAGE = "Click on the map to start measuring.";
   const MEASURE_DUPLICATE_EPS = 0.01;
 
   function hasCrsSelected() {
@@ -200,7 +200,7 @@
   function updateMapModeButton() {
     if (!el.mapModeBtn) return;
     const isGlobal = state.mode === "global";
-    el.mapModeBtn.textContent = isGlobal ? "📍 خريطة محلية" : "🌐 خريطة عالمية";
+    el.mapModeBtn.textContent = isGlobal ? "📍 Local Map" : "🌐 Global Map";
     el.mapModeBtn.setAttribute("aria-pressed", String(isGlobal));
   }
 
@@ -288,7 +288,7 @@
       el.measureTotal.textContent = "";
       return;
     }
-    el.measureTotal.textContent = `الإجمالي: ${formatDistance(state.measureTotalMeters)}`;
+    el.measureTotal.textContent = `Total: ${formatDistance(state.measureTotalMeters)}`;
   }
 
   function setMeasureActive(active) {
@@ -837,12 +837,12 @@
       .map((row) => {
         const parts = row.split(/[,,\s;]+/).filter(Boolean);
         let tokens = (order || "P,N,E,CODE").split(/[, ]+/).filter(Boolean);
-        // Fallback ذكي إذا كان هناك 3 أعمدة فقط ولم يتم التعرف على الترتيب
+        // Smart fallback when only 3 columns exist and order was not detected.
         if (parts.length === 3 && (!tokens || tokens.length < 3 || tokens[0] !== "P")) {
-          // العمود الأول Point، الباقي أرقام
+          // First column is Point ID, remaining columns are numeric.
           const val1 = parseFloat(parts[1]);
           const val2 = parseFloat(parts[2]);
-          // الأكبر غالبًا Northing
+          // Larger value is usually Northing.
           let e = val1, n = val2;
           if (val1 < val2) { e = val1; n = val2; } else { e = val2; n = val1; }
           return { id: parts[0], e, n, z: null, code: null, raw: row, tokens: ["P","E","N"] };
@@ -1302,7 +1302,7 @@
       // Add point count in a separate line
       const count = document.createElement("div");
       count.className = "file-count";
-      count.textContent = `عدد النقاط: ${ds.points.length}`;
+      count.textContent = `Point count: ${ds.points.length}`;
       el.fileList.appendChild(count);
       // Separator
       const sep = document.createElement("hr");
@@ -1321,7 +1321,7 @@
       el.fileList.appendChild(row);
       const count = document.createElement("div");
       count.className = "file-count";
-      count.textContent = `عدد النقاط: ${state.manualPoints.length}`;
+      count.textContent = `Point count: ${state.manualPoints.length}`;
       el.fileList.appendChild(count);
     }
   }

@@ -1,4 +1,4 @@
-// ===== GeoTools Suite Enhanced Theme System =====
+﻿// ===== GeoTools Suite Enhanced Theme System =====
 // Deprecated: No longer used. Dark mode and theme switching removed from project.
 (function() {
   'use strict';
@@ -10,7 +10,7 @@
   }
 
   init() {
-    // استخدم Intersection Observer للصور
+    // Use Intersection Observer for images
     if ('IntersectionObserver' in window) {
       this.observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -26,7 +26,7 @@
 
       document.querySelectorAll('img[data-src]').forEach(img => this.observer.observe(img));
     } else {
-      // Fallback للمتصفحات القديمة
+      // Fallback for older browsers
       document.querySelectorAll('img[data-src]').forEach(img => {
         img.src = img.dataset.src;
         img.removeAttribute('data-src');
@@ -88,7 +88,7 @@ class PageTransitionManager {
   }
 
   init() {
-    // إضافة animation عند تحميل الصفحة
+    // Add animation on page load
     document.addEventListener('DOMContentLoaded', () => {
       document.body.style.opacity = '0';
       setTimeout(() => {
@@ -97,7 +97,7 @@ class PageTransitionManager {
       }, 50);
     });
 
-    // تطبيق animation على العناصر عند ظهورها
+    // Apply animation when elements appear
     this.observeElements();
   }
 
@@ -112,7 +112,7 @@ class PageTransitionManager {
         });
       }, { threshold: 0.1 });
 
-      // لاحظ جميع البطاقات والعناصر
+      // Observe all cards and target elements
       document.querySelectorAll('.card, .result-card, .container-dltm, .container-converter').forEach(el => {
         this.observer.observe(el);
       });
@@ -138,10 +138,10 @@ class MobileEnhancements {
   }
 
   init() {
-    // إضافة ripple effect على الأزرار
+    // Add ripple effect to buttons
     this.addRippleEffect();
     
-    // تحسين أداء اللمس
+    // Improve touch performance
     this.optimizeTouchPerformance();
   }
 
@@ -180,11 +180,11 @@ class MobileEnhancements {
   }
 
   optimizeTouchPerformance() {
-    // تحسين الأداء عند اللمس
+    // Optimize touch performance
     document.addEventListener('touchstart', function() {
     }, { passive: true });
 
-    // إضافة will-change للعناصر القابلة للتمرير
+    // Add will-change to scrollable elements
     document.querySelectorAll('[data-scrollable]').forEach(el => {
       el.style.willChange = 'transform';
     });
@@ -311,7 +311,7 @@ class KeyboardNavigation {
   }
 
   handleEscape() {
-    // أغلق أي dialogs مفتوحة
+    // Close any open dialogs
     const openDialogs = document.querySelectorAll('[data-dialog][open]');
     if (openDialogs.length > 0) {
       openDialogs[openDialogs.length - 1].close();
@@ -323,7 +323,7 @@ class KeyboardNavigation {
 let lazyLoad, transitions, mobile; // Store instances for reinit
 
 document.addEventListener('DOMContentLoaded', () => {
-  // تهيئة جميع الميزات
+  // Initialize all features
   lazyLoad = new LazyLoadManager();
   const caching = new CachingManager();
   transitions = new PageTransitionManager();
@@ -332,10 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const responsive = new ResponsiveHelper();
   const keyboard = new KeyboardNavigation();
 
-  // تسجيل Service Worker
+  // Register Service Worker
   caching.registerServiceWorker();
 
-  // عرض البيانات
+  // Output diagnostics
   console.log('🚀 GeoTools Suite Enhanced - All systems initialized');
   console.log('📱 Responsive:', responsive.isMobile() ? 'Mobile' : responsive.isTablet() ? 'Tablet' : 'Desktop');
 });
@@ -350,3 +350,4 @@ window.GeoToolsTheme = {
 };
 
 })(); // End of IIFE
+

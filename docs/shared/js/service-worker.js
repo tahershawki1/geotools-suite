@@ -1,4 +1,4 @@
-// Service Worker for GeoTools Suite
+﻿// Service Worker for GeoTools Suite
 const CACHE_NAME = 'geotools-v9';
 const urlsToCache = [
   '/',
@@ -73,12 +73,12 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const { request } = event;
 
-  // تجاهل الطلبات غير GET
+  // Ignore non-GET requests
   if (request.method !== 'GET') {
     return;
   }
 
-  // استراتيجية Cache First للأصول الثابتة
+  // Cache First strategy for static assets
   if (request.url.includes('/vendor/') || request.url.endsWith('.css') || request.url.endsWith('.js')) {
     event.respondWith(
       caches.match(request)
@@ -88,11 +88,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // استراتيجية Network First للـ HTML و API calls
+  // Network First strategy for HTML and API calls
   event.respondWith(
     fetch(request)
       .then(response => {
-        // احفظ الاستجابة الناجحة في الـ cache
+        // Cache successful responses
         if (response.status === 200) {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then(cache => {
@@ -102,7 +102,7 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        // إذا فشل الطلب، استخدم النسخة المخزنة
+        // If request fails, use cached version
         return caches.match(request)
           .then(response => response || new Response('Offline', { status: 503 }));
       })
@@ -118,4 +118,5 @@ self.addEventListener('message', event => {
     });
   }
 });
+
 
