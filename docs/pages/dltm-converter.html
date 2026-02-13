@@ -4,6 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dubai DLTM Converter - GeoTools Suite</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Convert Dubai Local Transverse Mercator (DLTM) coordinates to WGS84 and vice versa. Supports single and batch conversion with multiple output formats including DMS, Decimal Degrees, and DDM." />
+  <meta name="keywords" content="DLTM converter, Dubai coordinates, Dubai Local Transverse Mercator, WGS84, coordinate conversion, Dubai surveying, UAE coordinates, batch conversion" />
+  <meta name="author" content="Taher Shawki" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html" />
+  
+  <!-- Open Graph / Social Media Meta Tags -->
+  <meta property="og:title" content="Dubai DLTM Converter - GeoTools Suite" />
+  <meta property="og:description" content="Convert between Dubai DLTM and WGS84 coordinates with single and batch processing" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html" />
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Dubai DLTM Converter - GeoTools Suite" />
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../favicon.ico" />
+  
   <link rel="stylesheet" href="../styles.css" />
   <link rel="stylesheet" href="./css/dltm-converter.css" />
   <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
@@ -12,6 +38,11 @@
 </head>
 <body>
 <div class="container-dltm">
+  <header style="text-align: center; margin-bottom: 2rem; padding: 1rem;">
+    <h1 style="color: #0f766e; margin-bottom: 0.5rem;">Dubai DLTM Converter</h1>
+    <p style="color: #6b7280; font-size: 1rem;">Convert between Dubai Local Transverse Mercator and WGS84 coordinates</p>
+  </header>
+  
   <div class="dltm-tabs">
     <div class="dltm-tab active" onclick="switchDltmTab(this, 'single')">
       Single Conversion
