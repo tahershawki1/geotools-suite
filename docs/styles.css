@@ -39,6 +39,7 @@ html,
 body {
     height: 100%;
     width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -47,6 +48,32 @@ body {
     color: var(--text-main);
     transition: background-color var(--transition-normal), color var(--transition-normal);
     line-height: 1.5;
+}
+
+img,
+svg,
+canvas,
+video,
+iframe {
+    max-width: 100%;
+}
+
+#app-container,
+#view-content,
+.dashboard-view,
+.header,
+.welcome-banner,
+.grid,
+.card {
+    min-width: 0;
+}
+
+.header h1,
+.header p,
+.welcome-copy,
+.loader-title,
+.loader-text {
+    overflow-wrap: anywhere;
 }
 
 /* ===== Animations ===== */
@@ -210,6 +237,10 @@ textarea {
 @media (max-width: 480px) {
     body {
         font-size: 13px;
+    }
+
+    #app-container {
+        padding: 12px;
     }
 
     .header h1 {

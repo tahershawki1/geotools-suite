@@ -15,6 +15,7 @@
     transition:
       background-color 0.3s ease,
       border-color 0.3s ease;
+    min-width: 0;
   }
   .dltm-tabs {
     display: flex;
@@ -23,6 +24,8 @@
     transition:
       background-color 0.3s ease,
       border-color 0.3s ease;
+    min-width: 0;
+    flex-wrap: wrap;
   }
   .dltm-tab {
     padding: 15px 30px;
@@ -31,6 +34,9 @@
     color: var(--text-muted);
     border-bottom: 3px solid transparent;
     transition: all 0.2s;
+    text-align: center;
+    flex: 1 1 180px;
+    min-width: 0;
   }
   .dltm-tab.active {
     color: var(--primary);
@@ -40,6 +46,7 @@
 
   .content-dltm {
     padding: 30px;
+    min-width: 0;
   }
   .tool-section {
     display: none;
@@ -53,6 +60,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     margin-bottom: 25px;
+    min-width: 0;
   }
   .input-group label {
     display: block;
@@ -140,6 +148,8 @@
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
     margin-bottom: 12px;
+    flex-wrap: wrap;
+    min-width: 0;
   }
 
   .result-title {
@@ -230,6 +240,25 @@
   }
 
   @media (max-width: 720px) {
+    .content-dltm {
+      padding: 16px 14px;
+    }
+
+    .input-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .dltm-tab {
+      flex-basis: 50%;
+      padding: 12px 10px;
+      font-size: 14px;
+    }
+
+    .field-name {
+      min-width: 0;
+    }
+
     .result-grid-2 {
       grid-template-columns: 1fr;
     }
@@ -243,6 +272,8 @@
     gap: 10px;
     align-items: baseline;
     margin-top: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
   }
 
   .field-name {
@@ -257,6 +288,8 @@
     font-size: 14px;
     font-weight: 800;
     color: var(--text-main);
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   #mapBox {

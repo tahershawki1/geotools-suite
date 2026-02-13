@@ -17,7 +17,7 @@
       <header class="conv-header">
         <div>
           <p class="eyebrow">Multi-file + live preview</p>
-          <h1>File Converter (CSV / TXT / SDR)</h1>
+          <h1>File Converter (Survey Files)</h1>
           <p class="sub">
             Upload one or more files, auto-detect order, pick CRS, and see
             points immediately on the map.
@@ -30,20 +30,21 @@
         aria-label="Upload and parsing controls"
       >
         <div class="control-col">
-          <label class="control-label">Upload CSV/TXT (multiple)</label>
+          <label class="control-label">Upload Survey Files (multiple)</label>
           <label class="dropzone" for="csvFiles">
             <span class="drop-icon">📁</span>
             <div>
               <strong>Drop or click to select files</strong>
               <p>
-                Accepts CSV / TXT with columns (Point, Easting, Northing, Code)
+                Supports CSV, TXT, SDR, DXF and common survey text files
+                (DAT/XYZ/PTS/RAW/PRN/ASC/GSI/SCR).
               </p>
             </div>
             <input
               type="file"
               id="csvFiles"
               name="csvFiles"
-              accept=".csv,.txt,text/plain"
+              accept=".csv,.txt,.sdr,.dxf,.dat,.xyz,.pts,.raw,.prn,.asc,.gsi,.scr,text/plain,application/dxf"
               multiple
             />
           </label>

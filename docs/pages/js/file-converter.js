@@ -472,22 +472,288 @@
   }
 
   // ---------- File parsing ----------
+  const SURVEY_TEXT_EXTENSIONS = new Set([
+    "csv",
+    "txt",
+    "sdr",
+    "dxf",
+    "dat",
+    "xyz",
+    "pts",
+    "raw",
+    "prn",
+    "asc",
+    "gsi",
+    "scr",
+    "cnv",
+  ]);
+
+  function getFileExtension(fileName) {
+    const name = String(fileName || "");
+    const dot = name.lastIndexOf(".");
+    if (dot < 0) return "";
+    return name.slice(dot + 1).trim().toLowerCase();
+  }
+
+  function isLikelySdrText(text) {
+    return /(^|\n)08KI/.test(String(text || ""));
+  }
+
+  function isLikelyDxfText(text) {
+    const head = String(text || "").slice(0, 6000).toUpperCase();
+    return head.includes("SECTION") && head.includes("ENTITIES") && head.includes("EOF");
+  }
+
+  function parseSdrText(text) {
+    let points = [];
+    if (window.ConverterExport && typeof window.ConverterExport.parseSdrPoints === "function") {
+      points = window.ConverterExport.parseSdrPoints(text);
+    } else {
+      const lines = String(text || "").replace(/\r/g, "").split("\n");
+      lines.forEach((line) => {
+        if (!line.startsWith("08KI")) return;
+        points.push({
+          p: line.slice(4, 20).trim(),
+          n: Number.parseFloat(line.slice(20, 36).trim()),
+          e: Number.parseFloat(line.slice(36, 52).trim()),
+          z: Number.parseFloat(line.slice(52, 68).trim()),
+          code: line.slice(68, 84).trim(),
+        });
+      });
+    }
+
+    return points
+      .map((pt, idx) => ({
+        id: String(pt.p || "").trim() || `P${idx + 1}`,
+        n: Number(pt.n),
+        e: Number(pt.e),
+        z: Number.isFinite(pt.z) ? pt.z : null,
+        code: String(pt.code || "").trim() || null,
+        raw: "SDR",
+        tokens: ["P", "N", "E", "Z", "CODE"],
+      }))
+      .filter((pt) => Number.isFinite(pt.e) && Number.isFinite(pt.n));
+  }
+
+  function parseDxfText(text) {
+    const lines = String(text || "").replace(/\r/g, "").split("\n");
+    if (lines.length < 4) return [];
+
+    const points = [];
+    let inEntities = false;
+    let awaitingSectionName = false;
+    let entity = null;
+    let autoId = 1;
+
+    const toFinite = (value) => {
+      const normalized = String(value || "").replace(",", ".");
+      const num = Number.parseFloat(normalized);
+      return Number.isFinite(num) ? num : null;
+    };
+
+    const getValues = (code) => {
+      if (!entity || !entity.groups || !entity.groups[code]) return [];
+      return entity.groups[code];
+    };
+
+    const firstText = (code) => {
+      const values = getValues(code);
+      return values.length ? String(values[0]).trim() : "";
+    };
+
+    const firstNumber = (code) => {
+      const values = getValues(code);
+      for (let i = 0; i < values.length; i++) {
+        const num = toFinite(values[i]);
+        if (num !== null) return num;
+      }
+      return null;
+    };
+
+    const numberArray = (code) =>
+      getValues(code)
+        .map((value) => toFinite(value))
+        .filter((value) => value !== null);
+
+    const nextId = (prefix) => {
+      const id = `${prefix}_${autoId}`;
+      autoId += 1;
+      return id;
+    };
+
+    const pushPoint = (x, y, z, preferredId, layer, type, vertexIndex) => {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      const baseId = String(preferredId || "").trim() || nextId(type || "DXF");
+      const pointId = vertexIndex ? `${baseId}_${vertexIndex}` : baseId;
+      points.push({
+        id: pointId,
+        e: x,
+        n: y,
+        z: Number.isFinite(z) ? z : null,
+        code: layer ? String(layer).trim() || null : null,
+        raw: type || "DXF",
+        tokens: ["P", "E", "N", "Z", "CODE"],
+      });
+    };
+
+    const flushEntity = () => {
+      if (!entity) return;
+
+      const type = entity.type;
+      const layer = firstText("8");
+      const labelCandidate = firstText("1") || firstText("2") || firstText("5");
+
+      if (
+        type === "POINT" ||
+        type === "INSERT" ||
+        type === "TEXT" ||
+        type === "MTEXT" ||
+        type === "VERTEX" ||
+        type === "CIRCLE"
+      ) {
+        pushPoint(firstNumber("10"), firstNumber("20"), firstNumber("30"), labelCandidate, layer, type);
+        entity = null;
+        return;
+      }
+
+      if (type === "LINE") {
+        const base = labelCandidate || nextId("LINE");
+        pushPoint(firstNumber("10"), firstNumber("20"), firstNumber("30"), `${base}_A`, layer, type);
+        pushPoint(firstNumber("11"), firstNumber("21"), firstNumber("31"), `${base}_B`, layer, type);
+        entity = null;
+        return;
+      }
+
+      if (type === "LWPOLYLINE") {
+        const xs = numberArray("10");
+        const ys = numberArray("20");
+        const zs = numberArray("30");
+        const count = Math.min(xs.length, ys.length);
+        const base = labelCandidate || nextId("LWPOLYLINE");
+        for (let i = 0; i < count; i++) {
+          const z = zs[i] ?? zs[0] ?? null;
+          pushPoint(xs[i], ys[i], z, base, layer, type, i + 1);
+        }
+        entity = null;
+        return;
+      }
+
+      if (type === "3DFACE") {
+        const corners = [
+          { x: firstNumber("10"), y: firstNumber("20"), z: firstNumber("30") },
+          { x: firstNumber("11"), y: firstNumber("21"), z: firstNumber("31") },
+          { x: firstNumber("12"), y: firstNumber("22"), z: firstNumber("32") },
+          { x: firstNumber("13"), y: firstNumber("23"), z: firstNumber("33") },
+        ];
+        const base = labelCandidate || nextId("3DFACE");
+        corners.forEach((corner, idx) => {
+          pushPoint(corner.x, corner.y, corner.z, `${base}_${idx + 1}`, layer, type);
+        });
+      }
+
+      entity = null;
+    };
+
+    for (let i = 0; i + 1 < lines.length; i += 2) {
+      const groupCode = lines[i].trim();
+      const groupValue = lines[i + 1].trim();
+
+      if (groupCode === "0") {
+        flushEntity();
+
+        const marker = groupValue.toUpperCase();
+        if (marker === "SECTION") {
+          awaitingSectionName = true;
+          continue;
+        }
+        if (marker === "ENDSEC") {
+          inEntities = false;
+          awaitingSectionName = false;
+          continue;
+        }
+        if (marker === "EOF") break;
+
+        if (inEntities) {
+          entity = { type: marker, groups: Object.create(null) };
+        }
+        continue;
+      }
+
+      if (awaitingSectionName && groupCode === "2") {
+        inEntities = groupValue.toUpperCase() === "ENTITIES";
+        awaitingSectionName = false;
+        continue;
+      }
+
+      if (!inEntities || !entity) continue;
+      if (!entity.groups[groupCode]) entity.groups[groupCode] = [];
+      entity.groups[groupCode].push(groupValue);
+    }
+
+    flushEntity();
+
+    return points.filter((pt) => Number.isFinite(pt.e) && Number.isFinite(pt.n));
+  }
+
+  function parseSurveyFile(text, fileName) {
+    const ext = getFileExtension(fileName);
+
+    if (ext === "sdr" || isLikelySdrText(text)) {
+      const sdrPoints = parseSdrText(text);
+      if (sdrPoints.length) return sdrPoints;
+    }
+
+    if (ext === "dxf" || isLikelyDxfText(text)) {
+      const dxfPoints = parseDxfText(text);
+      if (dxfPoints.length) return dxfPoints;
+    }
+
+    if (SURVEY_TEXT_EXTENSIONS.has(ext) || !ext) {
+      autoDetectOrder(text);
+    }
+    return parseText(text, state.order);
+  }
+
   function handleFiles() {
     const files = Array.from(el.filesInput.files || []);
     if (!files.length) return;
 
-    let colorIdx = 0;
+    let colorIdx = state.datasets.size;
+    let processed = 0;
+    const unreadableFiles = [];
+    const noPointsFiles = [];
+
+    const finalizeBatch = () => {
+      processed += 1;
+      if (processed < files.length) return;
+
+      if (unreadableFiles.length && el.status) {
+        el.status.textContent = `Failed to read: ${unreadableFiles.join(", ")}`;
+        return;
+      }
+      if (noPointsFiles.length && el.status) {
+        el.status.textContent = `No points found in: ${noPointsFiles.join(", ")}`;
+        return;
+      }
+      if (el.status) el.status.textContent = "";
+    };
+
     files.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
-        const text = reader.result || "";
-        autoDetectOrder(text);
-        const points = parseText(text, state.order);
+        const text = String(reader.result || "");
+        const points = parseSurveyFile(text, file.name);
+        if (!points.length) noPointsFiles.push(file.name);
         const color = colors[colorIdx % colors.length];
         colorIdx += 1;
         state.datasets.set(file.name, { name: file.name, color, points, layer: null });
         updateFileList();
         renderAll();
+        finalizeBatch();
+      };
+      reader.onerror = () => {
+        unreadableFiles.push(file.name);
+        finalizeBatch();
       };
       reader.readAsText(file);
     });
@@ -854,6 +1120,9 @@
           radius: 6,
           color: ds.color,
           weight: 2,
+          opacity: 1,
+          fill: true,
+          fillColor: ds.color,
           fillOpacity: 0.85,
         });
         // Build label: if overlap, show all point ids and colors
@@ -919,6 +1188,9 @@
         radius: 6,
         color: manualColor,
         weight: 2,
+        opacity: 1,
+        fill: true,
+        fillColor: manualColor,
         fillOpacity: 0.75,
       });
       // Build label for manual points

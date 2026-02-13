@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>معاينة تصميم GeoTools Suite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', 'Tajawal', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f0ff 0%, #f7fafc 100%);
+      color: #222;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    .container {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px 0 #2196f322;
+      padding: 36px 24px 28px 24px;
+      margin: 36px auto 24px auto;
+      max-width: 950px;
+      border: 1.5px solid #e0e7ef;
+    }
+    .header {
+      border-bottom: 2px solid #e0e7ef;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+    }
+    h1, h2, h3 {
+      color: #1976d2;
+      font-weight: 800;
+      margin: 0 0 10px 0;
+      letter-spacing: 0.5px;
+    }
+    .welcome-banner {
+      background: linear-gradient(90deg, #2196f3 60%, #06d6a0 100%);
+      color: #fff;
+      border-radius: 10px;
+      padding: 14px 22px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px #2196f322;
+    }
+    .welcome-badge {
+      background: #fff;
+      color: #2196f3;
+      font-weight: bold;
+      border-radius: 6px;
+      padding: 3px 14px;
+      font-size: 15px;
+      margin-left: 10px;
+      box-shadow: 0 1px 4px #2196f322;
+    }
+    .welcome-copy {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 28px;
+      margin-top: 38px;
+    }
+    .tool-card {
+      background: linear-gradient(120deg, #f0f7ff 60%, #e3f9f3 100%);
+      border: 1.5px solid #e0e7ef;
+      border-radius: 12px;
+      padding: 32px 18px 22px 18px;
+      text-align: center;
+      transition: box-shadow 0.2s, border 0.2s, transform 0.2s;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1976d2;
+      box-shadow: 0 2px 8px #2196f311;
+      position: relative;
+    }
+    .tool-card:hover {
+      box-shadow: 0 8px 24px #2196f344;
+      border-color: #2196f3;
+      transform: translateY(-4px) scale(1.03);
+      background: linear-gradient(120deg, #e3f0ff 60%, #d0f7ea 100%);
+    }
+    .tool-icon {
+      font-size: 38px;
+      margin-bottom: 10px;
+      display: block;
+      color: #06bfa0;
+      filter: drop-shadow(0 2px 6px #2196f322);
+    }
+    .legal-line {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin: 38px 0 0 0;
+      letter-spacing: 0.5px;
+    }
+    @media (max-width: 700px) {
+      .container {
+        padding: 12px 4px;
+        margin: 8px;
+      }
+      .grid {
+        gap: 14px;
+      }
+      .tool-card {
+        font-size: 15px;
+        padding: 18px 6px 14px 6px;
+      }
+    }
+  </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <div class="welcome-banner" role="note" aria-label="رسالة ترحيب">
+            <span class="welcome-badge">مرحباً بك</span>
+            <p class="welcome-copy">
+              أهلاً بك في مجموعة أدوات الجيوماتكس الاحترافية — كل ما تحتاجه في مكان واحد.
+            </p>
+          </div>
+          <h1>مجموعة أدوات المساحة GeoTools</h1>
+          <p style="color:#1976d2;font-weight:500;">اختر الخدمة التي تريد استخدامها اليوم</p>
+        </div>
+        <div class="grid">
+          <div class="tool-card"><span class="tool-icon">🧭</span>تحويل الإحداثيات</div>
+          <div class="tool-card"><span class="tool-icon">📏</span>حساب المساحة</div>
+          <div class="tool-card"><span class="tool-icon">📂</span>تحويل الملفات</div>
+          <div class="tool-card"><span class="tool-icon">🗺️</span>رسم الخرائط</div>
+          <div class="tool-card"><span class="tool-icon">📋</span>إدارة النقاط</div>
+        </div>
+        <div class="legal-line">© 2026 GeoTools Suite — جميع الحقوق محفوظة.</div>
+      </div>
+    </body>
+    </html>
+        <h1>GeoTools Suite</h1>

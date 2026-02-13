@@ -13,6 +13,11 @@
 body.shell-mounted {
   background: var(--shell-surface);
   color: var(--shell-text);
+  overflow-x: hidden;
+}
+
+body.sidebar-open {
+  overflow: hidden;
 }
 
 .navbar-unified {
@@ -28,6 +33,7 @@ body.shell-mounted {
   background: linear-gradient(180deg, var(--shell-blue) 0%, var(--shell-blue-strong) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 20px rgba(12, 45, 99, 0.2);
+  min-width: 0;
 }
 
 .nav-brand-wrap {
@@ -35,6 +41,7 @@ body.shell-mounted {
   align-items: center;
   gap: 10px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .nav-logo-unified {
@@ -70,6 +77,8 @@ body.shell-mounted {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
 .top-icon-btn {
@@ -127,6 +136,7 @@ body.shell-mounted {
   min-height: 34px;
   cursor: pointer;
   transition: background-color 0.16s ease, transform 0.16s ease;
+  white-space: nowrap;
 }
 
 .top-signout-btn:hover {
@@ -358,6 +368,9 @@ body.shell-mounted {
 
   .nav-logo-text {
     font-size: 16px;
+    max-width: 40vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .top-icon-btn {
@@ -367,5 +380,18 @@ body.shell-mounted {
   .top-signout-btn {
     font-size: 11px;
     letter-spacing: 0;
+    padding: 7px 9px;
+  }
+}
+
+@media (max-width: 420px) {
+  .nav-logo-text {
+    font-size: 14px;
+    max-width: 36vw;
+  }
+
+  .top-signout-btn {
+    font-size: 10px;
+    padding: 6px 7px;
   }
 }
