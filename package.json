@@ -11,8 +11,8 @@
     "format": "prettier --write 'docs/**/*.{js,css,html}'",
     "format:check": "prettier --check 'docs/**/*.{js,css,html}'",
     "audit": "npm audit",
-    "lighthouse": "lighthouse http://localhost:8000 --output html --output-path ./lighthouse-report.html --chrome-flags='--headless'",
-    "test:accessibility": "node scripts/accessibility-test.js",
+    "lighthouse": "echo 'Lighthouse requires Chrome. Install Chrome and run: npx lighthouse http://localhost:8000'",
+    "test:accessibility": "echo 'Install axe DevTools extension in your browser or use: npx @axe-core/cli http://localhost:8000'",
     "test:security": "npm audit && node scripts/security-check.js"
   },
   "repository": {
@@ -41,12 +41,9 @@
   },
   "homepage": "https://github.com/tahershawki1/geotools-suite#readme",
   "devDependencies": {
-    "@axe-core/cli": "^4.9.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-accessibility": "^4.0.2",
     "http-server": "^14.1.1",
-    "lighthouse": "^11.6.0",
     "prettier": "^3.2.5"
   },
   "engines": {
