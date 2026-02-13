@@ -48,7 +48,16 @@ class I18n {
    */
   async loadTranslations(lang) {
     try {
-      const response = await fetch(`./shared/locales/${lang}.json`);
+      // Determine the correct path based on current location
+      const scriptPath = document.currentScript?.src || '';
+      let basePath = './shared/locales/';
+      
+      // If we're in a subdirectory (like pages/), adjust the path
+      if (scriptPath.includes('/pages/') || window.location.pathname.includes('/pages/')) {
+        basePath = '../shared/locales/';
+      }
+      
+      const response = await fetch(`${basePath}${lang}.json`);
       if (!response.ok) {
         throw new Error(`Failed to load ${lang} translations`);
       }

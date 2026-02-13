@@ -26,11 +26,9 @@ jobs:
       
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
       
       - name: Check code formatting
         run: npm run format:check
-        continue-on-error: true
 
   security-audit:
     name: Security Audit
@@ -51,7 +49,6 @@ jobs:
       
       - name: Run npm audit
         run: npm audit --audit-level=moderate
-        continue-on-error: true
 
   accessibility-test:
     name: Accessibility Test
@@ -78,7 +75,7 @@ jobs:
       
       - name: Run axe accessibility tests
         run: npx @axe-core/cli http://localhost:8000
-        continue-on-error: true
+        continue-on-error: true  # OK to continue as axe requires browser setup
 
   lighthouse:
     name: Lighthouse Performance Test
@@ -105,7 +102,7 @@ jobs:
       
       - name: Run Lighthouse
         run: npm run lighthouse
-        continue-on-error: true
+        continue-on-error: true  # OK to continue as Lighthouse requires Chrome
       
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4

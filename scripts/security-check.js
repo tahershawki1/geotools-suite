@@ -35,16 +35,20 @@ const SECURITY_CHECKS = {
 async function scanFile(filePath) {
   const content = await fs.readFile(filePath, 'utf-8');
   const issues = [];
+  const lines = content.split('\n');
 
   for (const [checkName, check] of Object.entries(SECURITY_CHECKS)) {
     for (const pattern of check.patterns) {
-      const matches = content.match(pattern);
-      if (matches) {
+      // Use global flag to find all occurrences
+      const globalPattern = new RegExp(pattern.source, pattern.flags + (pattern.flags.includes('g') ? '' : 'g'));
+      let match;
+      while ((match = globalPattern.exec(content)) !== null) {
+        const lineNumber = content.substring(0, match.index).split('\n').length;
         issues.push({
           file: filePath,
           check: checkName,
           severity: check.severity,
-          line: content.substring(0, content.indexOf(matches[0])).split('\n').length
+          line: lineNumber
         });
       }
     }
