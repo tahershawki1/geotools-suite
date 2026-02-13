@@ -8,6 +8,21 @@ class I18n {
     this.currentLang = this.getSavedLanguage() || 'en';
     this.translations = {};
     this.fallbackLang = 'en';
+    // Determine base path based on current location
+    this.basePath = this.getBasePath();
+  }
+
+  /**
+   * Get base path for locales directory
+   */
+  getBasePath() {
+    const path = window.location.pathname;
+    // If in pages subdirectory, go up one level
+    if (path.includes('/pages/')) {
+      return '../shared/locales/';
+    }
+    // If in docs root or other location
+    return './shared/locales/';
   }
 
   /**
@@ -22,7 +37,7 @@ class I18n {
    */
   async loadLanguage(lang) {
     try {
-      const response = await fetch(`../shared/locales/${lang}.json`);
+      const response = await fetch(`${this.basePath}${lang}.json`);
       if (!response.ok) {
         throw new Error(`Failed to load language: ${lang}`);
       }

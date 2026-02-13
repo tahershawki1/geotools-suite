@@ -10,6 +10,8 @@ jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -35,6 +37,8 @@ jobs:
   validate:
     name: Validate Files
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -55,6 +59,8 @@ jobs:
   security:
     name: Security Audit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -82,6 +88,8 @@ jobs:
     needs: [lint, validate, security]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout code
