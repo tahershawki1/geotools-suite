@@ -1,0 +1,51 @@
+{
+  "name": "geotools-suite",
+  "version": "1.0.0",
+  "description": "GeoTools Suite - Professional browser-based surveying and coordinate conversion tools",
+  "main": "docs/index.html",
+  "scripts": {
+    "start": "cd docs && python3 -m http.server 8000",
+    "serve": "cd docs && npx http-server -p 8000",
+    "lint": "eslint docs/**/*.js --ignore-pattern 'docs/vendor/**'",
+    "lint:fix": "eslint docs/**/*.js --fix --ignore-pattern 'docs/vendor/**'",
+    "format": "prettier --write 'docs/**/*.{js,css,html}' --ignore-path .gitignore",
+    "format:check": "prettier --check 'docs/**/*.{js,css,html}' --ignore-path .gitignore",
+    "test": "echo 'No tests specified yet' && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tahershawki1/geotools-suite.git"
+  },
+  "keywords": [
+    "geotools",
+    "surveying",
+    "coordinates",
+    "GIS",
+    "DLTM",
+    "WGS84",
+    "UTM",
+    "coordinate-conversion",
+    "area-calculator",
+    "file-converter",
+    "geospatial"
+  ],
+  "author": "Taher Shawki",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/tahershawki1/geotools-suite/issues"
+  },
+  "homepage": "https://tahershawki1.github.io/geotools-suite/",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "proj4": "^2.11.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

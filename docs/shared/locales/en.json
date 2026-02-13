@@ -1,0 +1,118 @@
+{
+  "common": {
+    "appName": "GeoTools Suite",
+    "welcome": "Welcome to GeoTools Suite",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "copy": "Copy",
+    "clear": "Clear",
+    "delete": "Delete",
+    "download": "Download",
+    "upload": "Upload",
+    "import": "Import",
+    "export": "Export",
+    "search": "Search",
+    "filter": "Filter",
+    "settings": "Settings"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "fileConverter": "File Converter",
+    "dltmConverter": "Dubai DLTM Converter",
+    "coordinateTransform": "Coordinate Transform",
+    "areaCalculator": "Area Calculator",
+    "coordinateTools": "Coordinate Tools",
+    "signOut": "Sign Out"
+  },
+  "dashboard": {
+    "title": "GeoTools Survey Suite",
+    "subtitle": "Choose the service you want to use today",
+    "welcomeBadge": "Welcome",
+    "welcomeMessage": "Welcome to GeoTools Suite. Your professional geospatial workspace is ready."
+  },
+  "fileConverter": {
+    "title": "File Converter",
+    "subtitle": "Convert survey files with automatic detection and live preview",
+    "uploadLabel": "Upload Survey Files (multiple)",
+    "dropzone": "Drop or click to select files",
+    "supportedFormats": "Supports CSV, TXT, SDR, DXF and common survey text files",
+    "columnOrder": "Column order",
+    "crs": "Coordinate Reference System",
+    "clearAll": "Clear All",
+    "preview": "Preview",
+    "noFileSelected": "No file selected yet"
+  },
+  "dltmConverter": {
+    "title": "Dubai DLTM Converter",
+    "subtitle": "Convert between Dubai Local Transverse Mercator and WGS84 coordinates",
+    "singleConversion": "Single Conversion",
+    "batchConversion": "Batch Conversion (CSV)",
+    "reverseConversion": "WGS84 → DLTM",
+    "easting": "Easting (X)",
+    "northing": "Northing (Y)",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "outputFormat": "Output Format",
+    "precision": "Precision",
+    "convert": "Convert"
+  },
+  "coordinateTransform": {
+    "title": "Coordinate Transformation",
+    "subtitle": "Convert between WGS84 (Lat/Lon) and UTM coordinate systems",
+    "coordSystem": "Coord system",
+    "wgsToUtm": "WGS84 (Lat/Lon) → UTM",
+    "utmToWgs": "UTM → WGS84 (Lat/Lon)",
+    "latitude": "Latitude (N)",
+    "longitude": "Longitude (E)",
+    "easting": "Easting (X)",
+    "northing": "Northing (Y)",
+    "utmZone": "UTM Zone",
+    "convert": "Convert ✨",
+    "copyResults": "Copy Results 📋"
+  },
+  "areaCalculator": {
+    "title": "Area Calculator",
+    "subtitle": "Calculate polygon area and perimeter from coordinate points",
+    "enterPoints": "Enter Points",
+    "pointsPlaceholder": "Each line = one point\n\nAccepted examples:\nN, E\nN E\n1, N, E\n1 N E",
+    "drawAndCalculate": "Draw & Calculate",
+    "importCsv": "Import CSV/TXT",
+    "clear": "Clear",
+    "splitMethod": "Polygon split method",
+    "points": "Points",
+    "polygons": "Polygons",
+    "totalArea": "Total Area",
+    "totalPerimeter": "Total Perimeter"
+  },
+  "coordinateTools": {
+    "title": "Coordinate Tools",
+    "subtitle": "Additional coordinate tools and utilities for professional surveying",
+    "placeholder": "Placeholder — full tabs will be implemented in next iteration."
+  },
+  "footer": {
+    "copyright": "© 2026 GeoTools Suite — All rights reserved.",
+    "allRightsReserved": "All rights reserved"
+  },
+  "errors": {
+    "fileNotSupported": "File format not supported",
+    "invalidCoordinates": "Invalid coordinates",
+    "processingError": "Error processing data",
+    "networkError": "Network error occurred",
+    "unknownError": "An unknown error occurred"
+  },
+  "notifications": {
+    "fileSaved": "File saved successfully",
+    "fileUploaded": "File uploaded successfully",
+    "dataCopied": "Data copied to clipboard",
+    "operationCompleted": "Operation completed successfully",
+    "operationFailed": "Operation failed"
+  }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Homepage / Dashboard -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- File Converter Tool -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/file-converter.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Dubai DLTM Converter Tool -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Coordinate Transform Tool -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/coordinate-transform.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Area Calculator Tool -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/area-calculator.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Coordinate Tools -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/coordinate-tools.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

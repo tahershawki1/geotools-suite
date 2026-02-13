@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+        
+      - name: Check code formatting
+        run: npm run format:check
+        continue-on-error: true
+
+  validate:
+    name: Validate Files
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Check robots.txt exists
+        run: test -f docs/robots.txt
+        
+      - name: Check sitemap.xml exists
+        run: test -f docs/sitemap.xml
+        
+      - name: Validate HTML structure
+        run: |
+          echo "Checking for required meta tags..."
+          grep -r "meta name=\"description\"" docs/*.html docs/pages/*.html || echo "Warning: Some pages missing meta description"
+          grep -r "<h1" docs/pages/*.html || echo "Warning: Some pages missing H1 tag"
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+        
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential secrets..."
+          ! grep -r -i "api[_-]key\|password\|secret\|token" --include="*.js" --include="*.html" docs/ || echo "Warning: Potential secrets found"
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: [lint, validate, security]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          cname: false

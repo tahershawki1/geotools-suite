@@ -1,0 +1,22 @@
+# GeoTools Suite - Robots.txt
+# Allow all search engines to index the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://tahershawki1.github.io/geotools-suite/sitemap.xml
+
+# Disallow indexing of vendor libraries and development files
+Disallow: /vendor/
+Disallow: /preview-theme.html
+Disallow: /_admin-generator/
+Disallow: /_backup/
+
+# Allow indexing of main pages
+Allow: /index.html
+Allow: /pages/file-converter.html
+Allow: /pages/dltm-converter.html
+Allow: /pages/coordinate-transform.html
+Allow: /pages/area-calculator.html
+Allow: /pages/coordinate-tools.html

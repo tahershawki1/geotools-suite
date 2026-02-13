@@ -1,0 +1,240 @@
+/* RTL (Right-to-Left) Support for Arabic and other RTL languages */
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Navigation and Header */
+[dir="rtl"] .navbar-unified {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-brand-wrap {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-top-actions {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .hamburger-menu {
+  margin-left: 1rem;
+  margin-right: 0;
+}
+
+/* Sidebar */
+[dir="rtl"] .sidebar-unified {
+  right: 0;
+  left: auto;
+  border-left: 1px solid var(--border);
+  border-right: none;
+}
+
+[dir="rtl"] .shell-unified {
+  flex-direction: row-reverse;
+}
+
+/* Grid and Cards */
+[dir="rtl"] .grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .card {
+  text-align: right;
+}
+
+/* Forms and Inputs */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+[dir="rtl"] .input-group label {
+  text-align: right;
+}
+
+/* Buttons */
+[dir="rtl"] button {
+  text-align: center;
+}
+
+/* Icons and Arrows */
+[dir="rtl"] .arrow-icon,
+[dir="rtl"] .chevron-right {
+  transform: scaleX(-1);
+}
+
+/* Flex and Spacing with Logical Properties */
+.card,
+.container,
+.content {
+  padding-inline-start: 1rem;
+  padding-inline-end: 1rem;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
+}
+
+.input-group,
+.control-group {
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+/* File Converter specific */
+[dir="rtl"] .dropzone {
+  text-align: center;
+}
+
+[dir="rtl"] .control-col {
+  text-align: right;
+}
+
+/* Tables */
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+/* Lists */
+[dir="rtl"] ul,
+[dir="rtl"] ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+/* Tooltips and Popovers */
+[dir="rtl"] .tooltip,
+[dir="rtl"] .popover {
+  text-align: right;
+}
+
+/* Map Controls */
+[dir="rtl"] .leaflet-top.leaflet-left {
+  right: 0;
+  left: auto;
+}
+
+[dir="rtl"] .leaflet-top.leaflet-right {
+  left: 0;
+  right: auto;
+}
+
+[dir="rtl"] .leaflet-bottom.leaflet-left {
+  right: 0;
+  left: auto;
+}
+
+[dir="rtl"] .leaflet-bottom.leaflet-right {
+  left: 0;
+  right: auto;
+}
+
+/* Notifications */
+[dir="rtl"] .notification,
+[dir="rtl"] .toast {
+  right: auto;
+  left: 1rem;
+  text-align: right;
+}
+
+/* Modal/Dialog */
+[dir="rtl"] .modal-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .modal-footer {
+  flex-direction: row-reverse;
+}
+
+/* Breadcrumbs */
+[dir="rtl"] .breadcrumb {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .breadcrumb-separator::before {
+  content: "\\";
+}
+
+/* Progress bars */
+[dir="rtl"] .progress-bar {
+  transform: scaleX(-1);
+}
+
+/* Tabs */
+[dir="rtl"] .tabs,
+[dir="rtl"] .tab-list {
+  flex-direction: row-reverse;
+}
+
+/* Language Switcher */
+.language-switcher {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.lang-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.lang-btn:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.lang-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Font adjustments for Arabic */
+[dir="rtl"] body,
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+[dir="rtl"] button {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Adjust line height for Arabic text */
+[dir="rtl"] p,
+[dir="rtl"] li,
+[dir="rtl"] div {
+  line-height: 1.8;
+}
+
+/* Animation adjustments for RTL */
+[dir="rtl"] @keyframes slideInRight {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+[dir="rtl"] @keyframes slideInLeft {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "GeoTools Survey Suite",
+  "short_name": "GeoTools",
+  "description": "Professional browser-based surveying and coordinate conversion tools",
+  "start_url": "/geotools-suite/",
+  "scope": "/geotools-suite/",
+  "display": "standalone",
+  "background_color": "#f7f7f5",
+  "theme_color": "#0f766e",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "features": [
+    "Coordinate conversion (DLTM, WGS84, UTM)",
+    "File converter for survey files",
+    "Area and perimeter calculator",
+    "Offline capable",
+    "Dark mode support"
+  ]
+}
