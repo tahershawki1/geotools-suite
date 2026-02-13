@@ -1,0 +1,53 @@
+{
+  "name": "geotools-suite",
+  "version": "1.0.0",
+  "description": "A comprehensive browser-based surveying and coordinate tools suite with professional UI, accessibility, and dark mode support",
+  "main": "docs/index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000 --directory docs",
+    "dev": "npx http-server docs -p 8000 -o",
+    "lint": "eslint 'docs/**/*.js'",
+    "lint:fix": "eslint 'docs/**/*.js' --fix",
+    "format": "prettier --write 'docs/**/*.{js,css,html}'",
+    "format:check": "prettier --check 'docs/**/*.{js,css,html}'",
+    "audit": "npm audit",
+    "lighthouse": "echo 'Lighthouse requires Chrome. Install Chrome and run: npx lighthouse http://localhost:8000'",
+    "test:accessibility": "echo 'Install axe DevTools extension in your browser or use: npx @axe-core/cli http://localhost:8000'",
+    "test:security": "npm audit && node scripts/security-check.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tahershawki1/geotools-suite.git"
+  },
+  "keywords": [
+    "geotools",
+    "surveying",
+    "coordinates",
+    "mapping",
+    "dubai",
+    "dltm",
+    "wgs84",
+    "utm",
+    "accessibility",
+    "a11y",
+    "dark-mode",
+    "leaflet",
+    "proj4"
+  ],
+  "author": "GeoTools Suite",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/tahershawki1/geotools-suite/issues"
+  },
+  "homepage": "https://github.com/tahershawki1/geotools-suite#readme",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "http-server": "^14.1.1",
+    "prettier": "^3.2.5"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

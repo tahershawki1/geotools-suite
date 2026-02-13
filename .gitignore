@@ -1,5 +1,6 @@
 ﻿worker/
 green groth phace 3 plot limit points.txt
+
 # System files
 .DS_Store
 Thumbs.db
@@ -18,12 +19,18 @@ dist/
 build/
 *.log
 
-# Dependencies (if added)
+# Dependencies
 node_modules/
+package-lock.json
 venv/
 __pycache__/
 
+# Test reports
+lighthouse-report.html
+coverage/
+
 # Local-only admin generator
 docs/_admin-generator/
+
 # Backup snapshots (local only)
 docs/_backup/

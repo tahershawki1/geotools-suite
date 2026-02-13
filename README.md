@@ -2,6 +2,8 @@
 
 > A comprehensive browser-based surveying and coordinate tools suite with professional UI, accessibility, and dark mode support.
 
+**[English](README.md)** | [العربية](README.ar.md)
+
 ---
 
 ## 🎯 Overview
@@ -24,7 +26,7 @@ GeoTools Survey Suite is a modern, accessible, browser-based application for sur
 
 ### Requirements
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- Python 3.6+ or any static file server
+- Python 3.6+ or Node.js 14+ or any static file server
 
 ### Run Locally
 
@@ -37,11 +39,22 @@ Open: **http://localhost:8000/docs/**
 
 **Option 2: Node.js**
 ```bash
-cd geotools-suite/docs
-npx http-server
+cd geotools-suite
+npm start
 ```
 
-**Option 3: VS Code Live Server**
+**Option 3: Docker**
+```bash
+# Using Docker Compose
+docker-compose up -d
+
+# Or using Docker directly
+docker build -t geotools-suite .
+docker run -d -p 8080:80 geotools-suite
+```
+Open: **http://localhost:8080**
+
+**Option 4: VS Code Live Server**
 1. Install "Live Server" extension
 2. Right-click `docs/index.html`
 3. Select "Open with Live Server"
@@ -52,47 +65,42 @@ npx http-server
 
 ```
 geotools-suite/
-|-- README.md                      # This file
+|-- README.md                      # This file (English)
+|-- README.ar.md                   # Arabic version
+|-- package.json                   # Node.js configuration
+|-- Dockerfile                     # Docker configuration
+|-- docker-compose.yml             # Docker Compose setup
+|-- LICENSE                        # MIT License
+|-- CONTRIBUTING.md                # Contribution guide
+|-- .github/workflows/             # GitHub Actions CI/CD
 |-- docs/
-|   |-- index.html                 # Dashboard (LTR)
+|   |-- index.html                 # Dashboard (LTR/RTL support)
+|   |-- sitemap.xml               # SEO sitemap
+|   |-- robots.txt                # Robots file for crawlers
 |   |-- pages/
-|   |   |-- file-converter.html     # File Converter (LTR)
-|   |   |-- dltm-converter.html     # Dubai DLTM Converter (RTL)
-|   |   |-- coordinate-transform.html # Coordinate Transform (RTL)
-|   |   |-- area-calculator.html    # Area Calculator (RTL)
-|   |   |-- css/
-|   |   |   |-- file-converter.css
-|   |   |   |-- dltm-converter.css
-|   |   |   |-- coordinate-transform.css
-|   |   |   `-- area-calculator.css
-|   |   `-- js/
-|   |       |-- converter-export.js        # Export modal logic (File Converter)
-|   |       |-- file-converter.js
-|   |       |-- dltm-converter.js
-|   |       |-- coordinate-transform.js
-|   |       `-- area-calculator.js
+|   |   |-- file-converter.html     # File Converter
+|   |   |-- dltm-converter.html     # Dubai DLTM Converter
+|   |   |-- coordinate-transform.html # Coordinate Transform
+|   |   |-- area-calculator.html    # Area Calculator
+|   |   |-- css/                   # Page-specific styles
+|   |   `-- js/                    # Page-specific scripts
 |   |-- shared/
-|   |   |-- navbar.html             # Unified navigation bar component
-|   |   |-- footer.html             # Unified footer component
-|   |   |-- css/
-|   |   |   |-- navbar.css
-|   |   |   `-- footer.css
+|   |   |-- locales/              # Translation files (ar.json, en.json)
+|   |   |-- css/                  # Shared styles
 |   |   `-- js/
-|   |       |-- navbar-loader.js           # Auto-loads navbar on all pages
-|   |       |-- footer-loader.js           # Auto-loads footer on all pages
-|   |       |-- keyboard-navigation.js     # Keyboard accessibility module
-|   |       |-- notification-system.js     # Toast notification system
-|   |       |-- app-shell.js               # SPA loader for index.html
-|   |       |-- theme.js                   # Dark mode & theme management
-|   |       `-- service-worker.js          # Service worker logic
+|   |       |-- i18n.js                   # Internationalization (i18n)
+|   |       |-- navbar-loader.js          # Auto-loads navbar on all pages
+|   |       |-- keyboard-navigation.js    # Keyboard accessibility module
+|   |       |-- notification-system.js    # Toast notification system
+|   |       |-- theme.js                  # Dark mode & theme management
+|   |       `-- service-worker.js         # Service worker logic
 |   |-- styles.css                 # Global styles & CSS variables
-|   |-- service-worker.js          # Service worker bootstrap (keeps scope at /docs/)
-|   |-- sample_batch.csv           # Sample data for batch testing
 |   `-- vendor/
 |       |-- proj4.js               # Proj4js library (local)
-|       `-- leaflet/
-|           |-- leaflet.js
-|           `-- leaflet.css
+|       `-- leaflet/               # Leaflet mapping library
+`-- scripts/
+    |-- accessibility-test.js      # Accessibility testing script
+    `-- security-check.js          # Security check script
 ```
 
 
@@ -111,6 +119,7 @@ geotools-suite/
 - ✅ **Page Indicators** — Active page highlighted in navbar
 - ✅ **Responsive Design** — Works on desktop, tablet, and mobile
 - ✅ **Offline Capable** — Works without internet (except base maps)
+- ✅ **Multilingual** — Full English and Arabic support with RTL
 
 ### Accessibility (WCAG AA)
 - ✅ ARIA labels on all interactive elements
@@ -131,18 +140,44 @@ geotools-suite/
 
 ## 🔧 Developer Guide
 
+### Installing Dependencies
+
+```bash
+# Install Node.js dependencies (for dev tools)
+npm install
+
+# Start local server
+npm start
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+
+# Test accessibility
+npm run test:accessibility
+
+# Test security
+npm run test:security
+
+# Run Lighthouse
+npm run lighthouse
+```
+
 ### Adding a New Page
 
 1. Create your HTML file in `docs/pages/`
 2. Add these script tags in `<head>`:
 ```html
+<script src="./shared/js/i18n.js"></script>
 <script src="./shared/js/navbar-loader.js"></script>
-<script src="./shared/js/footer-loader.js"></script>
 <script src="./shared/js/keyboard-navigation.js"></script>
 <script src="./shared/js/notification-system.js"></script>
 ```
 3. Use CSS variables for consistent styling
 4. Add navigation button in `shared/navbar.html`
+5. Add translations in `shared/locales/ar.json` and `en.json`
 
 ### Using Notifications
 ```javascript
@@ -162,6 +197,24 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 | `End` | Last button |
 | `Alt+H` | Jump to home page |
 | `Enter/Space` | Activate focused button |
+
+---
+
+## 🌍 Internationalization (i18n)
+
+The project fully supports English and Arabic languages:
+
+- **Language Switching**: Click the language button at the top of the page
+- **RTL Support**: Full right-to-left support for Arabic
+- **Translations**: All text is translated in `docs/shared/locales/`
+- **Preference Persistence**: Your browser remembers your preferred language
+
+### Adding a New Language
+
+1. Create `docs/shared/locales/{lang}.json` file
+2. Add all keys with translations
+3. Update `docs/shared/js/i18n.js` to support the new language
+4. Test navigation and display
 
 ---
 
@@ -202,6 +255,11 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 - ✅ ARIA labels & live regions
 - ✅ Responsive mobile design
 - ✅ Comprehensive documentation
+- ✅ Full English and Arabic support with i18n
+- ✅ CI/CD setup with GitHub Actions
+- ✅ SEO improvements (sitemap, robots.txt, meta tags)
+- ✅ Docker for easy deployment
+- ✅ Development tools (ESLint, Prettier, Lighthouse, axe-core)
 
 ### Previous Fixes
 - ✅ Unified Leaflet loading (local copy only)
@@ -216,18 +274,116 @@ showInfo("Processing...", "Status", 0);  // 0 = no auto-dismiss
 
 | Document | Purpose |
 |----------|---------|
-| [ENHANCEMENT_PLAN.md](ENHANCEMENT_PLAN.md) | 7-phase project plan |
-| [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) | Complete implementation guide |
-| [QUALITY_ASSURANCE_REPORT.md](QUALITY_ASSURANCE_REPORT.md) | Code quality & QA report |
-| [PROJECT_COMPLETION_SUMMARY.md](PROJECT_COMPLETION_SUMMARY.md) | Final project summary |
+| [README.md](README.md) | Main documentation (English) |
+| [README.ar.md](README.ar.md) | Main documentation (Arabic) |
+| [LICENSE](LICENSE) | MIT License |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guide |
+| [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) | CI/CD setup |
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+### Local Testing
+
+```bash
+# Test accessibility
+npm run test:accessibility
+
+# Check security
+npm run test:security
+
+# Performance analysis
+npm run lighthouse
+
+# Code linting
+npm run lint
+
+# Audit vulnerabilities
+npm audit
+```
+
+### Automated CI/CD
+
+GitHub Actions automatically runs on every push or pull request:
+- ✅ Code linting (ESLint)
+- ✅ Security audit (npm audit)
+- ✅ Accessibility testing (axe-core)
+- ✅ Performance analysis (Lighthouse)
+- ✅ Docker build
+- ✅ Deploy to GitHub Pages
+
+---
+
+## 🚀 Deployment
+
+### GitHub Pages (Automatic)
+Automatically deployed when pushing to `main` branch via GitHub Actions.
+
+### Docker
+```bash
+# Build image
+docker build -t geotools-suite .
+
+# Run container
+docker run -d -p 8080:80 geotools-suite
+
+# Using Docker Compose
+docker-compose up -d
+```
+
+### Static Hosting
+Upload the contents of the `docs/` folder to any static file hosting service:
+- GitHub Pages
+- Netlify
+- Vercel
+- AWS S3
+- Azure Static Web Apps
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Ways to Contribute
+- 🐛 Report bugs
+- ✨ Suggest new features
+- 📝 Improve documentation
+- 🌍 Add translations
+- 💻 Submit pull requests
 
 ---
 
 ## 📄 License
 
-All rights reserved © 2026 GeoTools Survey Suite
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Third-Party Libraries
+- **Leaflet.js** - BSD-2-Clause License
+- **Proj4js** - MIT License
+- **OpenStreetMap** - ODbL License
+- **Cairo Font** - SIL Open Font License 1.1
 
 ---
 
-**Last Updated:** February 7, 2026 | **Version:** 1.0.0 | **Status:** ✅ Production Ready
+## 📞 Support & Contact
+
+- 🐛 **Bugs**: [GitHub Issues](https://github.com/tahershawki1/geotools-suite/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/tahershawki1/geotools-suite/discussions)
+- 📧 **Email**: See GitHub profile page
+
+---
+
+## 🌟 Acknowledgments
+
+Thanks to all contributors and open source projects that made this possible:
+- Leaflet.js for interactive mapping
+- Proj4js for coordinate transformations
+- OpenStreetMap for map data
+- All project contributors
+
+---
+
+**Last Updated:** February 13, 2026 | **Version:** 1.0.0 | **Status:** ✅ Production Ready
 

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+*.min.js
+*.min.css
+vendor/
+coverage/
+.git/
+*.log
+lighthouse-report.html

@@ -1,0 +1,108 @@
+{
+  "lang": "ar",
+  "dir": "rtl",
+  "common": {
+    "welcome": "مرحباً",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "warning": "تحذير",
+    "info": "معلومات",
+    "close": "إغلاق",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "remove": "إزالة",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "download": "تحميل",
+    "upload": "رفع",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "home": "الرئيسية",
+    "settings": "الإعدادات",
+    "help": "مساعدة",
+    "about": "حول"
+  },
+  "dashboard": {
+    "title": "مجموعة أدوات GeoTools المساحية",
+    "subtitle": "اختر الخدمة التي تريد استخدامها اليوم",
+    "welcomeBadge": "مرحباً",
+    "welcomeMessage": "مرحباً بك في مجموعة GeoTools. مساحة العمل الجغرافية المهنية جاهزة.",
+    "copyright": "© 2026 مجموعة GeoTools — جميع الحقوق محفوظة."
+  },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+    "fileConverter": "محول الملفات",
+    "dltmConverter": "محول دبي",
+    "coordinateTransform": "تحويل الإحداثيات",
+    "areaCalculator": "حاسبة المساحة",
+    "skipToContent": "الانتقال إلى المحتوى الرئيسي",
+    "toggleTheme": "تبديل المظهر",
+    "switchLanguage": "تبديل اللغة"
+  },
+  "tools": {
+    "fileConverter": {
+      "title": "محول الملفات",
+      "description": "تحويل ملفات CSV/TXT/SDR مع عرض الخريطة",
+      "uploadFile": "رفع ملف",
+      "convertFile": "تحويل الملف",
+      "downloadResult": "تحميل النتيجة"
+    },
+    "dltmConverter": {
+      "title": "محول دبي DLTM",
+      "description": "تحويل الإحداثيات DLTM ↔ WGS84 (نقطة واحدة أو مجموعة)",
+      "convertSingle": "تحويل نقطة واحدة",
+      "convertBatch": "تحويل مجموعة",
+      "dltmToWgs": "DLTM إلى WGS84",
+      "wgsToDltm": "WGS84 إلى DLTM"
+    },
+    "coordinateTransform": {
+      "title": "تحويل الإحداثيات",
+      "description": "تحويل الإحداثيات WGS84 ↔ UTM",
+      "latitude": "خط العرض",
+      "longitude": "خط الطول",
+      "easting": "الشرق",
+      "northing": "الشمال",
+      "zone": "المنطقة"
+    },
+    "areaCalculator": {
+      "title": "حاسبة المساحة",
+      "description": "حساب مساحة ومحيط المضلع مع الخريطة",
+      "drawPolygon": "رسم مضلع",
+      "calculateArea": "حساب المساحة",
+      "area": "المساحة",
+      "perimeter": "المحيط"
+    }
+  },
+  "accessibility": {
+    "keyboardShortcuts": "اختصارات لوحة المفاتيح",
+    "tabNavigation": "Tab - التنقل عبر العناصر التفاعلية",
+    "arrowNavigation": "مفاتيح الأسهم - التنقل بين الأزرار",
+    "homeKey": "Home - الزر الأول",
+    "endKey": "End - الزر الأخير",
+    "altH": "Alt+H - الانتقال إلى الصفحة الرئيسية",
+    "enterSpace": "Enter/Space - تفعيل الزر"
+  },
+  "errors": {
+    "fileNotSupported": "نوع الملف غير مدعوم",
+    "invalidCoordinates": "إحداثيات غير صالحة",
+    "networkError": "حدث خطأ في الشبكة",
+    "uploadFailed": "فشل الرفع",
+    "conversionFailed": "فشل التحويل",
+    "calculationFailed": "فشل الحساب"
+  },
+  "success": {
+    "fileUploaded": "تم رفع الملف بنجاح",
+    "fileConverted": "تم تحويل الملف بنجاح",
+    "coordinatesConverted": "تم تحويل الإحداثيات بنجاح",
+    "areaCalculated": "تم حساب المساحة بنجاح",
+    "dataSaved": "تم حفظ البيانات بنجاح"
+  }
+}

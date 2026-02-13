@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Main Dashboard -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tahershawki1.github.io/geotools-suite/"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tahershawki1.github.io/geotools-suite/?lang=ar"/>
+  </url>
+
+  <!-- File Converter -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/file-converter.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tahershawki1.github.io/geotools-suite/pages/file-converter.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tahershawki1.github.io/geotools-suite/pages/file-converter.html?lang=ar"/>
+  </url>
+
+  <!-- DLTM Converter -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tahershawki1.github.io/geotools-suite/pages/dltm-converter.html?lang=ar"/>
+  </url>
+
+  <!-- Coordinate Transform -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/coordinate-transform.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tahershawki1.github.io/geotools-suite/pages/coordinate-transform.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tahershawki1.github.io/geotools-suite/pages/coordinate-transform.html?lang=ar"/>
+  </url>
+
+  <!-- Area Calculator -->
+  <url>
+    <loc>https://tahershawki1.github.io/geotools-suite/pages/area-calculator.html</loc>
+    <lastmod>2026-02-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tahershawki1.github.io/geotools-suite/pages/area-calculator.html"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://tahershawki1.github.io/geotools-suite/pages/area-calculator.html?lang=ar"/>
+  </url>
+
+</urlset>

@@ -1,0 +1,22 @@
+# robots.txt for GeoTools Suite
+# https://tahershawki1.github.io/geotools-suite/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://tahershawki1.github.io/geotools-suite/sitemap.xml
+
+# Crawl delay (polite to search engines)
+Crawl-delay: 1
+
+# Disallow specific paths if needed
+Disallow: /vendor/
+Disallow: /*.log$
+Disallow: /*.json$
+Disallow: /service-worker.js
+
+# Allow important resources
+Allow: /styles.css
+Allow: /pages/
+Allow: /shared/
