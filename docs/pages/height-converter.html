@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ellipsoid → Orthometric Height - GeoTools Suite</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/height-converter.css" />
+</head>
+<body>
+
+<div class="ht-container">
+  <!-- Tab bar -->
+  <div class="ht-tabs" role="tablist" aria-label="Height converter tabs">
+    <div class="ht-tab active" role="tab" aria-selected="true" tabindex="0"
+         onclick="switchHeightTab(this,'single')"
+         onkeydown="if(event.key==='Enter'||event.key===' ')switchHeightTab(this,'single')">
+      Single Point
+    </div>
+    <div class="ht-tab" role="tab" aria-selected="false" tabindex="0"
+         onclick="switchHeightTab(this,'batch')"
+         onkeydown="if(event.key==='Enter'||event.key===' ')switchHeightTab(this,'batch')">
+      Batch Conversion
+    </div>
+    <div class="ht-tab" role="tab" aria-selected="false" tabindex="0"
+         onclick="switchHeightTab(this,'info')"
+         onkeydown="if(event.key==='Enter'||event.key===' ')switchHeightTab(this,'info')">
+      Reference &amp; Help
+    </div>
+  </div>
+
+  <div class="ht-content">
+
+    <!-- ── Single Point ─────────────────────────────────────── -->
+    <div id="ht-section-single" class="ht-section active">
+
+      <div class="ht-formula-banner" role="note">
+        <strong>H = h − N</strong><br>
+        <em>Orthometric height (H)</em> = Ellipsoidal height (h) − Geoid undulation (N)
+      </div>
+
+      <div class="ht-input-grid">
+        <div class="ht-input-group">
+          <label for="ht-h">Ellipsoidal Height h (m)</label>
+          <input type="number" id="ht-h" step="any"
+                 placeholder="e.g. 52.340"
+                 aria-label="Ellipsoidal height in metres" />
+        </div>
+        <div class="ht-input-group">
+          <label for="ht-N">Geoid Undulation N (m)</label>
+          <input type="number" id="ht-N" step="any"
+                 placeholder="e.g. -18.500"
+                 aria-label="Geoid undulation in metres" />
+        </div>
+        <div class="ht-input-group">
+          <label for="ht-prec">Decimal Precision</label>
+          <select id="ht-prec" aria-label="Decimal precision">
+            <option value="4">4 decimal places</option>
+            <option value="3">3 decimal places</option>
+            <option value="2">2 decimal places</option>
+            <option value="6">6 decimal places</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ht-error" id="ht-single-error" role="alert"></div>
+
+      <div class="ht-btn-row">
+        <button class="btn-ht-calc" onclick="runSingleHeight()" aria-label="Calculate orthometric height">
+          Calculate ✨
+        </button>
+        <button class="btn-ht-secondary" onclick="clearSingleHeight()" aria-label="Clear inputs">
+          🗑️ Clear
+        </button>
+      </div>
+
+      <!-- Result card -->
+      <div class="ht-result-card" id="ht-result-card" role="region" aria-label="Conversion result">
+        <div class="ht-result-head">
+          <div class="ht-result-title">Conversion Result</div>
+          <button class="btn-ht-copy" id="ht-copy-btn" data-value=""
+                  onclick="copyHeightResult(this)"
+                  aria-label="Copy orthometric height to clipboard">
+            📋 Copy H
+          </button>
+        </div>
+
+        <div class="ht-result-row">
+          <span class="ht-result-label">Ellipsoidal height (h)</span>
+          <span class="ht-result-value" id="ht-res-h">—</span>
+        </div>
+        <div class="ht-result-row">
+          <span class="ht-result-label">Geoid undulation (N)</span>
+          <span class="ht-result-value" id="ht-res-N">—</span>
+        </div>
+        <div class="ht-result-row">
+          <span class="ht-result-label">Orthometric height (H)</span>
+          <span class="ht-result-value highlight" id="ht-res-H">—</span>
+        </div>
+        <div class="ht-formula-line" id="ht-res-formula"></div>
+      </div>
+    </div><!-- /single -->
+
+
+    <!-- ── Batch ─────────────────────────────────────────────── -->
+    <div id="ht-section-batch" class="ht-section">
+
+      <div class="ht-formula-banner" role="note">
+        <strong>Batch mode</strong>: paste rows below. Accepted formats per row:<br>
+        <code>h</code> &nbsp;|&nbsp;
+        <code>Pt, h, N</code> &nbsp;|&nbsp;
+        <code>Pt, Lat, Lon, h, N</code><br>
+        If "Use global N" is checked, the N column is optional.
+      </div>
+
+      <!-- Global N option -->
+      <div class="ht-checkbox-row">
+        <input type="checkbox" id="ht-batch-use-global" checked
+               aria-label="Use a single geoid undulation value for all points" />
+        <label for="ht-batch-use-global">Use a single N value for all points</label>
+      </div>
+
+      <div class="ht-input-grid" id="ht-global-n-wrap" style="margin-bottom:16px">
+        <div class="ht-input-group">
+          <label for="ht-batch-N">Global Geoid Undulation N (m)</label>
+          <input type="number" id="ht-batch-N" step="any"
+                 placeholder="e.g. -18.500"
+                 aria-label="Global geoid undulation for all points" />
+        </div>
+        <div class="ht-input-group">
+          <label for="ht-batch-prec">Decimal Precision</label>
+          <select id="ht-batch-prec" aria-label="Output decimal precision">
+            <option value="4">4 decimal places</option>
+            <option value="3">3 decimal places</option>
+            <option value="2">2 decimal places</option>
+            <option value="6">6 decimal places</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ht-input-group" style="margin-bottom:16px">
+        <label for="ht-batch-input">Paste Data (one point per line)</label>
+        <textarea id="ht-batch-input" class="ht-batch-textarea"
+                  placeholder="Examples:
+52.340
+1, 52.340, -18.500
+1, 25.123456, 55.123456, 52.340, -18.500"></textarea>
+      </div>
+
+      <div class="ht-error" id="ht-batch-error" role="alert"></div>
+
+      <div class="ht-btn-row">
+        <button class="btn-ht-calc" onclick="runBatchHeight()" aria-label="Convert all points">
+          Convert All ✨
+        </button>
+        <button class="btn-ht-secondary" onclick="importBatchFile()" aria-label="Import CSV or TXT file">
+          📂 Import File
+        </button>
+        <button class="btn-ht-secondary" onclick="exportBatchCSV()" aria-label="Export results as CSV">
+          💾 Export CSV
+        </button>
+      </div>
+      <input type="file" id="ht-batch-file" accept=".csv,.txt" style="display:none" aria-hidden="true" />
+
+      <!-- Results table -->
+      <div class="ht-batch-table-wrap" id="ht-batch-table-wrap">
+        <table class="ht-batch-table" aria-label="Batch conversion results">
+          <thead>
+            <tr>
+              <th>Pt</th>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>h ellipsoidal (m)</th>
+              <th>N geoid (m)</th>
+              <th>H orthometric (m)</th>
+            </tr>
+          </thead>
+          <tbody id="ht-batch-tbody"></tbody>
+        </table>
+      </div>
+    </div><!-- /batch -->
+
+
+    <!-- ── Reference & Help ──────────────────────────────────── -->
+    <div id="ht-section-info" class="ht-section">
+
+      <div class="ht-formula-banner" role="note">
+        <strong>Concepts</strong><br>
+        <strong>h</strong> — Ellipsoidal height: height above the WGS84 reference ellipsoid, as measured by GPS/GNSS.<br>
+        <strong>N</strong> — Geoid undulation: vertical separation between the ellipsoid and the geoid (equipotential surface approximating mean sea level). Positive N means the geoid is above the ellipsoid.<br>
+        <strong>H</strong> — Orthometric height: height above the geoid, used in everyday surveying and engineering.
+      </div>
+
+      <div class="ht-info-box">
+        <h3>Typical Geoid Undulation Values — Middle East &amp; UAE</h3>
+        <p>These values are approximate EGM2008 geoid undulations for reference only.
+           Always use precise geoid grid files (e.g., EGM2008 or national model) for
+           production work.</p>
+        <table class="ht-info-table" aria-label="Typical geoid undulation values">
+          <thead>
+            <tr>
+              <th>Region / City</th>
+              <th>Approx. Latitude</th>
+              <th>Approx. N (m)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Dubai, UAE</td><td>25.2°N</td><td>−19.5 to −20.5</td></tr>
+            <tr><td>Abu Dhabi, UAE</td><td>24.5°N</td><td>−20.0 to −21.0</td></tr>
+            <tr><td>Sharjah, UAE</td><td>25.3°N</td><td>−19.5 to −20.5</td></tr>
+            <tr><td>Doha, Qatar</td><td>25.3°N</td><td>−20.0 to −21.0</td></tr>
+            <tr><td>Riyadh, Saudi Arabia</td><td>24.7°N</td><td>−17.0 to −19.0</td></tr>
+            <tr><td>Cairo, Egypt</td><td>30.1°N</td><td>−8.0 to −10.0</td></tr>
+            <tr><td>Beirut, Lebanon</td><td>33.9°N</td><td>+14.0 to +17.0</td></tr>
+            <tr><td>Amman, Jordan</td><td>31.9°N</td><td>+14.0 to +18.0</td></tr>
+            <tr><td>Baghdad, Iraq</td><td>33.3°N</td><td>−5.0 to −7.0</td></tr>
+            <tr><td>Muscat, Oman</td><td>23.6°N</td><td>−22.0 to −24.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ht-info-box" style="margin-top:16px">
+        <h3>Common Geoid Models</h3>
+        <table class="ht-info-table" aria-label="Common geoid models">
+          <thead>
+            <tr><th>Model</th><th>Coverage</th><th>Resolution</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>EGM96</td><td>Global</td><td>15 arc-min</td><td>Standard GPS reference</td></tr>
+            <tr><td>EGM2008</td><td>Global</td><td>1 arc-min (~1.8 km)</td><td>Higher accuracy</td></tr>
+            <tr><td>UAE National Geoid</td><td>UAE only</td><td>Sub-km</td><td>Contact UAE Survey Authority</td></tr>
+            <tr><td>OSG (Saudi Arabia)</td><td>Saudi Arabia</td><td>Variable</td><td>GASTAT / MOMRA data</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ht-info-box" style="margin-top:16px">
+        <h3>How to use this tool</h3>
+        <ol style="margin-left:18px;line-height:2">
+          <li>Obtain the geoid undulation <strong>N</strong> for your area from a geoid model (EGM2008, national model, or the reference table above).</li>
+          <li>Enter your GPS-derived ellipsoidal height <strong>h</strong>.</li>
+          <li>The tool computes <strong>H = h − N</strong>.</li>
+          <li>For batch processing, paste or import a CSV file and use the Batch tab.</li>
+        </ol>
+      </div>
+
+    </div><!-- /info -->
+
+  </div><!-- /.ht-content -->
+</div><!-- /.ht-container -->
+
+<script src="./js/height-converter.js"></script>
+</body>
+</html>

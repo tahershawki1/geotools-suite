@@ -16,6 +16,7 @@ GeoTools Survey Suite is a modern, accessible, browser-based application for sur
 | 📄 **File Converter** | Convert CSV/TXT/SDR files with map display | `pages/file-converter.html` |
 | 🔄 **Dubai Converter** | DLTM ↔ WGS84 coordinate conversion (single & batch) | `pages/dltm-converter.html` |
 | 🌍 **Coordinate Transform** | WGS84 ↔ UTM coordinate transformation | `pages/coordinate-transform.html` |
+| ⛰️ **Height Converter** | Ellipsoid → Orthometric height (H = h − N), single & batch | `pages/height-converter.html` |
 | 📐 **Area Calculator** | Polygon area & perimeter calculation with map | `pages/area-calculator.html` |
 
 ---
@@ -59,6 +60,8 @@ geotools-suite/
 |   |   |-- file-converter.html     # File Converter (LTR)
 |   |   |-- dltm-converter.html     # Dubai DLTM Converter (RTL)
 |   |   |-- coordinate-transform.html # Coordinate Transform (RTL)
+|   |   |-- coordinate-tools.html   # Unified Coordinate Tools
+|   |   |-- height-converter.html   # Ellipsoid → Orthometric Height Converter
 |   |   |-- area-calculator.html    # Area Calculator (RTL)
 |   |   |-- css/
 |   |   |   |-- file-converter.css

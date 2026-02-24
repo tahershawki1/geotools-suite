@@ -1,0 +1,307 @@
+.ht-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 20px auto 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Tabs ── */
+.ht-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-wrap: wrap;
+}
+.ht-tab {
+  padding: 15px 30px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  flex: 1 1 160px;
+  text-align: center;
+}
+.ht-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: var(--card-bg);
+}
+
+/* ── Content ── */
+.ht-content {
+  padding: 30px;
+}
+.ht-section {
+  display: none;
+}
+.ht-section.active {
+  display: block;
+}
+
+/* ── Formula banner ── */
+.ht-formula-banner {
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  border-radius: 14px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+.ht-formula-banner strong {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+/* ── Input grid ── */
+.ht-input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) {
+  .ht-input-grid { grid-template-columns: 1fr; }
+  .ht-tab { padding: 12px 16px; font-size: 13px; }
+}
+
+.ht-input-group {
+  display: flex;
+  flex-direction: column;
+}
+.ht-input-group label {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--text-main);
+}
+.ht-input-group input,
+.ht-input-group select,
+.ht-input-group textarea {
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ht-input-group input:focus,
+.ht-input-group select:focus,
+.ht-input-group textarea:focus {
+  border-color: var(--primary);
+}
+
+/* ── Buttons ── */
+.ht-btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.btn-ht-calc {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  min-width: 140px;
+}
+.btn-ht-calc:hover { background: var(--primary-hover); }
+.btn-ht-secondary {
+  padding: 14px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-ht-secondary:hover { background: var(--bg); }
+
+/* ── Error ── */
+.ht-error {
+  display: none;
+  background: #fee2e2;
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+/* ── Result card ── */
+.ht-result-card {
+  display: none;
+  margin-top: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+.ht-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+.ht-result-title {
+  font-weight: 900;
+  font-size: 15px;
+  color: var(--text-main);
+}
+.ht-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ht-result-row:last-child { border-bottom: none; }
+.ht-result-label { color: var(--text-muted); }
+.ht-result-value { font-weight: 700; color: var(--text-main); font-family: monospace; font-size: 15px; }
+.ht-result-value.highlight { color: var(--primary); font-size: 17px; }
+.ht-formula-line {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.btn-ht-copy {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-main);
+  transition: background 0.15s;
+}
+.btn-ht-copy:hover { background: var(--bg); }
+
+/* ── Batch ── */
+.ht-batch-textarea {
+  width: 100%;
+  height: 160px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-family: monospace;
+  font-size: 13px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ht-batch-textarea:focus { border-color: var(--primary); }
+
+.ht-global-n-wrap {
+  display: block;
+}
+
+.ht-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.ht-checkbox-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+/* ── Batch results table ── */
+.ht-batch-table-wrap {
+  display: none;
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: auto;
+}
+.ht-batch-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ht-batch-table th {
+  background: var(--bg);
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ht-batch-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: monospace;
+}
+.ht-batch-table tr:last-child td { border-bottom: none; }
+
+/* ── Reference info ── */
+.ht-info-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.ht-info-box h3 {
+  font-size: 14px;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+.ht-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.ht-info-table th,
+.ht-info-table td {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+.ht-info-table th {
+  background: var(--card-bg);
+  font-weight: 700;
+  text-align: left;
+}
