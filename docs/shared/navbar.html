@@ -1,30 +1,25 @@
 <link rel="stylesheet" href="./css/navbar.css" />
-<!-- Unified App Shell (top header + left sidebar) -->
-<header class="navbar-unified" role="banner" aria-label="GeoTools top bar">
-  <div class="nav-brand-wrap">
-    <button class="hamburger-menu" type="button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobile-main-menu">
-      <span></span><span></span><span></span>
-    </button>
-    <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
-      <span class="nav-logo-mark" aria-hidden="true"></span>
-      <span class="nav-logo-text">GeoTools Cloud</span>
-    </a>
-  </div>
-
-  <div class="nav-top-actions">
-    <button type="button" class="top-icon-btn" aria-label="Open app menu">
-      <span class="top-grid-icon" aria-hidden="true"></span>
-    </button>
-    <span class="top-user-name">Taher Shawki</span>
-    <button type="button" class="top-signout-btn">SIGN OUT</button>
-  </div>
-</header>
-
 <div class="shell-unified">
+  <header class="navbar-unified" role="banner" aria-label="GeoTools top app bar">
+    <div class="nav-brand-wrap">
+      <button class="hamburger-menu" type="button" aria-label="Open tools menu" aria-expanded="false" aria-controls="mobile-main-menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
+        <span class="nav-logo-mark" aria-hidden="true"></span>
+        <span class="nav-logo-copy">
+          <span class="nav-logo-text">GeoTools Suite</span>
+          <span class="nav-logo-kicker" data-current-page-label>Home</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
   <aside class="sidebar-unified" id="mobile-main-menu" role="navigation" aria-label="Main navigation">
     <div class="sidebar-head">
-      <p class="sidebar-title">Workspace</p>
-      <p class="sidebar-subtitle">Pages</p>
+      <p class="sidebar-title">Navigation</p>
+      <p class="sidebar-subtitle">Atlas-inspired access to every survey workflow.</p>
     </div>
     <div class="nav-links-unified"></div>
   </aside>

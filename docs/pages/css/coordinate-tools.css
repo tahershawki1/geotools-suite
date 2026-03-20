@@ -1,2 +1,115 @@
-﻿.coord-tools { padding: 24px; }
-.coord-tools .muted { color: var(--text-muted); }
+.coordinate-tools-page {
+  padding: 20px;
+}
+
+.coord-tools-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.coord-tools-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coord-tools-kicker {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.coord-tools-hero h1 {
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+.coord-tools-hero .muted {
+  max-width: 720px;
+  color: var(--text-muted);
+}
+
+.coord-tools-panel {
+  margin-top: 0;
+}
+
+.coord-page-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 20px 20px 0;
+}
+
+.coord-page-link {
+  min-height: 52px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.coord-page-link:hover,
+.coord-page-link:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  outline: none;
+}
+
+.coord-page-link.is-active,
+.coord-page-link[aria-current="page"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--card-bg);
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .coordinate-tools-page {
+    padding: 16px;
+  }
+
+  .coord-tools-hero h1 {
+    font-size: 26px;
+  }
+
+  .coord-page-links {
+    grid-template-columns: 1fr;
+    padding: 14px 14px 0;
+  }
+}
+
+@container app (max-width: 430px) {
+  .coordinate-tools-page {
+    padding: 12px;
+  }
+
+  .coord-tools-shell {
+    gap: 12px;
+  }
+
+  .coord-tools-hero h1 {
+    font-size: 24px;
+  }
+
+  .coord-page-links {
+    grid-template-columns: 1fr;
+    padding: 12px 12px 0;
+  }
+}

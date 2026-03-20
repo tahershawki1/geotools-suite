@@ -28,35 +28,38 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
 
-  <body>
-    <div
-      id="loader"
-      role="status"
-      aria-live="polite"
-      aria-hidden="true"
-      aria-label="Loading page content"
-    >
-      <div class="loader-content">
-        <div class="loader-spinner" aria-hidden="true"></div>
-        <div class="loader-title">Welcome to GeoTools Suite</div>
-        <div id="loader-text" class="loader-text">Preparing your workspace...</div>
-      </div>
-    </div>
-
+  <body data-active-page="home">
     <div id="app-container">
       <main id="view-content" class="dashboard-view" tabindex="-1" aria-busy="false">
-        <div class="header">
-          <div class="welcome-banner" role="note" aria-label="Welcome message">
-            <span class="welcome-badge">Welcome</span>
-            <p class="welcome-copy">
-              Welcome to GeoTools Suite. Your professional geospatial workspace is ready.
-            </p>
+        <section class="app-section surface" aria-label="Applications launcher">
+          <div class="section-head">
+            <div class="section-copy">
+              <p class="section-kicker">GeoTools Suite</p>
+              <h2>Survey tools</h2>
+              <p class="section-subtitle">
+                Local survey utilities for coordinate conversion, file workflows, and field calculations.
+              </p>
+            </div>
+            <span class="section-count" data-tool-count-label="geotools">6 tools ready</span>
           </div>
-          <h1>GeoTools Survey Suite</h1>
-          <p>Choose the service you want to use today</p>
-        </div>
 
-        <div class="grid" data-tools-grid></div>
+          <div class="grid" data-tools-grid="geotools"></div>
+        </section>
+
+        <section class="app-section surface" aria-label="Site tools launcher">
+          <div class="section-head">
+            <div class="section-copy">
+              <p class="section-kicker">GeoTools Suite</p>
+              <h2>Site Tools</h2>
+              <p class="section-subtitle">
+                Website utilities and internal helpers can be surfaced here when they are ready.
+              </p>
+            </div>
+            <span class="section-count" data-tool-count-label="site-tools">0 tools ready</span>
+          </div>
+
+          <div class="grid" data-tools-grid="site-tools"></div>
+        </section>
       </main>
     </div>
 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WGS84 to DLTM - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/coordinate-tools.css" />
+  <link rel="stylesheet" href="./css/dltm-converter.css" />
+  <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
+</head>
+<body>
+  <div class="coordinate-tools-page">
+    <div class="coord-tools-shell">
+      <header class="coord-tools-hero">
+        <p class="coord-tools-kicker">Coordinate Workspace</p>
+        <h1>WGS84 to DLTM</h1>
+        <p class="muted">
+          Convert latitude and longitude, or UTM values, into DLTM coordinates.
+        </p>
+      </header>
+
+      <div class="container-dltm coord-tools-panel">
+        <nav class="coord-page-links" aria-label="Coordinate workflow pages">
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-tools');}else{window.location.href='./coordinate-tools.html';}"
+          >
+            Single Conversion
+          </button>
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-tools-batch');}else{window.location.href='./coordinate-tools-batch.html';}"
+          >
+            Batch Conversion
+          </button>
+          <button class="coord-page-link is-active" type="button" aria-current="page">
+            WGS84 to DLTM
+          </button>
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-transform');}else{window.location.href='./coordinate-transform.html';}"
+          >
+            Coordinate Transform
+          </button>
+        </nav>
+
+        <div class="content-dltm">
+          <div id="section-reverse" class="tool-section active">
+            <div style="margin-bottom: 12px">
+              <label style="display: block; font-weight: 900; margin-bottom: 8px">
+                Choose Input Type:
+              </label>
+              <div style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap">
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    cursor: pointer;
+                  "
+                >
+                  <input
+                    type="radio"
+                    name="rev-input-type"
+                    value="wgs84"
+                    checked
+                    onchange="switchReverseInputType('wgs84')"
+                  />
+                  WGS84 (Lat/Lon)
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    cursor: pointer;
+                  "
+                >
+                  <input
+                    type="radio"
+                    name="rev-input-type"
+                    value="utm"
+                    onchange="switchReverseInputType('utm')"
+                  />
+                  UTM
+                </label>
+              </div>
+            </div>
+
+            <div id="wgs84-inputs" class="input-grid">
+              <div class="input-group">
+                <label>Longitude</label>
+                <input type="number" id="inp-lon" placeholder="55.123456" />
+              </div>
+              <div class="input-group">
+                <label>Latitude</label>
+                <input type="number" id="inp-lat" placeholder="25.123456" />
+              </div>
+            </div>
+
+            <div id="utm-inputs" class="input-grid" style="display: none">
+              <div class="input-group">
+                <label>UTM Zone</label>
+                <input type="text" id="inp-utm-zone" placeholder="40N" maxlength="3" />
+              </div>
+              <div class="input-group">
+                <label>Easting (meters)</label>
+                <input type="number" id="inp-utm-e" placeholder="500000" step="0.01" />
+              </div>
+              <div class="input-group">
+                <label>Northing (meters)</label>
+                <input type="number" id="inp-utm-n" placeholder="2768000" step="0.01" />
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px">
+              <button class="btn-calc" style="flex: 1" onclick="runReverseDltm()">
+                Convert Now
+              </button>
+              <button class="btn-nav-top" onclick="showOnMapFromWgs()">
+                Show on Map
+              </button>
+              <button class="btn-nav-top" title="Clear saved data" onclick="clearLastInputs()">
+                Clear
+              </button>
+            </div>
+
+            <div id="reverse-box" class="result-card">
+              <div class="result-head">
+                <div>
+                  <div class="result-title">DLTM Output</div>
+                  <div class="result-sub">TM (Dubai Local) in meters</div>
+                </div>
+                <div class="result-actions">
+                  <button class="btn-mini" onclick="copyReverse('dltm')">Copy DLTM</button>
+                  <button class="btn-mini" onclick="copyReverse('wgs')">Copy WGS84</button>
+                </div>
+              </div>
+
+              <div class="result-grid-2">
+                <div class="result-field">
+                  <div class="field-label">Easting (DLTM)</div>
+                  <div class="field-line">
+                    <span class="field-name">E:</span>
+                    <span class="field-value" id="res-dltm-e">-</span>
+                  </div>
+                </div>
+                <div class="result-field">
+                  <div class="field-label">Northing (DLTM)</div>
+                  <div class="field-line">
+                    <span class="field-name">N:</span>
+                    <span class="field-value" id="res-dltm-n">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-note" id="reverse-note"></div>
+            </div>
+
+            <div id="mapBox" style="margin-top: 14px; display: none">
+              <div
+                id="map"
+                style="
+                  height: 320px;
+                  border: 1px solid var(--border);
+                  border-radius: 10px;
+                  overflow: hidden;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../vendor/leaflet/leaflet.js"></script>
+  <script src="./js/dltm-converter.js"></script>
+</body>
+</html>

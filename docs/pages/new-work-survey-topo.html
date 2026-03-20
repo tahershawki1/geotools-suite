@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Survey Topo - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/new-work.css" />
+</head>
+<body>
+  <div class="new-work-page">
+    <div class="new-work-shell">
+      <header class="new-work-hero">
+        <p class="new-work-kicker">New Work</p>
+        <h1>Survey Topo</h1>
+        <p class="muted">
+          Dedicated page shell for survey topo workflow inputs, review, and outputs.
+        </p>
+      </header>
+
+      <section class="surface new-work-panel">
+        <nav class="new-work-links" aria-label="New work pages">
+          <button
+            class="new-work-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('new-work');}else{window.location.href='./new-work.html';}"
+          >
+            Overview
+          </button>
+          <button
+            class="new-work-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('new-work-gate-level');}else{window.location.href='./new-work-gate-level.html';}"
+          >
+            Gate Level
+          </button>
+          <button class="new-work-link is-active" type="button" aria-current="page">
+            Survey Topo
+          </button>
+        </nav>
+
+        <div class="new-work-body">
+          <section class="new-work-summary">
+            <h2>Survey Topo workspace</h2>
+            <p>
+              This page is ready to host the survey topo process when you want to add forms, tables, or exports.
+            </p>
+          </section>
+
+          <section class="new-work-placeholder" aria-label="Survey Topo placeholder">
+            <h2>Ready for implementation</h2>
+            <ul class="new-work-checklist">
+              <li>Input block for topo points, codes, or imported files</li>
+              <li>Review area for classifications, checks, and comments</li>
+              <li>Output block for processed data, summaries, or export actions</li>
+            </ul>
+          </section>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New work - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/new-work.css" />
+</head>
+<body>
+  <div class="new-work-page">
+    <div class="new-work-shell">
+      <header class="new-work-hero">
+        <p class="new-work-kicker">New Work</p>
+        <h1>New work</h1>
+        <p class="muted">
+          Central workspace for the new pages requested in this tool set.
+        </p>
+      </header>
+
+      <section class="surface new-work-panel">
+        <nav class="new-work-links" aria-label="New work pages">
+          <button class="new-work-link is-active" type="button" aria-current="page">
+            Overview
+          </button>
+          <button
+            class="new-work-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('new-work-gate-level');}else{window.location.href='./new-work-gate-level.html';}"
+          >
+            Gate Level
+          </button>
+          <button
+            class="new-work-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('new-work-survey-topo');}else{window.location.href='./new-work-survey-topo.html';}"
+          >
+            Survey Topo
+          </button>
+        </nav>
+
+        <div class="new-work-body">
+          <section class="new-work-summary">
+            <h2>Available pages</h2>
+            <p>
+              Use this hub to open the two new subpages and expand each workflow independently later.
+            </p>
+          </section>
+
+          <div class="new-work-card-grid">
+            <button
+              class="new-work-card"
+              type="button"
+              aria-label="Open Gate Level page"
+              onclick="if(typeof loadPage==='function'){loadPage('new-work-gate-level');}else{window.location.href='./new-work-gate-level.html';}"
+            >
+              <div class="new-work-card-head">
+                <span class="new-work-badge">Page 1</span>
+                <h2>Gate Level</h2>
+              </div>
+              <p>
+                Open the Gate Level workspace and keep its inputs, checks, and output actions isolated.
+              </p>
+            </button>
+
+            <button
+              class="new-work-card"
+              type="button"
+              aria-label="Open Survey Topo page"
+              onclick="if(typeof loadPage==='function'){loadPage('new-work-survey-topo');}else{window.location.href='./new-work-survey-topo.html';}"
+            >
+              <div class="new-work-card-head">
+                <span class="new-work-badge">Page 2</span>
+                <h2>Survey Topo</h2>
+              </div>
+              <p>
+                Open the Survey Topo workspace and keep topo-specific actions grouped in one place.
+              </p>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

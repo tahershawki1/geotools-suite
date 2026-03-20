@@ -4,7 +4,7 @@
     margin: 0 auto;
     background: var(--card-bg, #fff);
     border: 1px solid var(--border);
-    border-radius: 24px;
+    border-radius: 10px;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
     margin-top: 20px;
@@ -13,18 +13,44 @@
     direction: ltr;
     min-width: 0;
   }
-  .content-trans { padding: 30px; min-width: 0; }
+  .content-trans { padding: 24px; min-width: 0; }
+
+  .trans-header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .trans-kicker {
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .trans-copy {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
 
   .input-group { margin-bottom: 20px; }
   .input-group label { display: block; font-weight: 700; margin-bottom: 8px; color: var(--text-main); font-size: 14px; }
-  .input-group input, .input-group select { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid var(--border); font-size: 16px; outline: none; }
+  .input-group input, .input-group select { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); font-size: 16px; outline: none; }
 
-  .res-box-trans { margin-top: 25px; background: var(--primary-light); padding: 20px; border-radius: 16px; border: 1px solid var(--primary); display: none; min-width: 0; }
+  .res-box-trans { margin-top: 25px; background: var(--primary-light); padding: 20px; border-radius: 10px; border: 1px solid #cfe0d6; display: none; min-width: 0; }
   .res-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; color: var(--primary-hover); gap: 8px; flex-wrap: wrap; }
   .res-val { font-family: monospace; font-size: 18px; min-width: 0; overflow-wrap: anywhere; word-break: break-word; text-align: right; }
 
-  .btn-calc-trans { width:100%; padding: 14px; border:none; border-radius: 12px; background:var(--primary); color:#fff; font-weight:700; font-size:16px; cursor:pointer; }
+  .btn-calc-trans { width:100%; padding: 14px; border:none; border-radius: 10px; background:var(--primary); color:#fff; font-weight:700; font-size:16px; cursor:pointer; box-shadow: 0 10px 24px rgba(10, 127, 138, 0.18); }
   .btn-calc-trans:hover { background: var(--primary-hover); }
+
+  .trans-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
 
   @media (max-width: 560px) {
     .content-trans {

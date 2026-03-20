@@ -1,0 +1,183 @@
+.orthometric-page {
+  padding: 20px;
+}
+
+.orthometric-panel {
+  margin-top: 0;
+}
+
+.orthometric-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.orthometric-section-kicker {
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.orthometric-chip-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.orthometric-mode {
+  margin-bottom: 16px;
+}
+
+.orthometric-mode .orthometric-mode-btn {
+  flex: 1 1 180px;
+}
+
+.orthometric-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.orthometric-grid[data-input-panel="wgs84"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.orthometric-page .input-group label {
+  min-height: 2.8em;
+  line-height: 1.4;
+  display: flex;
+  align-items: flex-end;
+}
+
+.orthometric-grid[hidden] {
+  display: none !important;
+}
+
+.orthometric-help,
+.orthometric-status {
+  display: block;
+  margin-top: 0;
+}
+
+.orthometric-help {
+  margin-bottom: 14px;
+}
+
+.orthometric-status[data-tone="success"] {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.orthometric-status[data-tone="error"] {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.orthometric-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.orthometric-actions .btn-calc {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 180px;
+  padding-inline: 20px;
+  margin: 0;
+}
+
+.orthometric-result {
+  margin-top: 18px;
+}
+
+.orthometric-result[hidden] {
+  display: none !important;
+}
+
+.orthometric-summary {
+  margin-bottom: 12px;
+}
+
+.orthometric-highlight {
+  background: var(--primary-light);
+  border-color: rgba(10, 127, 138, 0.16);
+}
+
+.orthometric-value-lg {
+  font-size: 24px;
+}
+
+.orthometric-detail-row {
+  margin-top: 12px;
+}
+
+.orthometric-formula-card {
+  margin-top: 12px;
+}
+
+.orthometric-fetch,
+.orthometric-formula {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+@media (max-width: 860px) {
+  .orthometric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .orthometric-grid[data-input-panel="wgs84"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .orthometric-page {
+    padding: 16px;
+  }
+
+  .orthometric-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .orthometric-grid[data-input-panel="wgs84"] {
+    grid-template-columns: 1fr;
+  }
+
+  .orthometric-page .input-group label {
+    min-height: 0;
+    display: block;
+  }
+
+  .orthometric-toolbar {
+    flex-direction: column;
+  }
+}
+
+@container app (max-width: 430px) {
+  .orthometric-page {
+    padding: 12px;
+  }
+
+  .orthometric-actions {
+    flex-direction: column;
+  }
+
+  .orthometric-actions .btn-calc {
+    width: 100%;
+    min-width: 0;
+  }
+}

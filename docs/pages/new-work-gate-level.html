@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gate Level - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/new-work.css" />
+  <link rel="stylesheet" href="./css/new-work-gate-level.css" />
+</head>
+<body>
+  <div class="new-work-page">
+    <div class="new-work-shell">
+      <header class="new-work-hero">
+        <p class="new-work-kicker">New Work</p>
+        <h1>Gate Level</h1>
+        <p class="muted">صفحة تشغيل عملية للجيت لفل تشمل إدخال النقاط والتحقق والحسابات ومعاينة التقرير النهائي.</p>
+      </header>
+
+      <section class="surface new-work-panel">
+        <nav class="new-work-links" aria-label="New work pages">
+          <button class="new-work-link" type="button" onclick="if(typeof loadPage==='function'){loadPage('new-work');}else{window.location.href='./new-work.html';}">Overview</button>
+          <button class="new-work-link is-active" type="button" aria-current="page">Gate Level</button>
+          <button class="new-work-link" type="button" onclick="if(typeof loadPage==='function'){loadPage('new-work-survey-topo');}else{window.location.href='./new-work-survey-topo.html';}">Survey Topo</button>
+        </nav>
+
+        <div class="new-work-body gate-level-host">
+          <div class="custom-page">
+            <header class="main-header">
+              <div class="logo-wrapper">
+                <div class="logo"><img src="../icons/brand-logo.svg" alt="Atlas" class="header-logo" /></div>
+                <span class="logo-text-brand">ATLAS SURVEYING</span>
+              </div>
+            </header>
+
+            <main class="form-container">
+              <div class="page-header">
+                <div class="header-btns">
+                  <button class="back-btn-header" type="button" onclick="handleHeaderBack()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20" style="transform: rotate(180deg);"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                    العودة
+                  </button>
+                  <button class="reset-btn" type="button" onclick="resetPage()"><span>🗑️</span>إعادة تعيين</button>
+                </div>
+              </div>
+
+              <div id="step1" class="step-section active">
+                <div class="level-card">
+                  <h2 style="margin-bottom:.5rem;color:var(--primary);font-weight:900;font-size:1.6rem;">1) غرفة إدخال النقاط</h2>
+                  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-weight:600;font-size:.9rem;">إدخال النقاط المؤقتة في الموقع لإثبات المنسوب.</p>
+                  <button class="add-point-btn" type="button" onclick="showPointForm()">+ إضافة نقطة</button>
+                  <div class="points-table-container">
+                    <table class="points-table">
+                      <thead><tr><th>اسم النقطة</th><th>RL منسوبها</th><th>صورة</th><th>إجراء</th></tr></thead>
+                      <tbody id="pointsList"><tr><td colspan="4" class="empty-msg">لا توجد نقاط مضافة بعد</td></tr></tbody>
+                    </table>
+                  </div>
+                  <div class="action-btn-group">
+                    <button class="btn-primary" type="button" onclick="nextStep(2)"><span>التالي: الحسابات</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+                    <button class="btn-secondary" type="button" onclick="goToNewWorkHome()">رجوع</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="step2" class="step-section">
+                <div class="level-card">
+                  <h2 style="margin-bottom:.5rem;color:var(--primary);font-weight:900;font-size:1.6rem;">2) التحقق من النقاط</h2>
+                  <p style="color:var(--text-dim);margin-bottom:1.5rem;font-weight:600;font-size:.9rem;">إجراء عمليات الرصد لمطابقة المنسوب بين النقاط المكتشفة.</p>
+                  <div class="form-field"><label>النقطة الأولى (Reference)</label><select id="sel_pt1" onchange="enableNextField(1); calculateCheck()"><option value="">-- اختر النقطة --</option></select></div>
+                  <div class="form-field"><label>القراءة على النقطة الأولى</label><input type="number" id="read_1" step="0.001" placeholder="0.000" disabled oninput="enableNextField(2); calculateCheck()" /></div>
+                  <div class="form-field"><label>النقطة الثانية</label><select id="sel_pt2" disabled onchange="enableNextField(3); calculateCheck()"><option value="">-- اختر النقطة --</option></select></div>
+                  <div class="form-field"><label>القراءة على النقطة الثانية</label><input type="number" id="read_2" step="0.001" placeholder="0.000" disabled oninput="calculateCheck()" /></div>
+
+                  <div id="calcBox" class="technical-summary" style="display:none;border-left:5px solid var(--primary);">
+                    <h4 style="margin-bottom:1rem;color:var(--primary);font-weight:900;">نتائج التحقيق الفني</h4>
+                    <div class="summary-row"><span>منسوب سطح الميزان (HI)</span><span id="res_msm">0.000</span></div>
+                    <div class="summary-row"><span>الفرق بين منسوب النقطتين (الناتج 1)</span><span id="res_true_diff">0.000</span></div>
+                    <div class="summary-row"><span>فارق الرصد المحسوب (الناتج 2)</span><span id="res_calc_diff">0.000</span></div>
+                    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px dashed #cbd5e1;">
+                      <div class="summary-row" style="margin-bottom:.8rem;"><span>السماحية المطلوبة</span><span style="background:var(--primary);color:white;padding:2px 8px;border-radius:6px;">4cm</span></div>
+                      <div class="summary-row"><span>الفارق بين الناتجين (الخطأ)</span><span id="res_error" style="font-size:1.1rem;">0.000</span></div>
+                      <div id="statusBadge" style="margin-top:1rem;text-align:center;padding:12px;border-radius:12px;font-weight:900;font-size:1.1rem;display:none;"></div>
+                    </div>
+                  </div>
+
+                  <div class="action-btn-group">
+                    <button id="btnCheckNext" class="btn-primary" type="button" disabled onclick="nextStep(3)"><span>التالي: التوقيع</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+                    <button class="btn-secondary" type="button" onclick="nextStep(1, true)">رجوع</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="step3" class="step-section">
+                <div class="level-card">
+                  <h2 style="margin-bottom:.5rem;color:var(--primary);font-weight:900;font-size:1.6rem;">3) توقيع علام جيت لفل</h2>
+                  <p style="color:var(--text-dim);margin-bottom:2rem;font-weight:600;font-size:.9rem;">تحديد القراءة المطلوبة لتوقيع المنسوب بدقة على الموقع.</p>
+                  <div class="form-field"><label>منسوب الجيت لفل (المخطط)</label><input type="number" id="design_rl" step="0.001" placeholder="0.000" oninput="updateStakingCalc()" /></div>
+
+                  <div class="input-group">
+                    <label>إضافة إزاحة (Offset)</label>
+                    <div class="type-selector">
+                      <div id="off_0" class="type-option active" onclick="setStakingOffset(0)"><span style="font-size:1.2rem;font-weight:800;">0.00</span><span class="type-label">افتراضي</span></div>
+                      <div id="off_1" class="type-option" onclick="setStakingOffset(1)"><span style="font-size:1.2rem;font-weight:800;">+1m</span><span class="type-label">إزاحة متر</span></div>
+                      <div id="off_custom" class="type-option" onclick="showCustomOffsetModal()"><span style="font-size:1.2rem;font-weight:800;">+</span><span class="type-label" id="custom_off_label">قيمة خاصة</span></div>
+                    </div>
+                  </div>
+
+                  <div id="stakingResultBox" class="level-card" style="display:none;margin-top:2rem;background:var(--primary);color:white;border:none;text-align:center;padding:2rem 1rem;border-radius:28px;box-shadow:0 15px 35px rgba(30,64,175,.2);">
+                    <span style="display:block;font-size:1rem;opacity:.9;font-weight:700;margin-bottom:.5rem;">القراءة المطلوبة على القامة</span>
+                    <h1 id="required_reading" style="font-size:5rem;font-weight:950;margin:0;font-family:'Outfit',sans-serif;line-height:1;">0.000</h1>
+                    <span id="reading_warning" style="display:none;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:8px;font-size:.85rem;font-weight:800;margin-top:8px;">المنسوب أعلى من الميزان ⚠️</span>
+                  </div>
+
+                  <div id="stakingSecondaryBox" class="level-card" style="display:none;margin-top:1.2rem;background:#fff;border:2px solid var(--primary);padding:1.2rem;border-radius:24px;text-align:center;">
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <span id="offset_display" style="font-size:1.8rem;font-weight:950;color:var(--text-main);direction:ltr;line-height:1.2;">+0.00m</span>
+                      <div style="height:1px;background:#e2e8f0;width:60%;margin:4px auto;"></div>
+                      <span id="target_rl_display" style="font-size:1.8rem;font-weight:950;color:var(--text-main);direction:ltr;line-height:1.2;">+0.000 (DMD)</span>
+                    </div>
+                  </div>
+
+                  <div class="form-field" style="margin-top:2rem;">
+                    <label>توثيق العلام (Photo Documentation)</label>
+                    <input type="file" id="staking_image" accept="image/*" capture="environment" style="display:none;" onchange="updateStakingImageStatus()" />
+                    <div id="photoCard" class="photo-staking-card" onclick="document.getElementById('staking_image').click()">
+                      <div class="icon-box" id="photoIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
+                      <span class="upload-text" id="staking_img_text">التقاط صورة للعلام الميداني</span>
+                      <img id="staking_preview" class="preview-img" alt="Preview" />
+                      <span class="upload-hint" id="staking_img_hint">اضغط هنا لفتح الكاميرا</span>
+                    </div>
+                  </div>
+
+                  <div class="action-btn-group" style="margin-top:2rem;">
+                    <button class="btn-primary" type="button" onclick="nextStep(4)"><span>التالي: التوثيق النهائي</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"></path></svg></button>
+                    <button class="btn-secondary" type="button" onclick="nextStep(2, true)">رجوع</button>
+                  </div>
+                </div>
+              </div>
+
+              <div id="step4" class="step-section">
+                <div class="level-card" style="border:none;background:transparent;padding:0;box-shadow:none;">
+                  <h2 style="margin-bottom:.5rem;color:var(--primary);font-weight:900;font-size:1.6rem;">4) معاينة التقرير الميداني</h2>
+                  <p style="color:var(--text-dim);margin-bottom:2rem;font-weight:600;font-size:.9rem;">مراجعة نهائية لكافة البيانات قبل اعتماد التقرير وحفظه.</p>
+                  <style id="mobile-report-style">@media (max-width:650px){#reportContent{padding:10px!important}.rep-title{font-size:1rem!important;line-height:1.2!important}.rep-subtitle{font-size:.65rem!important}.rep-header-info{padding:5px 6px!important;font-size:.6rem!important}.rep-content-row{flex-direction:column!important;gap:10px!important}.rep-info-box{padding:10px!important}.rep-calc-col{border-right:none!important;padding-right:0!important;border-top:1px dashed #e2e8f0!important;padding-top:10px!important}.rep-points-table th,.rep-points-table td{font-size:.6rem!important;padding:3px!important}.rep-calc-row{font-size:.6rem!important;margin-bottom:3px!important;padding-bottom:2px!important}.rep-calc-err{font-size:.7rem!important;padding:3px 5px!important;margin-top:4px!important}.rep-gwd-sec{padding:10px 8px!important;flex-direction:column!important;text-align:center;gap:8px!important}.rep-gwd-sec>div{width:100%!important;align-items:center;display:flex;flex-direction:column}.rep-gwd-val{font-size:1.35rem!important}.rep-dmd-bg{justify-content:center;font-size:.65rem!important}.rep-reading-box{width:95%!important;padding:10px!important;margin-top:4px!important}.rep-reading-val{font-size:1.6rem!important}.rep-photo-sig-row{height:auto!important;flex-direction:column!important;gap:8px!important}.rep-photo-box{height:110px!important}.rep-sig-box{padding:8px!important}.rep-sig-val{font-size:.9rem!important}}</style>
+
+                  <div id="reportContent" style="background:linear-gradient(135deg,#f8fafc,#e2e8f0);border-radius:20px;padding:15px 25px;border:2px solid #fff;box-shadow:0 10px 20px rgba(30,64,175,.05);max-width:800px;margin:0 auto;color:var(--text-main);font-family:'Cairo',sans-serif;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px dashed rgba(30,64,175,.15);padding-bottom:15px;margin-bottom:15px;">
+                      <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:45px;height:45px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(30,64,175,.2);"><img src="../icons/brand-logo.svg" alt="Atlas" class="report-logo-image" style="filter:brightness(0) invert(1);" /></div>
+                        <div><h2 class="rep-subtitle" style="color:var(--text-dim);font-weight:700;font-size:.8rem;margin:0;">تقرير تحديد منسوب (Gate Level)</h2></div>
+                      </div>
+                      <div class="rep-header-info" style="text-align:left;background:#fff;padding:8px 12px;border-radius:10px;font-weight:700;font-size:.75rem;border:1px solid rgba(30,64,175,.05);box-shadow:0 2px 5px rgba(0,0,0,.02);">
+                        <div>رقم التقرير: <span id="rep_id" style="color:var(--primary);font-weight:900;">--</span></div>
+                        <div style="margin-top:2px;color:var(--text-dim);"><span id="rep_date">--/--/----</span></div>
+                      </div>
+                    </div>
+
+                    <div class="rep-info-box" style="background:#fff;border-radius:16px;padding:15px;border:1px solid rgba(30,64,175,.05);box-shadow:0 4px 15px rgba(0,0,0,.02);margin-bottom:15px;">
+                      <div class="rep-content-row" style="display:flex;gap:15px;">
+                        <div style="flex:1.2;">
+                          <h3 style="color:var(--primary);font-weight:800;font-size:.9rem;margin-top:0;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="background:var(--accent-soft);width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:.7rem;">📍</span> النقاط المرجعية</h3>
+                          <table class="rep-points-table" style="width:100%;border-collapse:collapse;text-align:center;font-size:.75rem;font-weight:700;">
+                            <thead style="background:var(--accent-soft);color:var(--primary);"><tr><th style="padding:6px;border-radius:0 6px 6px 0;">اسم النقطة</th><th style="padding:6px;">المنسوب</th><th style="padding:6px;border-radius:6px 0 0 0;">صورة</th></tr></thead>
+                            <tbody id="rep_points_list"></tbody>
+                          </table>
+                        </div>
+                        <div class="rep-calc-col" style="flex:1;border-right:1px solid #f1f5f9;padding-right:15px;">
+                          <h3 style="color:var(--primary);font-weight:800;font-size:.9rem;margin-top:0;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><span style="background:var(--accent-soft);width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:.7rem;">⚙️</span> التحقيق الحسابي</h3>
+                          <div class="rep-calc-row" style="display:flex;justify-content:space-between;font-weight:700;font-size:.75rem;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:3px;"><span>سطح الميزان (MSM):</span><span id="rep_msm" style="direction:ltr;">0.000m</span></div>
+                          <div class="rep-calc-row" style="display:flex;justify-content:space-between;font-weight:700;font-size:.75rem;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:3px;"><span>الفرق الحقيقي:</span><span id="rep_true_diff" style="direction:ltr;">0.000m</span></div>
+                          <div class="rep-calc-row" style="display:flex;justify-content:space-between;font-weight:700;font-size:.75rem;margin-bottom:6px;border-bottom:1px solid #f1f5f9;padding-bottom:3px;"><span>الفرق المرصود:</span><span id="rep_calc_diff" style="direction:ltr;">0.000m</span></div>
+                          <div class="rep-calc-err" style="display:flex;justify-content:space-between;font-weight:800;font-size:.85rem;margin-top:8px;background:#f8fafc;padding:6px 8px;border-radius:8px;border:1px solid rgba(30,64,175,.05);"><span style="color:var(--primary);">مقدار الخطأ:</span><span id="rep_error" style="direction:ltr;">0.000m</span></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="rep-reading-box" style="background:#fff;border-radius:16px;padding:15px;margin-bottom:15px;text-align:center;border:2px solid var(--primary);box-shadow:0 4px 15px rgba(30,64,175,.1);">
+                      <div style="font-weight:800;font-size:.95rem;color:var(--primary);margin-bottom:5px;">القراءة المطلوبة على القامة</div>
+                      <div class="rep-reading-val" id="rep_reading" style="font-weight:950;font-size:2.8rem;color:#0f172a;direction:ltr;line-height:1;">0.000</div>
+                    </div>
+
+                    <div class="rep-gwd-sec" style="background:var(--primary);border-radius:16px;padding:15px 20px;color:white;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 8px 15px rgba(30,64,175,.2);position:relative;overflow:hidden;">
+                      <div style="position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
+                      <div style="position:relative;z-index:2;"><span style="font-weight:700;font-size:.85rem;opacity:.9;display:block;margin-bottom:4px;">المنسوب النهائي المستهدف للعلام</span><div class="rep-gwd-val" id="rep_gwd" style="font-weight:950;font-size:2rem;direction:ltr;line-height:1.1;">+0.000 (DMD)</div></div>
+                      <div class="rep-dmd-bg" style="position:relative;z-index:2;display:flex;flex-direction:column;gap:8px;text-align:left;"><div style="background:rgba(0,0,0,.2);padding:5px 12px;border-radius:6px;font-weight:700;font-size:.8rem;" id="rep_dmd"></div><div style="background:rgba(255,255,255,.2);padding:5px 12px;border-radius:6px;color:white;font-weight:700;font-size:.8rem;" id="rep_offset"></div></div>
+                    </div>
+
+                    <div class="rep-photo-sig-row" style="display:flex;gap:15px;align-items:stretch;height:160px;">
+                      <div class="rep-photo-box" style="flex:1.5;background:#fff;border-radius:16px;padding:10px;border:1px solid rgba(30,64,175,.05);display:flex;flex-direction:column;box-shadow:0 2px 10px rgba(0,0,0,.02);">
+                        <div id="rep_image_box" style="flex:1;background:#f8fafc;border-radius:12px;border:2px dashed rgba(30,64,175,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;height:100%;"><span id="rep_no_img" style="color:var(--text-dim);font-weight:700;font-size:.75rem;">📷 لا توجد صورة مرفقة</span><img id="rep_staking_img" alt="Gate level mark" style="display:none;width:100%;height:100%;object-fit:contain;" /></div>
+                      </div>
+                      <div class="rep-sig-box" style="flex:1;background:#fff;border-radius:16px;padding:12px;border:1px solid rgba(30,64,175,.05);box-shadow:0 2px 10px rgba(0,0,0,.02);display:flex;flex-direction:row;gap:12px;">
+                        <div style="flex:1;text-align:center;display:flex;flex-direction:column;justify-content:center;border-left:1px dashed rgba(30,64,175,.15);"><span style="font-weight:800;font-size:.8rem;color:var(--text-dim);display:block;margin-bottom:5px;">المساح المسئول</span><span class="rep-sig-val" style="font-weight:900;font-size:1.1rem;color:var(--primary);">طاهر شوقي</span></div>
+                        <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#f8fafc;border-radius:12px;border:1px dashed rgba(30,64,175,.1);"><span style="color:#cbd5e1;font-weight:600;font-size:.85rem;">(التوقيع)</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="action-btn-group" style="flex-wrap:wrap;">
+                    <button class="btn-primary" type="button" onclick="exportToPDF()" style="flex:1;min-width:140px;">تصدير PDF</button>
+                    <button class="btn-primary" type="button" style="background:#1d4ed8;flex:1;min-width:140px;" onclick="exportToWord()">تصدير Word</button>
+                    <button class="btn-secondary" type="button" style="flex:1;min-width:100px;" onclick="nextStep(3, true)">رجوع</button>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="pointModal" class="point-modal-backdrop" aria-hidden="true">
+    <div class="level-card point-modal-card">
+      <h3 id="modalTitle" style="margin-bottom:1.5rem;color:var(--primary);font-weight:900;">إضافة نقطة جديدة</h3>
+      <div class="form-field"><label>اسم النقطة</label><input type="text" id="pt_name" placeholder="مثال: PM 1" /></div>
+      <div class="form-field"><label>المنسوب (RL)</label><input type="number" step="0.001" id="pt_rl" placeholder="0.000" /></div>
+      <div class="form-field">
+        <label>صورة النقطة (اختياري)</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button class="point-modal-file-btn" type="button" style="flex:1 1 180px;font-size:.8rem;" onclick="document.getElementById('pt_image').click()">📷 اختيار / تغيير صورة</button>
+          <input type="file" id="pt_image" accept="image/*" style="display:none;" onchange="updateImageStatus()" />
+          <span id="img_status" style="font-size:.8rem;color:var(--text-dim);">لا توجد صورة</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button id="modalSaveBtn" class="btn-primary" type="button" style="flex:1 1 140px" onclick="savePoint()">إضافة</button>
+        <button class="btn-secondary" type="button" style="flex:1 1 140px" onclick="hidePointForm()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/new-work-gate-level.js"></script>
+</body>
+</html>

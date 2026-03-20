@@ -1,0 +1,344 @@
+.zcompare-page {
+  min-height: 100vh;
+  padding: 32px 28px 40px;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.08), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.08), transparent 26%),
+    linear-gradient(180deg, #f8fbff 0%, #eef5fb 100%);
+}
+
+.zcompare-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.zcompare-hero {
+  margin-bottom: 18px;
+}
+
+.zcompare-kicker {
+  margin: 0 0 6px;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.zcompare-hero h1,
+.zcompare-mobile-card h1 {
+  margin: 0;
+  font-size: clamp(2rem, 3.3vw, 3rem);
+  line-height: 1.08;
+  color: #0f172a;
+}
+
+.zcompare-lead,
+.zcompare-mobile-card p {
+  max-width: 860px;
+  margin: 14px 0 0;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.zcompare-note,
+.zcompare-status,
+.zcompare-flags {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.zcompare-note {
+  margin-bottom: 18px;
+  color: #334155;
+}
+
+.zcompare-upload-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+
+.zcompare-card {
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.zcompare-card-head h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.zcompare-card-head p {
+  margin: 8px 0 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.zcompare-file-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  margin-top: 18px;
+  padding: 20px;
+  border: 1.5px dashed rgba(14, 165, 233, 0.32);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(240, 249, 255, 0.95) 0%, rgba(248, 250, 252, 0.96) 100%);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+
+.zcompare-file-input:hover {
+  transform: translateY(-1px);
+  border-color: rgba(14, 165, 233, 0.48);
+  box-shadow: 0 12px 26px rgba(14, 165, 233, 0.08);
+}
+
+.zcompare-file-input input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zcompare-file-input span {
+  color: #0f766e;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.zcompare-summary {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.zcompare-manual {
+  margin-top: 18px;
+}
+
+.zcompare-manual-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.zcompare-manual-input {
+  width: 100%;
+  min-height: 180px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: #fff;
+  color: #0f172a;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.65;
+  resize: vertical;
+  direction: ltr;
+  text-align: left;
+}
+
+.zcompare-manual-input:focus {
+  outline: 2px solid rgba(14, 165, 233, 0.18);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.zcompare-summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  color: #334155;
+}
+
+.zcompare-summary-line + .zcompare-summary-line {
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.zcompare-summary-line span {
+  color: #64748b;
+}
+
+.zcompare-summary-line strong {
+  display: block;
+  color: #0f172a;
+  font-family: var(--mono);
+  text-align: right;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.zcompare-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 20px 0 16px;
+}
+
+.zcompare-actions .btn-calc {
+  width: auto;
+  min-width: 270px;
+  margin: 0;
+}
+
+.zcompare-status[data-tone="info"] {
+  color: #1d4ed8;
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+.zcompare-status[data-tone="success"] {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+.zcompare-status[data-tone="error"] {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.18);
+}
+
+.zcompare-flags {
+  margin-top: 14px;
+}
+
+#zcompare-flags-list {
+  margin: 10px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(239, 68, 68, 0.36);
+  background: rgba(239, 68, 68, 0.04);
+  color: #991b1b;
+  font-family: var(--mono);
+  line-height: 1.7;
+  overflow: auto;
+  max-height: 280px;
+}
+
+.zcompare-results-wrap {
+  margin-top: 18px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.zcompare-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(248, 250, 252, 0.94);
+}
+
+.zcompare-output-scroll {
+  overflow-x: auto;
+}
+
+#zcompare-output-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+#zcompare-output-table th,
+#zcompare-output-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  vertical-align: middle;
+}
+
+#zcompare-output-table th {
+  color: #334155;
+  background: #f8fafc;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+}
+
+#zcompare-output-table td:nth-child(2),
+#zcompare-output-table td:nth-child(3),
+#zcompare-output-table td:nth-child(4),
+#zcompare-output-table td:nth-child(5),
+#zcompare-output-table td:nth-child(6) {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.zcompare-diff-good {
+  color: #047857;
+}
+
+.zcompare-diff-warn {
+  color: #b45309;
+}
+
+.zcompare-diff-bad {
+  color: #b91c1c;
+}
+
+.zcompare-status-ok {
+  color: #047857;
+  font-weight: 800;
+}
+
+.zcompare-status-error {
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+.zcompare-mobile-blocker {
+  display: none;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top, rgba(14, 165, 233, 0.1), transparent 36%),
+    linear-gradient(180deg, #f8fbff 0%, #eef5fb 100%);
+}
+
+.zcompare-mobile-card {
+  max-width: 440px;
+  padding: 26px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .zcompare-page {
+    display: none;
+  }
+
+  .zcompare-mobile-blocker {
+    display: flex;
+  }
+}

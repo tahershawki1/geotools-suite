@@ -1,21 +1,192 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coordinate Tools - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
   <link rel="stylesheet" href="../styles.css" />
   <link rel="stylesheet" href="./css/coordinate-tools.css" />
-  <script src="../vendor/proj4.js"></script>
-  <script src="../vendor/leaflet/leaflet.js"></script>
+  <link rel="stylesheet" href="./css/dltm-converter.css" />
   <link rel="stylesheet" href="../vendor/leaflet/leaflet.css" />
-  <script src="../shared/js/crs-registry.js"></script>
 </head>
 <body>
-  <div class="coord-tools surface">
-    <h1>Coordinate Tools</h1>
-    <p class="muted">Placeholder — full tabs will be implemented in next iteration.</p>
+  <div class="coordinate-tools-page">
+    <div class="coord-tools-shell">
+      <header class="coord-tools-hero">
+        <p class="coord-tools-kicker">Coordinate Workspace</p>
+        <h1>Single Conversion</h1>
+        <p class="muted">
+          Convert one DLTM point to WGS84 and UTM, then preview it on the map.
+        </p>
+      </header>
+
+      <div class="container-dltm coord-tools-panel">
+        <nav class="coord-page-links" aria-label="Coordinate workflow pages">
+          <button class="coord-page-link is-active" type="button" aria-current="page">
+            Single Conversion
+          </button>
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-tools-batch');}else{window.location.href='./coordinate-tools-batch.html';}"
+          >
+            Batch Conversion
+          </button>
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-tools-reverse');}else{window.location.href='./coordinate-tools-reverse.html';}"
+          >
+            WGS84 to DLTM
+          </button>
+          <button
+            class="coord-page-link"
+            type="button"
+            onclick="if(typeof loadPage==='function'){loadPage('coordinate-transform');}else{window.location.href='./coordinate-transform.html';}"
+          >
+            Coordinate Transform
+          </button>
+        </nav>
+
+        <div class="content-dltm">
+          <div id="section-single" class="tool-section active">
+            <div class="input-grid">
+              <div class="input-group">
+                <label>Easting (X)</label>
+                <input type="number" id="inp-e" placeholder="500000.00" />
+              </div>
+              <div class="input-group">
+                <label>Northing (Y)</label>
+                <input type="number" id="inp-n" placeholder="2768000.00" />
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px">
+              <div class="input-group" style="flex: 1; min-width: 220px">
+                <label>Output Format</label>
+                <select
+                  id="out-format"
+                  style="
+                    width: 100%;
+                    padding: 12px 15px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                  "
+                >
+                  <option value="dms">DMS</option>
+                  <option value="dd">Decimal Degrees</option>
+                  <option value="ddm">DDM</option>
+                </select>
+              </div>
+              <div class="input-group" style="flex: 1; min-width: 220px">
+                <label>Precision</label>
+                <select
+                  id="out-prec"
+                  style="
+                    width: 100%;
+                    padding: 12px 15px;
+                    border-radius: 10px;
+                    border: 1px solid var(--border);
+                  "
+                >
+                  <option value="8">Decimal: 8</option>
+                  <option value="6">Decimal: 6</option>
+                  <option value="4">Decimal: 4</option>
+                </select>
+              </div>
+              <button class="btn-nav-top" title="Clear saved data" onclick="clearLastInputs()">
+                Clear
+              </button>
+            </div>
+
+            <button class="btn-calc" id="btn-convert-single" onclick="runSingleDltm()">
+              Convert Now
+            </button>
+
+            <div id="res-box-single" class="result-card">
+              <div class="result-head">
+                <div>
+                  <div class="result-title">Output coordinates</div>
+                  <div class="result-sub">Format summary</div>
+                </div>
+
+                <div class="result-actions">
+                  <button class="btn-mini" onclick="copySingle('dms')">Copy DMS</button>
+                  <button class="btn-mini" onclick="copySingle('dd')">Copy Decimal</button>
+                  <button class="btn-mini" onclick="copySingle('utm')">Copy UTM</button>
+                </div>
+              </div>
+
+              <div class="result-grid-2">
+                <div class="result-field">
+                  <div class="field-label">Longitude</div>
+                  <div class="field-line">
+                    <span class="field-name">DMS:</span>
+                    <span class="field-value" id="res-lon-dms">-</span>
+                  </div>
+                  <div class="field-line">
+                    <span class="field-name">Decimal:</span>
+                    <span class="field-hint" id="res-lon-dd">-</span>
+                  </div>
+                </div>
+
+                <div class="result-field">
+                  <div class="field-label">Latitude</div>
+                  <div class="field-line">
+                    <span class="field-name">DMS:</span>
+                    <span class="field-value" id="res-lat-dms">-</span>
+                  </div>
+                  <div class="field-line">
+                    <span class="field-name">Decimal:</span>
+                    <span class="field-hint" id="res-lat-dd">-</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-grid-3">
+                <div class="result-field">
+                  <div class="field-label">UTM Zone</div>
+                  <div class="field-value" id="res-utm-z">-</div>
+                </div>
+                <div class="result-field">
+                  <div class="field-label">UTM Easting</div>
+                  <div class="field-value" id="res-utm-e">-</div>
+                </div>
+                <div class="result-field">
+                  <div class="field-label">UTM Northing</div>
+                  <div class="field-value" id="res-utm-n">-</div>
+                </div>
+              </div>
+
+              <div class="result-note" id="res-note"></div>
+            </div>
+
+            <div id="mapBox" style="margin-top: 14px; display: none">
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px">
+                <button class="btn-nav-top" onclick="openGoogleMapsLink()">
+                  Open in Google Maps
+                </button>
+                <button class="btn-nav-top" onclick="downloadSingleKml()">
+                  Save KML
+                </button>
+              </div>
+              <div
+                id="map"
+                style="
+                  height: 320px;
+                  border: 1px solid var(--border);
+                  border-radius: 10px;
+                  overflow: hidden;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <script src="./js/coordinate-tools.js"></script>
+  <script src="../vendor/leaflet/leaflet.js"></script>
+  <script src="./js/dltm-converter.js"></script>
 </body>
 </html>

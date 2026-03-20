@@ -4,15 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Coordinate Transformation - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
   <link rel="stylesheet" href="../styles.css" />
   <link rel="stylesheet" href="./css/coordinate-transform.css" />
   <!-- Theme.js removed: No dark mode or theme switching -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script>
+  <script src="../vendor/proj4.js"></script>
 </head>
 <body>
 
 <div class="container-transform">
   <div class="content-trans">
+    <div class="trans-header">
+      <p class="trans-kicker">Legacy Quick Tool</p>
+      <h1>Coordinate Transform</h1>
+      <p class="trans-copy">Convert between WGS84 and UTM in a compact Android-style workspace.</p>
+    </div>
+
     <div class="input-group">
       <label>Coord system</label>
       <select id="transType" onchange="window.updateTransUI()">
@@ -51,8 +58,8 @@
 
     <div class="res-box-trans" id="resBoxTrans">
       <div id="res-content-trans"></div>
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button class="btn-nav-top" style="flex: 1;" onclick="window.copyTransformRes()">Copy Results 📋</button>
+      <div class="trans-actions">
+        <button class="btn-nav-top" style="flex: 1;" onclick="window.copyTransformRes()">Copy Results</button>
       </div>
     </div>
   </div>

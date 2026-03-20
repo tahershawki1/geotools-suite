@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Before / After Level Check - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/coordinate-z-check.css" />
+</head>
+<body>
+  <div class="zcompare-mobile-blocker">
+    <div class="zcompare-mobile-card">
+      <p class="zcompare-kicker">Desktop Only</p>
+      <h1>Before / After Level Check</h1>
+      <p>
+        This page is intentionally disabled on phone-sized screens. Open it on a desktop or wide
+        tablet to work with file comparison.
+      </p>
+    </div>
+  </div>
+
+  <main class="zcompare-page">
+    <div class="zcompare-shell">
+      <header class="zcompare-hero">
+        <p class="zcompare-kicker">Conversion QA</p>
+        <h1>Before / After Level Check</h1>
+        <p class="zcompare-lead">
+          Upload source points before conversion and converted points after conversion. The results
+          table is built only from points found in the <strong>after conversion</strong> file.
+        </p>
+      </header>
+
+      <div class="zcompare-note">
+        Points that exist only in the before file are ignored in the comparison. Unnamed rows are
+        skipped automatically.
+      </div>
+
+      <section class="zcompare-upload-grid">
+        <article class="zcompare-card">
+          <div class="zcompare-card-head">
+            <div>
+              <h2>Before Conversion</h2>
+              <p>
+                Upload one or more source files or enter rows manually. Supported files:
+                <strong>txt, csv, xls, xlsx</strong>.
+              </p>
+            </div>
+          </div>
+
+          <label class="zcompare-file-input">
+            <input type="file" id="zcompare-before-file" accept=".txt,.csv,.xls,.xlsx" multiple />
+            <span>Select Before File(s)</span>
+          </label>
+
+          <div class="zcompare-manual">
+            <label class="zcompare-manual-label" for="zcompare-before-text">Manual Input</label>
+            <textarea
+              id="zcompare-before-text"
+              class="zcompare-manual-input"
+              rows="8"
+              placeholder="1 SS32759 2772536.163 507748.538 51.325&#10;ss27906,2755607.620,462698.382,-24.793,-24.793,0.008,0.018"
+            ></textarea>
+          </div>
+
+          <div class="zcompare-summary" id="zcompare-before-summary">
+            No before-conversion source loaded yet.
+          </div>
+        </article>
+
+        <article class="zcompare-card">
+          <div class="zcompare-card-head">
+            <div>
+              <h2>After Conversion</h2>
+              <p>
+                Upload one or more converted files or enter rows manually. Supported files:
+                <strong>pdf, txt, csv, xls, xlsx</strong>. Only points in these files or manual
+                list will appear in the final comparison.
+              </p>
+            </div>
+          </div>
+
+          <label class="zcompare-file-input">
+            <input
+              type="file"
+              id="zcompare-after-file"
+              accept=".pdf,.txt,.csv,.xls,.xlsx"
+              multiple
+            />
+            <span>Select After File(s)</span>
+          </label>
+
+          <div class="zcompare-manual">
+            <label class="zcompare-manual-label" for="zcompare-after-text">Manual Input</label>
+            <textarea
+              id="zcompare-after-text"
+              class="zcompare-manual-input"
+              rows="8"
+              placeholder="ss27906,2755607.620,462698.382,-24.793,-24.793&#10;9,2755723.625,462574.465,-25.814,-25.814"
+            ></textarea>
+          </div>
+
+          <div class="zcompare-summary" id="zcompare-after-summary">
+            No after-conversion source loaded yet.
+          </div>
+        </article>
+      </section>
+
+      <div class="zcompare-actions">
+        <button type="button" class="btn-calc" id="zcompare-run">Compare Converted Points</button>
+        <button type="button" class="btn-mini" id="zcompare-clear">Clear</button>
+      </div>
+
+      <div
+        class="result-note zcompare-status"
+        id="zcompare-status"
+        data-tone="info"
+        role="status"
+        aria-live="polite"
+      >
+        Loading EGM2008 model header...
+      </div>
+
+      <div class="result-note zcompare-flags" id="zcompare-flags-wrap" hidden>
+        <strong>Flagged rows</strong>
+        <pre id="zcompare-flags-list"></pre>
+      </div>
+
+      <section class="results-table-wrap zcompare-results-wrap" id="zcompare-results-wrap">
+        <div class="zcompare-results-head">
+          <strong id="zcompare-count">0 converted points compared</strong>
+          <div class="result-actions">
+            <button type="button" class="btn-mini" id="zcompare-copy" disabled>Copy Results</button>
+          </div>
+        </div>
+
+        <div class="zcompare-output-scroll">
+          <table id="zcompare-output-table">
+            <thead>
+              <tr>
+                <th>POINT</th>
+                <th>BEFORE_h</th>
+                <th>GEOID_N</th>
+                <th>CALC_H</th>
+                <th>AFTER_H</th>
+                <th>DIFF</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="zcompare-output-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../vendor/proj4.js"></script>
+  <script src="../vendor/xlsx.full.min.js"></script>
+  <script src="../shared/js/crs-registry.js"></script>
+  <script src="./js/coordinate-z-check.js"></script>
+</body>
+</html>

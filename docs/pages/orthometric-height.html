@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orthometric Height - GeoTools Suite</title>
+  <link rel="stylesheet" href="../shared/css/theme.css" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/coordinate-tools.css" />
+  <link rel="stylesheet" href="./css/dltm-converter.css" />
+  <link rel="stylesheet" href="./css/orthometric-height.css" />
+</head>
+<body>
+  <div class="coordinate-tools-page orthometric-page">
+    <div class="coord-tools-shell">
+      <header class="coord-tools-hero orthometric-hero">
+        <p class="coord-tools-kicker">Vertical Datum</p>
+        <h1>Orthometric Height</h1>
+        <p class="muted">
+          Convert ellipsoidal height <strong>h</strong> to orthometric height
+          <strong>H</strong> using local geoid undulation <strong>N</strong> from your EGM2008 grid.
+        </p>
+      </header>
+
+      <div class="container-dltm coord-tools-panel orthometric-panel" aria-labelledby="orthometric-title">
+        <div class="content-dltm">
+          <div class="orthometric-toolbar">
+            <div>
+              <p class="orthometric-section-kicker">Model</p>
+              <h2 id="orthometric-title">Single-point vertical conversion</h2>
+            </div>
+            <div class="orthometric-chip-row">
+              <span class="chip">EGM2008</span>
+              <span class="chip">H = h - N</span>
+            </div>
+          </div>
+
+          <div class="dltm-tabs orthometric-mode" role="tablist" aria-label="Coordinate input type">
+            <button
+              class="dltm-tab orthometric-mode-btn active"
+              id="mode-wgs84"
+              type="button"
+              data-mode="wgs84"
+              role="tab"
+              aria-selected="true"
+            >
+              WGS84
+            </button>
+            <button
+              class="dltm-tab orthometric-mode-btn"
+              id="mode-utm"
+              type="button"
+              data-mode="utm"
+              role="tab"
+              aria-selected="false"
+            >
+              UTM
+            </button>
+            <button
+              class="dltm-tab orthometric-mode-btn"
+              id="mode-dltm"
+              type="button"
+              data-mode="dltm"
+              role="tab"
+              aria-selected="false"
+            >
+              DLTM
+            </button>
+          </div>
+
+          <form id="orthometric-form" class="orthometric-form" novalidate>
+            <div class="input-grid orthometric-grid" data-input-panel="wgs84">
+              <div class="input-group">
+                <label for="wgs-lat">Latitude</label>
+                <input type="number" id="wgs-lat" placeholder="25.204800" step="0.000001" />
+              </div>
+              <div class="input-group">
+                <label for="wgs-lon">Longitude</label>
+                <input type="number" id="wgs-lon" placeholder="55.270800" step="0.000001" />
+              </div>
+              <div class="input-group">
+                <label for="wgs-h">Ellipsoidal Height h (m)</label>
+                <input type="number" id="wgs-h" placeholder="132.450" step="0.001" />
+              </div>
+            </div>
+
+            <div class="input-grid orthometric-grid" data-input-panel="utm" hidden>
+              <div class="input-group">
+                <label for="utm-zone">UTM Zone</label>
+                <input type="number" id="utm-zone" placeholder="40" step="1" min="1" max="60" />
+              </div>
+              <div class="input-group">
+                <label for="utm-hemi">Hemisphere</label>
+                <select id="utm-hemi">
+                  <option value="N">North</option>
+                  <option value="S">South</option>
+                </select>
+              </div>
+              <div class="input-group">
+                <label for="utm-e">Easting</label>
+                <input type="number" id="utm-e" placeholder="526020.811" step="0.001" />
+              </div>
+              <div class="input-group">
+                <label for="utm-n">Northing</label>
+                <input type="number" id="utm-n" placeholder="2788100.502" step="0.001" />
+              </div>
+              <div class="input-group">
+                <label for="utm-h">Ellipsoidal Height h (m)</label>
+                <input type="number" id="utm-h" placeholder="132.450" step="0.001" />
+              </div>
+            </div>
+
+            <div class="input-grid orthometric-grid" data-input-panel="dltm" hidden>
+              <div class="input-group">
+                <label for="dltm-e">DLTM Easting</label>
+                <input type="number" id="dltm-e" placeholder="489817.908" step="0.001" />
+              </div>
+              <div class="input-group">
+                <label for="dltm-n">DLTM Northing</label>
+                <input type="number" id="dltm-n" placeholder="2768047.013" step="0.001" />
+              </div>
+              <div class="input-group">
+                <label for="dltm-h">Ellipsoidal Height h (m)</label>
+                <input type="number" id="dltm-h" placeholder="132.450" step="0.001" />
+              </div>
+            </div>
+
+            <div class="result-note orthometric-help">
+              All modes are converted internally to WGS84 latitude and longitude, then the tool
+              reads geoid separation <strong>N</strong> from the local EGM2008 grid.
+            </div>
+
+            <div class="orthometric-actions">
+              <button type="submit" class="btn-calc" id="orthometric-submit">Convert Height</button>
+              <button type="button" class="btn-nav-top" id="orthometric-clear">Clear</button>
+            </div>
+          </form>
+
+          <div
+            class="result-note orthometric-status"
+            id="orthometric-status"
+            data-tone="info"
+            role="status"
+            aria-live="polite"
+          >
+            Loading EGM2008 model header...
+          </div>
+
+          <section class="result-card orthometric-result" id="orthometric-result" hidden>
+            <div class="result-head">
+              <div>
+                <div class="result-title">Computed heights</div>
+                <div class="result-sub">Single-point vertical conversion</div>
+              </div>
+              <div class="result-actions">
+                <button type="button" class="btn-mini" id="orthometric-copy" disabled>
+                  Copy Result
+                </button>
+              </div>
+            </div>
+
+            <div class="result-grid-2 orthometric-summary">
+              <div class="result-field orthometric-highlight">
+                <div class="field-label">Orthometric Height H</div>
+                <div class="field-value orthometric-value-lg" id="result-h">-</div>
+              </div>
+              <div class="result-field orthometric-highlight">
+                <div class="field-label">Geoid Separation N</div>
+                <div class="field-value orthometric-value-lg" id="result-n">-</div>
+              </div>
+            </div>
+
+            <div class="result-grid-3">
+              <div class="result-field">
+                <div class="field-label">Input System</div>
+                <div class="field-value" id="result-source">-</div>
+              </div>
+              <div class="result-field">
+                <div class="field-label">Latitude</div>
+                <div class="field-value" id="result-lat">-</div>
+              </div>
+              <div class="result-field">
+                <div class="field-label">Longitude</div>
+                <div class="field-value" id="result-lon">-</div>
+              </div>
+            </div>
+
+            <div class="result-grid-2 orthometric-detail-row">
+              <div class="result-field">
+                <div class="field-label">Ellipsoidal Height h</div>
+                <div class="field-value" id="result-ellipsoidal">-</div>
+              </div>
+              <div class="result-field">
+                <div class="field-label">Grid Access</div>
+                <div class="field-hint orthometric-fetch" id="result-fetch-mode">-</div>
+              </div>
+            </div>
+
+            <div class="result-field orthometric-formula-card">
+              <div class="field-label">Applied Formula</div>
+              <div class="field-hint orthometric-formula" id="result-formula">-</div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../vendor/proj4.js"></script>
+  <script src="../shared/js/crs-registry.js"></script>
+  <script src="./js/orthometric-height.js"></script>
+</body>
+</html>

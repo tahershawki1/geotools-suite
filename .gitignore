@@ -27,3 +27,5 @@ __pycache__/
 docs/_admin-generator/
 # Backup snapshots (local only)
 docs/_backup/
+.tmp/
+Geoids/

@@ -43,9 +43,10 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 20px;
+  padding: 12px;
   min-width: 0;
   max-width: 100%;
+  margin: 0 auto;
 }
 
 .conv-header {
@@ -55,6 +56,32 @@
   gap: 16px;
   flex-wrap: wrap;
   min-width: 0;
+}
+
+.open-map-btn,
+.close-map-btn {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: #111827;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    border-color var(--ease-fast),
+    background-color var(--ease-fast),
+    color var(--ease-fast);
+}
+
+.open-map-btn:hover,
+.open-map-btn:focus-visible,
+.close-map-btn:hover,
+.close-map-btn:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .eyebrow {
@@ -71,7 +98,7 @@
 
 .controls-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   padding: 16px;
   min-width: 0;
@@ -122,7 +149,7 @@
   border: 1px solid #e5e7eb;
   background: #fff;
   color: #111827;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
   font-weight: 700;
@@ -138,7 +165,7 @@
 
 .dropzone {
   border: 2px dashed var(--border);
-  border-radius: var(--radius-lg, 16px);
+  border-radius: 10px;
   padding: 24px 16px;
   min-height: 200px;
   display: grid;
@@ -166,7 +193,7 @@
 .preview-box {
   min-height: 200px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md, 12px);
+  border-radius: 10px;
   padding: 12px;
   background: var(--panel-bg, #fdfcfb);
   font-family: var(--mono, 'SFMono-Regular', monospace);
@@ -200,7 +227,7 @@
   background: var(--primary-soft);
   color: var(--primary);
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -218,11 +245,66 @@
 .map-panel {
   padding: 0;
   overflow: hidden;
-  border-radius: var(--radius-lg, 16px);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   position: relative;
+}
+
+.map-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+}
+
+.map-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.map-overlay-shell {
+  width: min(100%, 400px);
+  height: min(86vh, 780px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: var(--shadow-lg);
+}
+
+.map-overlay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+}
+
+.map-overlay-head h3 {
+  margin: 0;
+  color: var(--text-main);
+}
+
+.map-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .map-bottom-toolbar {
@@ -245,7 +327,7 @@
   border: 1px solid var(--border);
   background: #fff;
   color: #111827;
-  border-radius: 12px;
+  border-radius: 10px;
   padding: 8px 14px;
   font-size: 14px;
   font-weight: 700;
@@ -272,7 +354,7 @@
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: 10px;
   border: 1px solid #fecaca;
   background: #fff1f2;
   color: #b91c1c;
@@ -298,18 +380,28 @@
 
 .map-area {
   width: 100% !important;
-  height: 720px !important;
+  height: 100% !important;
   position: relative;
   background: radial-gradient(circle at 20% 20%, rgba(15,118,110,0.05), transparent 35%),
     radial-gradient(circle at 80% 10%, rgba(245,158,11,0.05), transparent 30%),
     #f8fafc;
 }
 
+.map-controls {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .actions-panel {
   display: flex;
   gap: 10px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: stretch;
   padding: 12px;
   flex-wrap: wrap;
   min-width: 0;
@@ -324,6 +416,13 @@
   font-weight: 700;
 }
 
+.actions-panel .open-map-btn {
+  width: min(320px, 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 #status {
   color: var(--muted);
   font-size: 13px;
@@ -333,7 +432,7 @@
 /* Secondary row (preview + file list) */
 .secondary-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   padding: 16px;
   min-width: 0;
@@ -341,7 +440,7 @@
 
 .file-list {
   border: 1px solid var(--border);
-  border-radius: var(--radius-md, 12px);
+  border-radius: 10px;
   padding: 10px 12px;
   min-height: 20em; /* ~20 lines */
   max-height: 20em;
@@ -425,6 +524,21 @@
     grid-template-columns: 1fr;
   }
 
+  .map-overlay {
+    padding: 12px;
+  }
+
+  .map-overlay-shell {
+    width: 100%;
+    height: min(92vh, 780px);
+  }
+
+  .map-overlay-head {
+    padding: 14px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
   .map-bottom-toolbar {
     justify-content: stretch;
   }
@@ -440,6 +554,42 @@
   .actions-panel .export-btn {
     width: 100%;
   }
+
+  .actions-panel .open-map-btn {
+    width: 100%;
+  }
+}
+
+@container app (max-width: 430px) {
+  .container-converter {
+    padding: 10px;
+  }
+
+  .conv-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls-panel,
+  .secondary-panel {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .dropzone {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 18px 14px;
+  }
+
+  .manual-panel {
+    padding: 12px;
+  }
+
+  .actions-panel .export-btn,
+  .actions-panel .open-map-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
@@ -447,6 +597,11 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .open-map-btn {
+    width: 100%;
+  }
+
   .controls-panel {
     grid-template-columns: 1fr;
   }

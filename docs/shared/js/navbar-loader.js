@@ -49,7 +49,9 @@
     return [
       { id: "file-converter", title: "File Converter", pagePath: "pages/file-converter.html" },
       { id: "coordinate-tools", title: "Coordinate Tools", pagePath: "pages/coordinate-tools.html" },
-      { id: "dltm-converter", title: "DLTM Converter", pagePath: "pages/dltm-converter.html" },
+      { id: "new-work", title: "New work", pagePath: "pages/new-work.html" },
+      { id: "orthometric-height", title: "Orthometric Height", pagePath: "pages/orthometric-height.html" },
+      { id: "coordinate-z-check", title: "Before / After Level Check", pagePath: "pages/coordinate-z-check.html" },
       { id: "coordinate-transform", title: "Coordinate Transform", pagePath: "pages/coordinate-transform.html" },
       { id: "area-calculator", title: "Area Calculator", pagePath: "pages/area-calculator.html" },
     ];
@@ -63,11 +65,10 @@
   function iconForPage(id) {
     const key = normalizePageName(id);
     if (key === "home") return "HM";
-    if (key === "file-converter") return "FC";
-    if (key === "coordinate-tools") return "CT";
-    if (key === "dltm-converter") return "DL";
-    if (key === "coordinate-transform") return "TR";
-    if (key === "area-calculator") return "AR";
+    const registry = window.GeoToolsRegistry;
+    const entry =
+      registry && typeof registry.getById === "function" ? registry.getById(key) : null;
+    if (entry && entry.icon) return entry.icon;
     return "PG";
   }
 
@@ -97,7 +98,7 @@
     if (!container) return;
     container.innerHTML = "";
 
-    const homeItem = { id: "", title: "Maps" };
+    const homeItem = { id: "", title: "Home" };
     container.appendChild(createNavButton(homeItem, isMobile));
 
     getToolsList()
@@ -129,20 +130,28 @@
   }
 
   function navigateToPage(page) {
+    const key = page || "";
+    const registry = window.GeoToolsRegistry;
+    const entry = registry && typeof registry.getById === "function" ? registry.getById(key) : null;
+    if (entry && (entry.mode === "direct" || entry.direct === true)) {
+      window.location.href = resolvePagePath(key);
+      return;
+    }
+
     if (typeof window.loadPage === "function") {
-      const result = window.loadPage(page || "");
+      const result = window.loadPage(key);
       if (result && typeof result.then === "function") {
         result.finally(() => {
           if (typeof window.updatePageIndicator === "function") {
-            window.updatePageIndicator(page || "home");
+            window.updatePageIndicator(key || "home");
           }
         });
       } else if (typeof window.updatePageIndicator === "function") {
-        window.updatePageIndicator(page || "home");
+        window.updatePageIndicator(key || "home");
       }
       return;
     }
-    window.location.href = resolvePagePath(page || "");
+    window.location.href = resolvePagePath(key);
   }
 
   function setupNavbarButtonHandlers() {
@@ -151,7 +160,8 @@
       btn.dataset.navBound = "true";
       btn.addEventListener("click", function () {
         const page = this.getAttribute("data-page") || "";
-        const shouldClose = isMobileViewport();
+        const shouldClose =
+          document.body.classList.contains("sidebar-open") || isMobileViewport();
         navigateToPage(page);
         if (shouldClose) {
           closeSidebar(false);
@@ -160,10 +170,26 @@
     });
   }
 
+  function resolvePageLabel(activePage) {
+    const currentPage = normalizePageName(activePage);
+    if (currentPage === "home") return "Home";
+    const registry = window.GeoToolsRegistry;
+    const entry =
+      registry && typeof registry.getById === "function" ? registry.getById(currentPage) : null;
+    return entry && entry.title ? entry.title : "Workspace";
+  }
+
   window.updatePageIndicator = function (activePage) {
     const navButtons = document.querySelectorAll(".btn-nav-unified");
     const currentFromPath = window.location.pathname.split("/").pop().replace(".html", "");
     const currentPage = normalizePageName(activePage || currentFromPath);
+    const currentPageLabel = document.querySelector("[data-current-page-label]");
+
+    document.body.setAttribute("data-active-page", currentPage);
+
+    if (currentPageLabel) {
+      currentPageLabel.textContent = resolvePageLabel(currentPage);
+    }
 
     navButtons.forEach((btn) => {
       const btnPage = normalizePageName(btn.getAttribute("data-page"));

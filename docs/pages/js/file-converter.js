@@ -26,6 +26,7 @@
     measurePoints: [],
     measureLayer: null,
     measureTotalMeters: 0,
+    mapOverlayOpen: false,
   };
 
   // ---------- Elements ----------
@@ -41,6 +42,9 @@
     manualSwatch: document.getElementById("manualSwatch"),
     crsWarning: document.getElementById("crsWarning"),
     mapEl: document.getElementById("map"),
+    mapOverlay: document.getElementById("mapOverlay"),
+    openMapBtn: document.getElementById("openMapBtn"),
+    closeMapBtn: document.getElementById("closeMapBtn"),
     exportBtn: document.getElementById("exportBtn"),
     status: document.getElementById("status"),
     zoomInBtn: document.getElementById("zoomInBtn"),
@@ -160,6 +164,19 @@
     if (el.measureBtn) {
       el.measureBtn.addEventListener("click", toggleMeasure);
     }
+    if (el.openMapBtn) {
+      el.openMapBtn.addEventListener("click", openMapOverlay);
+    }
+    if (el.closeMapBtn) {
+      el.closeMapBtn.addEventListener("click", closeMapOverlay);
+    }
+    if (el.mapOverlay) {
+      el.mapOverlay.addEventListener("click", (event) => {
+        if (event.target === el.mapOverlay) {
+          closeMapOverlay();
+        }
+      });
+    }
     // Zoom controls
     if (el.zoomInBtn) el.zoomInBtn.addEventListener("click", () => {
       if (state.map) state.map.zoomIn();
@@ -182,6 +199,11 @@
 
     // Spacebar shortcut to fit bounds.
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && state.mapOverlayOpen) {
+        e.preventDefault();
+        closeMapOverlay();
+        return;
+      }
       if (e.key === " " && !e.target.matches("input, textarea, select, button")) {
         e.preventDefault();
         fitBounds(null);
@@ -363,6 +385,40 @@
     state.mode = "local";
     updateMapModeButton();
     initMap(true);
+  }
+
+  function openMapOverlay() {
+    if (!el.mapOverlay) return;
+    state.mapOverlayOpen = true;
+    el.mapOverlay.classList.add("is-open");
+    el.mapOverlay.setAttribute("aria-hidden", "false");
+    document.body.classList.add("map-overlay-open");
+    if (el.openMapBtn) {
+      el.openMapBtn.setAttribute("aria-expanded", "true");
+    }
+
+    setTimeout(() => {
+      if (!state.map) return;
+      state.map.invalidateSize(true);
+      fitBounds(null);
+      if (el.closeMapBtn && typeof el.closeMapBtn.focus === "function") {
+        el.closeMapBtn.focus({ preventScroll: true });
+      }
+    }, 120);
+  }
+
+  function closeMapOverlay() {
+    if (!el.mapOverlay) return;
+    state.mapOverlayOpen = false;
+    el.mapOverlay.classList.remove("is-open");
+    el.mapOverlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("map-overlay-open");
+    if (el.openMapBtn) {
+      el.openMapBtn.setAttribute("aria-expanded", "false");
+      if (typeof el.openMapBtn.focus === "function") {
+        el.openMapBtn.focus({ preventScroll: true });
+      }
+    }
   }
 
   function collectExportPoints() {

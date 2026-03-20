@@ -14,12 +14,18 @@
     // Local Storage for Last Inputs
     // ----------------------------
     function saveLastInputs() {
-      const e = document.getElementById("inp-e").value;
-      const n = document.getElementById("inp-n").value;
-      const lon = document.getElementById("inp-lon").value;
-      const lat = document.getElementById("inp-lat").value;
-      const format = document.getElementById("out-format").value;
-      const precision = document.getElementById("out-prec").value;
+      const e = document.getElementById("inp-e")?.value || "";
+      const n = document.getElementById("inp-n")?.value || "";
+      const lon = document.getElementById("inp-lon")?.value || "";
+      const lat = document.getElementById("inp-lat")?.value || "";
+      const format = document.getElementById("out-format")?.value || "dms";
+      const precision = document.getElementById("out-prec")?.value || "8";
+      const inputType =
+        document.querySelector("input[name='rev-input-type']:checked")?.value ||
+        "wgs84";
+      const utmZone = document.getElementById("inp-utm-zone")?.value || "";
+      const utmE = document.getElementById("inp-utm-e")?.value || "";
+      const utmN = document.getElementById("inp-utm-n")?.value || "";
 
       localStorage.setItem("dltm_lastE", e);
       localStorage.setItem("dltm_lastN", n);
@@ -27,6 +33,10 @@
       localStorage.setItem("dltm_lastLat", lat);
       localStorage.setItem("dltm_lastFormat", format);
       localStorage.setItem("dltm_lastPrecision", precision);
+      localStorage.setItem("dltm_lastInputType", inputType);
+      localStorage.setItem("dltm_lastUtmZone", utmZone);
+      localStorage.setItem("dltm_lastUtmE", utmE);
+      localStorage.setItem("dltm_lastUtmN", utmN);
     }
 
     function loadLastInputs() {
@@ -36,13 +46,48 @@
       const lat = localStorage.getItem("dltm_lastLat");
       const format = localStorage.getItem("dltm_lastFormat") || "dms";
       const precision = localStorage.getItem("dltm_lastPrecision") || "8";
+      const inputType = localStorage.getItem("dltm_lastInputType") || "wgs84";
+      const utmZone = localStorage.getItem("dltm_lastUtmZone");
+      const utmE = localStorage.getItem("dltm_lastUtmE");
+      const utmN = localStorage.getItem("dltm_lastUtmN");
 
-      if (e) document.getElementById("inp-e").value = e;
-      if (n) document.getElementById("inp-n").value = n;
-      if (lon) document.getElementById("inp-lon").value = lon;
-      if (lat) document.getElementById("inp-lat").value = lat;
-      document.getElementById("out-format").value = format;
-      document.getElementById("out-prec").value = precision;
+      if (e && document.getElementById("inp-e")) {
+        document.getElementById("inp-e").value = e;
+      }
+      if (n && document.getElementById("inp-n")) {
+        document.getElementById("inp-n").value = n;
+      }
+      if (lon && document.getElementById("inp-lon")) {
+        document.getElementById("inp-lon").value = lon;
+      }
+      if (lat && document.getElementById("inp-lat")) {
+        document.getElementById("inp-lat").value = lat;
+      }
+      if (utmZone && document.getElementById("inp-utm-zone")) {
+        document.getElementById("inp-utm-zone").value = utmZone;
+      }
+      if (utmE && document.getElementById("inp-utm-e")) {
+        document.getElementById("inp-utm-e").value = utmE;
+      }
+      if (utmN && document.getElementById("inp-utm-n")) {
+        document.getElementById("inp-utm-n").value = utmN;
+      }
+      if (document.getElementById("out-format")) {
+        document.getElementById("out-format").value = format;
+      }
+      if (document.getElementById("out-prec")) {
+        document.getElementById("out-prec").value = precision;
+      }
+
+      const inputTypeControl = document.querySelector(
+        `input[name='rev-input-type'][value='${inputType}']`,
+      );
+      if (inputTypeControl) {
+        inputTypeControl.checked = true;
+      }
+      if (typeof window.switchReverseInputType === "function") {
+        window.switchReverseInputType(inputType);
+      }
     }
 
     function clearLastInputs() {
@@ -52,20 +97,54 @@
       localStorage.removeItem("dltm_lastLat");
       localStorage.removeItem("dltm_lastFormat");
       localStorage.removeItem("dltm_lastPrecision");
+      localStorage.removeItem("dltm_lastUtmZone");
+      localStorage.removeItem("dltm_lastUtmE");
+      localStorage.removeItem("dltm_lastUtmN");
+      localStorage.removeItem("dltm_lastInputType");
+
+      [
+        "inp-e",
+        "inp-n",
+        "inp-lon",
+        "inp-lat",
+        "inp-utm-zone",
+        "inp-utm-e",
+        "inp-utm-n",
+      ].forEach((id) => {
+        const field = document.getElementById(id);
+        if (field) field.value = "";
+      });
     }
 
     // ----------------------------
     // Tabs
     // ----------------------------
-    window.switchDltmTab = function (el, tab) {
-      document
-        .querySelectorAll(".dltm-tab")
-        .forEach((t) => t.classList.remove("active"));
-      document
-        .querySelectorAll(".tool-section")
-        .forEach((s) => s.classList.remove("active"));
-      el.classList.add("active");
-      document.getElementById("section-" + tab).classList.add("active");
+    window.switchDltmTab = function (targetOrTab, explicitTab) {
+      const tabName =
+        explicitTab ||
+        (typeof targetOrTab === "string"
+          ? targetOrTab
+          : targetOrTab?.dataset?.dltmTab);
+      if (!tabName) return;
+
+      const activeButton =
+        typeof targetOrTab === "string"
+          ? document.querySelector(`.dltm-tab[data-dltm-tab='${tabName}']`)
+          : targetOrTab;
+
+      document.querySelectorAll(".dltm-tab").forEach((button) => {
+        const isActive =
+          button === activeButton || button.dataset.dltmTab === tabName;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-selected", String(isActive));
+        button.tabIndex = isActive ? 0 : -1;
+      });
+
+      document.querySelectorAll(".tool-section").forEach((section) => {
+        const isActive = section.id === "section-" + tabName;
+        section.classList.toggle("active", isActive);
+        section.hidden = !isActive;
+      });
     };
 
     window.switchBatchDirection = function (dir) {
@@ -1090,66 +1169,11 @@
       alert(ok ? "Copied ✅" : "Copy failed ❌");
     };
 
-    // ----------------------------
-    // Local Storage for Last Inputs
-    // ----------------------------
-    window.saveLastInputs = function () {
-      const e = document.getElementById("inp-e").value;
-      const n = document.getElementById("inp-n").value;
-      const lon = document.getElementById("inp-lon").value;
-      const lat = document.getElementById("inp-lat").value;
-      const format = document.getElementById("out-format").value;
-      const precision = document.getElementById("out-prec").value;
-
-      localStorage.setItem("dltm_lastE", e);
-      localStorage.setItem("dltm_lastN", n);
-      localStorage.setItem("dltm_lastLon", lon);
-      localStorage.setItem("dltm_lastLat", lat);
-      localStorage.setItem("dltm_lastFormat", format);
-      localStorage.setItem("dltm_lastPrecision", precision);
-    };
-
-    window.loadLastInputs = function () {
-      const e = localStorage.getItem("dltm_lastE");
-      const n = localStorage.getItem("dltm_lastN");
-      const lon = localStorage.getItem("dltm_lastLon");
-      const lat = localStorage.getItem("dltm_lastLat");
-      const format = localStorage.getItem("dltm_lastFormat") || "dms";
-      const precision = localStorage.getItem("dltm_lastPrecision") || "8";
-
-      if (e) document.getElementById("inp-e").value = e;
-      if (n) document.getElementById("inp-n").value = n;
-      if (lon) document.getElementById("inp-lon").value = lon;
-      if (lat) document.getElementById("inp-lat").value = lat;
-      document.getElementById("out-format").value = format;
-      document.getElementById("out-prec").value = precision;
-    };
-
-    window.clearLastInputs = function () {
-      localStorage.removeItem("dltm_lastE");
-      localStorage.removeItem("dltm_lastN");
-      localStorage.removeItem("dltm_lastLon");
-      localStorage.removeItem("dltm_lastLat");
-      localStorage.removeItem("dltm_lastFormat");
-      localStorage.removeItem("dltm_lastPrecision");
-      localStorage.removeItem("dltm_lastUtmZone");
-      localStorage.removeItem("dltm_lastUtmE");
-      localStorage.removeItem("dltm_lastUtmN");
-      localStorage.removeItem("dltm_lastInputType");
-      document.getElementById("inp-e").value = "";
-      document.getElementById("inp-n").value = "";
-      document.getElementById("inp-lon").value = "";
-      document.getElementById("inp-lat").value = "";
-      document.getElementById("inp-utm-zone").value = "";
-      document.getElementById("inp-utm-e").value = "";
-      document.getElementById("inp-utm-n").value = "";
-      alert("Saved data cleared ✨");
-    };
-
     // Switch input type for reverse conversion
     window.switchReverseInputType = function (type) {
       const wgs84Inputs = document.getElementById("wgs84-inputs");
       const utmInputs = document.getElementById("utm-inputs");
+      if (!wgs84Inputs || !utmInputs) return;
 
       if (type === "wgs84") {
         wgs84Inputs.style.display = "grid";
@@ -1251,79 +1275,48 @@
       }
     }
 
-    // Update save logic
-    window.saveLastInputs = function () {
-      const e = document.getElementById("inp-e").value;
-      const n = document.getElementById("inp-n").value;
-      const lon = document.getElementById("inp-lon").value;
-      const lat = document.getElementById("inp-lat").value;
-      const format = document.getElementById("out-format").value;
-      const precision = document.getElementById("out-prec").value;
-      const inputType =
-        document.querySelector("input[name='rev-input-type']:checked")?.value ||
-        "wgs84";
-      const utmZone = document.getElementById("inp-utm-zone").value;
-      const utmE = document.getElementById("inp-utm-e").value;
-      const utmN = document.getElementById("inp-utm-n").value;
+    function initDltmPage() {
+      const hasWorkspace =
+        document.getElementById("section-single") ||
+        document.getElementById("section-batch") ||
+        document.getElementById("section-reverse");
+      if (!hasWorkspace) return;
 
-      localStorage.setItem("dltm_lastE", e);
-      localStorage.setItem("dltm_lastN", n);
-      localStorage.setItem("dltm_lastLon", lon);
-      localStorage.setItem("dltm_lastLat", lat);
-      localStorage.setItem("dltm_lastFormat", format);
-      localStorage.setItem("dltm_lastPrecision", precision);
-      localStorage.setItem("dltm_lastInputType", inputType);
-      localStorage.setItem("dltm_lastUtmZone", utmZone);
-      localStorage.setItem("dltm_lastUtmE", utmE);
-      localStorage.setItem("dltm_lastUtmN", utmN);
-    };
+      document.querySelectorAll(".dltm-tab").forEach((button) => {
+        if (button.dataset.dltmBound === "true") return;
+        button.dataset.dltmBound = "true";
+        button.addEventListener("click", () => {
+          window.switchDltmTab(button);
+        });
+      });
 
-    // Update load logic
-    window.loadLastInputs = function () {
-      const e = localStorage.getItem("dltm_lastE");
-      const n = localStorage.getItem("dltm_lastN");
-      const lon = localStorage.getItem("dltm_lastLon");
-      const lat = localStorage.getItem("dltm_lastLat");
-      const format = localStorage.getItem("dltm_lastFormat") || "dms";
-      const precision = localStorage.getItem("dltm_lastPrecision") || "8";
-      const inputType = localStorage.getItem("dltm_lastInputType") || "wgs84";
-      const utmZone = localStorage.getItem("dltm_lastUtmZone");
-      const utmE = localStorage.getItem("dltm_lastUtmE");
-      const utmN = localStorage.getItem("dltm_lastUtmN");
-
-      if (e) document.getElementById("inp-e").value = e;
-      if (n) document.getElementById("inp-n").value = n;
-      if (lon) document.getElementById("inp-lon").value = lon;
-      if (lat) document.getElementById("inp-lat").value = lat;
-      if (utmZone) document.getElementById("inp-utm-zone").value = utmZone;
-      if (utmE) document.getElementById("inp-utm-e").value = utmE;
-      if (utmN) document.getElementById("inp-utm-n").value = utmN;
-
-      document.getElementById("out-format").value = format;
-      document.getElementById("out-prec").value = precision;
-
-      // Switch reverse conversion input type
-      document.querySelector(
-        `input[name='rev-input-type'][value='${inputType}']`,
-      ).checked = true;
-      switchReverseInputType(inputType);
-    };
-
-    // Load saved inputs on page load
-    loadLastInputs();
-
-    // Test function for batch conversion
-    window.testBatchConversion = function () {
-      // Use data loaded from file or table
-      if (!batchData || batchData.length === 0) {
-        console.log("❌ No data loaded. Please upload a CSV file first.");
-        return;
+      const initialTab =
+        document.querySelector(".dltm-tab.active") ||
+        document.querySelector(".dltm-tab");
+      if (initialTab) {
+        window.switchDltmTab(initialTab);
       }
 
-      console.log("✓ Loaded data processing test:", batchData.length, "rows");
-      console.table(batchData);
+      loadLastInputs();
+    }
 
-      return batchData;
+    window.saveLastInputs = saveLastInputs;
+    window.loadLastInputs = loadLastInputs;
+    window.clearLastInputs = function () {
+      clearLastInputs();
+      alert("Saved data cleared ✨");
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initDltmPage, {
+        once: true,
+      });
+    } else {
+      initDltmPage();
+    }
+
+    window.testBatchConversion = function () {
+      return Array.isArray(batchData) ? [...batchData] : [];
     };
   })();
 

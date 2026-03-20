@@ -1,9 +1,5 @@
-      console.log("GeoTools SPA fetch-loader active - v2026-02-08");
-
       const appContainer = document.getElementById("app-container");
       const contentDiv = document.getElementById("view-content");
-      const loaderElement = document.getElementById("loader");
-      const loaderText = document.getElementById("loader-text");
       const defaultMeta = {
         lang: document.documentElement.lang || "en",
         dir: document.documentElement.dir || "ltr",
@@ -13,18 +9,7 @@
       let dashboardHtml = "";
       let leafletObserver = null;
       let autoFieldCounter = 0;
-      let loaderFailSafeTimer = null;
-      let loaderHideTimer = null;
       let navigationRunId = 0;
-      let loaderState = {
-        session: 0,
-        visible: false,
-        pending: false,
-      };
-
-      const LOADER_HIDE_DELAY_MS = 2000;
-      const LOADER_HIDE_ANIM_MS = 180;
-      const LOADER_FAILSAFE_MS = 20000;
 
       // Attribute flags for page-injected assets (removed on navigation)
       const PAGE_STYLE_ATTR = "data-spa";
@@ -95,154 +80,10 @@
         root.querySelectorAll(LEGACY_PAGE_LOADER_SELECTOR).forEach((node) => node.remove());
       }
 
-      function clearLoaderTimers() {
-        if (loaderFailSafeTimer) {
-          clearTimeout(loaderFailSafeTimer);
-          loaderFailSafeTimer = null;
-        }
-        if (loaderHideTimer) {
-          clearTimeout(loaderHideTimer);
-          loaderHideTimer = null;
-        }
-      }
-
-      function revealLoader(session) {
-        if (session !== loaderState.session || !loaderState.pending || loaderState.visible) return;
-        loaderState.visible = true;
-        if (!loaderElement) return;
-        loaderElement.style.display = "flex";
-        loaderElement.setAttribute("aria-hidden", "false");
-        requestAnimationFrame(() => {
-          if (session !== loaderState.session || !loaderState.visible) return;
-          loaderElement.classList.add("is-visible");
-        });
-      }
-
-      function resolveLoaderLabel(pageName) {
-        const key = String(pageName || "").toLowerCase();
-        if (!key || key === "home") return "Welcome. Preparing your workspace...";
-        const registry = window.GeoToolsRegistry;
-        const entry = registry && typeof registry.getById === "function" ? registry.getById(key) : null;
-        return entry && entry.title
-          ? `Welcome back. Loading ${entry.title}...`
-          : "Welcome back. Loading your page...";
-      }
-
-      function showLoader(show, options) {
-        const opts = options || {};
-        const navigation = Boolean(opts.navigation);
-
-        if (show) {
-          clearLoaderTimers();
-          const currentlyVisible = !!(loaderElement && loaderElement.classList.contains("is-visible"));
-          loaderState = {
-            session: loaderState.session + 1,
-            visible: currentlyVisible,
-            pending: true,
-          };
-
-          if (loaderText) {
-            loaderText.textContent = String(opts.label || "Welcome. Preparing your workspace...");
-          }
-
-          if (contentDiv) {
-            contentDiv.setAttribute("aria-busy", "true");
-          }
-
-          if (navigation) {
-            const session = loaderState.session;
-            loaderFailSafeTimer = setTimeout(() => {
-              if (session !== loaderState.session || !loaderState.visible) return;
-              console.warn("Loader fail-safe triggered; forcing loader hide.");
-              showLoader(false, { session, force: true });
-              appContainer.style.opacity = "1";
-              notifyLoadError("Page load timed out. Please try again.");
-            }, LOADER_FAILSAFE_MS);
-          }
-
-          const session = loaderState.session;
-          if (!loaderState.visible) {
-            revealLoader(session);
-          }
-          return;
-        }
-
-        if (!loaderState.visible && !loaderState.pending) {
-          if (loaderElement) {
-            loaderElement.classList.remove("is-visible");
-            loaderElement.style.display = "none";
-            loaderElement.setAttribute("aria-hidden", "true");
-          }
-          if (contentDiv) {
-            contentDiv.setAttribute("aria-busy", "false");
-          }
-          return;
-        }
-
-        const session = loaderState.session;
-        if (opts.session && Number(opts.session) !== session) {
-          return;
-        }
-
-        clearLoaderTimers();
-        loaderState.pending = false;
-
-        if (!loaderState.visible) {
-          if (contentDiv) {
-            contentDiv.setAttribute("aria-busy", "false");
-          }
-          if (loaderElement) {
-            loaderElement.classList.remove("is-visible");
-            loaderElement.style.display = "none";
-            loaderElement.setAttribute("aria-hidden", "true");
-          }
-          if (loaderText) {
-            loaderText.textContent = "Welcome. Preparing your workspace...";
-          }
-          return;
-        }
-
-        if (!opts.force) {
-          loaderHideTimer = setTimeout(() => {
-            showLoader(false, { session, force: true });
-          }, LOADER_HIDE_DELAY_MS);
-          return;
-        }
-
-        loaderState.visible = false;
-
+      function setBusyState(isBusy) {
         if (contentDiv) {
-          contentDiv.setAttribute("aria-busy", "false");
+          contentDiv.setAttribute("aria-busy", isBusy ? "true" : "false");
         }
-        if (loaderElement) {
-          loaderElement.classList.remove("is-visible");
-          loaderElement.setAttribute("aria-hidden", "true");
-          loaderHideTimer = setTimeout(() => {
-            if (session !== loaderState.session || loaderState.visible || loaderState.pending) return;
-            loaderElement.style.display = "none";
-          }, LOADER_HIDE_ANIM_MS);
-        }
-        if (loaderText) {
-          loaderText.textContent = "Welcome. Preparing your workspace...";
-        }
-      }
-
-      let initialLoadPending = false;
-      let initialLoaderSession = 0;
-
-      // Show loader on first site entry (home) immediately.
-      if (contentDiv && contentDiv.classList.contains("dashboard-view")) {
-        initialLoadPending = true;
-        showLoader(true, { navigation: true, label: resolveLoaderLabel("home") });
-        initialLoaderSession = loaderState.session;
-        appContainer.style.opacity = "0.5";
-      }
-
-      function completeInitialLoad() {
-        if (!initialLoadPending) return;
-        initialLoadPending = false;
-        appContainer.style.opacity = "1";
-        showLoader(false, { session: initialLoaderSession });
       }
 
       // Resolve page URL using GeoToolsRegistry as the single source of truth.
@@ -362,6 +203,35 @@
         }
       }
 
+      function shouldResolveRelativeUrl(value) {
+        const raw = String(value || "").trim();
+        if (!raw) return false;
+        if (raw.startsWith("#")) return false;
+        return !/^(?:data:|mailto:|tel:|javascript:|blob:)/i.test(raw);
+      }
+
+      function rewriteNodeUrls(root, baseUrl) {
+        if (!root || root.nodeType !== Node.ELEMENT_NODE) return root;
+        const attrs = ["src", "href", "poster", "action"];
+        const selector = attrs.map((attr) => `[${attr}]`).join(",");
+        const nodes = [root, ...root.querySelectorAll(selector)];
+
+        nodes.forEach((node) => {
+          attrs.forEach((attr) => {
+            if (!node.hasAttribute(attr)) return;
+            const value = node.getAttribute(attr);
+            if (!shouldResolveRelativeUrl(value)) return;
+            try {
+              node.setAttribute(attr, new URL(value, baseUrl || location.href).href);
+            } catch (_) {
+              // Ignore malformed URLs and leave the original attribute untouched.
+            }
+          });
+        });
+
+        return root;
+      }
+
       function parsePage(html, baseUrl) {
         const parser = new DOMParser();
         const parsed = parser.parseFromString(html, "text/html");
@@ -403,7 +273,8 @@
             if (el.tagName === "FOOTER") return; // Skip any embedded footers to keep single legal line
             if (el.matches(".standalone-footer,[data-standalone-only='true']")) return;
             if (el.matches(LEGACY_PAGE_LOADER_SELECTOR)) return;
-            nodes.push(el.outerHTML);
+            const clonedEl = rewriteNodeUrls(el.cloneNode(true), baseUrl);
+            nodes.push(clonedEl.outerHTML);
             return;
           }
           if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
@@ -501,10 +372,7 @@
         ) {
           return !!window.L;
         }
-        if (
-          normalized.includes("proj4.js") ||
-          normalized.includes("cdnjs.cloudflare.com/ajax/libs/proj4js")
-        ) {
+        if (normalized.includes("proj4.js")) {
           return !!window.proj4;
         }
         const ignored = [
@@ -585,8 +453,7 @@
         // Apply lightweight fade-in for page transitions.
         appContainer.classList.add("page-fade-in");
         setTimeout(() => appContainer.classList.remove("page-fade-in"), 220);
-        appContainer.style.opacity = "1";
-        showLoader(false);
+        setBusyState(false);
         contentDiv.focus({ preventScroll: true });
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -595,8 +462,7 @@
         clearLegacyPageLoaders(document);
         const runId = ++navigationRunId;
         const normalizedPage = String(pageName || "").toLowerCase();
-        showLoader(true, { navigation: true, label: resolveLoaderLabel(normalizedPage) });
-        appContainer.style.opacity = "0.5";
+        setBusyState(true);
         removeMapArtifacts();
 
         if (!normalizedPage || normalizedPage === "home") {
@@ -634,8 +500,7 @@
           if (runId !== navigationRunId) return;
           notifyLoadError("Error loading page: " + err.message);
           console.error("Page load error:", err);
-          appContainer.style.opacity = "1";
-          showLoader(false);
+          setBusyState(false);
         }
       };
 
@@ -646,14 +511,6 @@
         installLeafletObserver();
         if (typeof window.updatePageIndicator === "function") {
           window.updatePageIndicator("home");
-        }
-
-        if (initialLoadPending) {
-          if (document.readyState === "complete") {
-            completeInitialLoad();
-          } else {
-            window.addEventListener("load", completeInitialLoad, { once: true });
-          }
         }
       });
     
