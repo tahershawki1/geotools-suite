@@ -25,8 +25,8 @@
 }
 
 .new-work-hero h1 {
-  font-size: 30px;
-  line-height: 1.1;
+  font-size: 20px;
+  line-height: 1.2;
   color: var(--text-main);
 }
 
@@ -190,7 +190,7 @@
   }
 
   .new-work-hero h1 {
-    font-size: 26px;
+    font-size: 18px;
   }
 
   .new-work-links,
@@ -217,7 +217,7 @@
   }
 
   .new-work-hero h1 {
-    font-size: 24px;
+    font-size: 16px;
   }
 
   .new-work-links {

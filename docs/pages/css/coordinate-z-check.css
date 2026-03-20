@@ -28,8 +28,8 @@
 .zcompare-hero h1,
 .zcompare-mobile-card h1 {
   margin: 0;
-  font-size: clamp(2rem, 3.3vw, 3rem);
-  line-height: 1.08;
+  font-size: 18px;
+  line-height: 1.2;
   color: #0f172a;
 }
 
@@ -75,7 +75,7 @@
 .zcompare-card-head h2 {
   margin: 0;
   color: #0f172a;
-  font-size: 24px;
+  font-size: 16px;
 }
 
 .zcompare-card-head p {
