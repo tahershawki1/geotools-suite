@@ -195,8 +195,13 @@
 
       textWrap.appendChild(nameEl);
       textWrap.appendChild(descEl);
+      const arrowEl = document.createElement("div");
+      arrowEl.className = "drawer-item-arrow";
+      arrowEl.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
+
       btn.appendChild(iconEl);
       btn.appendChild(textWrap);
+      btn.appendChild(arrowEl);
 
       btn.addEventListener("click", () => {
         closeDrawer();

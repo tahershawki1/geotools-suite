@@ -386,16 +386,16 @@ body:not([data-active-page="home"]) .back-btn {
 }
 
 .drawer-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .drawer-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 14px;
+  padding: 13px 14px;
   border-radius: var(--radius-md);
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
@@ -403,11 +403,10 @@ body:not([data-active-page="home"]) .back-btn {
   transition: all var(--ease-fast);
   -webkit-tap-highlight-color: transparent;
   font-family: var(--font-family);
-  font-size: 13px;
-  font-weight: 700;
   color: var(--text);
   text-align: left;
   box-shadow: none;
+  width: 100%;
 }
 
 .drawer-item:hover {
@@ -418,18 +417,18 @@ body:not([data-active-page="home"]) .back-btn {
 }
 
 .drawer-item:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .drawer-item-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 900;
   font-family: "Outfit", sans-serif;
 }
@@ -437,12 +436,13 @@ body:not([data-active-page="home"]) .back-btn {
 .drawer-item-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .drawer-item-name {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--text);
   white-space: nowrap;
@@ -451,11 +451,34 @@ body:not([data-active-page="home"]) .back-btn {
 }
 
 .drawer-item-desc {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-dim);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.drawer-item-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  border: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--text-dim);
+}
+
+.drawer-item-arrow svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .drawer-backdrop {
