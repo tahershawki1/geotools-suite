@@ -1,80 +1,71 @@
-// GeoTools Suite - dashboard card builder driven by GeoToolsRegistry
+// GeoTools Suite - Mobile app dashboard card builder
 (function () {
+
+  const TOOL_META = {
+    "file-converter": {
+      badge: "Import",
+      badgeClass: "badge-cyan",
+      shortDesc: "Convert SDR/CSV files with map preview",
+    },
+    "coordinate-tools": {
+      badge: "Hub",
+      badgeClass: "badge-indigo",
+      shortDesc: "WGS84, UTM & DLTM workspace",
+    },
+    "new-work": {
+      badge: "Work",
+      badgeClass: "badge-violet",
+      shortDesc: "Gate Level and Survey Topo access",
+    },
+    "orthometric-height": {
+      badge: "Geoid",
+      badgeClass: "badge-green",
+      shortDesc: "h to H using EGM2008 model",
+    },
+    "coordinate-z-check": {
+      badge: "QA",
+      badgeClass: "badge-amber",
+      shortDesc: "Before / after level comparison",
+    },
+    "coordinate-transform": {
+      badge: "Legacy",
+      badgeClass: "badge-blue",
+      shortDesc: "WGS84 ↔ UTM quick converter",
+    },
+    "area-calculator": {
+      badge: "Measure",
+      badgeClass: "badge-pink",
+      shortDesc: "Area & perimeter from coordinates",
+    },
+  };
+
   function getToolMeta(id) {
-    switch (String(id || "").toLowerCase()) {
-      case "file-converter":
-        return { badge: "Import", tag: "Files + map" };
-      case "coordinate-tools":
-        return { badge: "Hub", tag: "DLTM + UTM" };
-      case "new-work":
-        return { badge: "Hub", tag: "Gate + topo" };
-      case "orthometric-height":
-        return { badge: "Geoid", tag: "h to H" };
-      case "coordinate-z-check":
-        return { badge: "QA", tag: "Before / after" };
-      case "coordinate-transform":
-        return { badge: "Legacy", tag: "Quick convert" };
-      case "area-calculator":
-        return { badge: "Measure", tag: "Area + lines" };
-      default:
-        return { badge: "Tool", tag: "Open" };
-    }
+    return TOOL_META[String(id || "").toLowerCase()] || {
+      badge: "Tool",
+      badgeClass: "badge-cyan",
+      shortDesc: "Survey utility",
+    };
   }
 
-  function syncSummaryCount(group, total) {
-    document.querySelectorAll(`[data-tool-count-label="${group}"]`).forEach((node) => {
-      node.textContent = `${total} tools ready`;
-    });
-  }
-
-  function getEmptyStateCopy(group) {
-    switch (String(group || "").toLowerCase()) {
-      case "site-tools":
-        return {
-          title: "Site tools will appear here",
-          desc: "This section is ready for website utilities and internal shortcuts as soon as they are added.",
-        };
-      default:
-        return {
-          title: "No tools available yet",
-          desc: "Add a tool to this group in the registry and it will appear automatically.",
-        };
-    }
-  }
-
-  function buildEmptyState(group) {
-    const copy = getEmptyStateCopy(group);
-    const state = document.createElement("div");
-    state.className = "grid-empty-state";
-    state.setAttribute("role", "status");
-
-    const title = document.createElement("h3");
-    title.textContent = copy.title;
-
-    const desc = document.createElement("p");
-    desc.textContent = copy.desc;
-
-    state.appendChild(title);
-    state.appendChild(desc);
-    return state;
-  }
+  const ARROW_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
 
   function buildCard(tool, index) {
     const meta = getToolMeta(tool.id);
+
     const btn = document.createElement("button");
     btn.className = "card";
     btn.type = "button";
-    btn.setAttribute("aria-label", `Open ${tool.title} tool`);
+    btn.setAttribute("aria-label", `Open ${tool.title}`);
     btn.style.setProperty("--card-index", String(index + 1));
     btn.addEventListener("click", () => navigate(tool));
 
-    const main = document.createElement("div");
-    main.className = "card-main";
-
+    // Icon box
     const iconBox = document.createElement("div");
     iconBox.className = "icon-box";
+    iconBox.setAttribute("data-tool", tool.id);
     iconBox.textContent = tool.icon || "GT";
 
+    // Card copy
     const copy = document.createElement("div");
     copy.className = "card-copy";
 
@@ -82,37 +73,47 @@
     title.textContent = tool.title;
 
     const desc = document.createElement("p");
-    desc.textContent = tool.desc;
+    desc.textContent = meta.shortDesc || tool.desc;
 
     copy.appendChild(title);
     copy.appendChild(desc);
 
-    main.appendChild(iconBox);
-    main.appendChild(copy);
-
-    const side = document.createElement("div");
-    side.className = "card-side";
+    // Footer
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
 
     const badge = document.createElement("span");
-    badge.className = "card-badge";
+    badge.className = `card-badge ${meta.badgeClass}`;
     badge.textContent = meta.badge;
-
-    const tag = document.createElement("span");
-    tag.className = "card-tag";
-    tag.textContent = meta.tag;
 
     const arrow = document.createElement("span");
     arrow.className = "card-arrow";
-    arrow.setAttribute("aria-hidden", "true");
-    arrow.textContent = ">";
+    arrow.innerHTML = ARROW_SVG;
 
-    side.appendChild(badge);
-    side.appendChild(tag);
-    side.appendChild(arrow);
+    footer.appendChild(badge);
+    footer.appendChild(arrow);
 
-    btn.appendChild(main);
-    btn.appendChild(side);
+    btn.appendChild(iconBox);
+    btn.appendChild(copy);
+    btn.appendChild(footer);
+
     return btn;
+  }
+
+  function buildEmptyState() {
+    const el = document.createElement("div");
+    el.className = "grid-empty-state";
+    el.setAttribute("role", "status");
+
+    const title = document.createElement("h3");
+    title.textContent = "No tools available";
+
+    const desc = document.createElement("p");
+    desc.textContent = "Tools added to this group will appear here automatically.";
+
+    el.appendChild(title);
+    el.appendChild(desc);
+    return el;
   }
 
   function listToolsByGroup(group) {
@@ -121,42 +122,40 @@
       return window.GeoToolsRegistry.listByGroup(group);
     }
     if (typeof window.GeoToolsRegistry.list === "function") {
-      return window.GeoToolsRegistry
-        .list()
-        .filter((tool) => String(tool.group || "geotools").toLowerCase() === group);
+      return window.GeoToolsRegistry.list().filter(
+        (t) => String(t.group || "geotools").toLowerCase() === group,
+      );
     }
     return [];
   }
 
-  function renderGroup(grid, group) {
-    if (!grid) {
-      return;
-    }
+  function syncCount(group, total) {
+    document.querySelectorAll(`[data-tool-count-label="${group}"]`).forEach((el) => {
+      el.textContent = String(total);
+    });
+  }
 
+  function renderGroup(grid, group) {
+    if (!grid) return;
     grid.innerHTML = "";
     const tools = listToolsByGroup(group);
-    syncSummaryCount(group, tools.length);
+    syncCount(group, tools.length);
 
     if (!tools.length) {
-      grid.appendChild(buildEmptyState(group));
+      grid.appendChild(buildEmptyState());
       return;
     }
 
-    tools.forEach((tool, index) => {
-      grid.appendChild(buildCard(tool, index));
-    });
+    tools.forEach((tool, i) => grid.appendChild(buildCard(tool, i)));
   }
 
   function renderCards() {
     const grids = document.querySelectorAll("[data-tools-grid]");
-    if (!grids.length || !window.GeoToolsRegistry || typeof window.GeoToolsRegistry.list !== "function") {
-      const fallbackGrid = document.querySelector(".grid");
-      if (fallbackGrid) {
-        renderGroup(fallbackGrid, "geotools");
-      }
+    if (!grids.length || !window.GeoToolsRegistry) {
+      const fallback = document.querySelector(".grid");
+      if (fallback) renderGroup(fallback, "geotools");
       return;
     }
-
     grids.forEach((grid) => {
       const group = String(grid.getAttribute("data-tools-grid") || "geotools").toLowerCase();
       renderGroup(grid, group);
@@ -169,7 +168,6 @@
       window.location.href = href;
       return;
     }
-
     if (typeof window.loadPage === "function") {
       window.loadPage(tool.id);
       return;

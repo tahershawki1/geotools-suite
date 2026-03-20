@@ -1,28 +1,35 @@
 <link rel="stylesheet" href="./css/navbar.css" />
 <div class="shell-unified">
-  <header class="navbar-unified" role="banner" aria-label="GeoTools top app bar">
-    <div class="nav-brand-wrap">
-      <button class="hamburger-menu" type="button" aria-label="Open tools menu" aria-expanded="false" aria-controls="mobile-main-menu">
-        <span></span><span></span><span></span>
+  <header class="app-header" role="banner" aria-label="GeoTools app header">
+    <div class="header-left">
+      <div class="app-logo-mark" aria-hidden="true"></div>
+      <div class="app-logo-copy">
+        <span class="app-logo-title">GeoTools</span>
+        <span class="app-logo-sub" data-current-page-label>Survey Suite</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="header-icon-btn" type="button" aria-label="Info" id="header-info-btn">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
       </button>
-
-      <a href="./index.html" class="nav-logo-unified" aria-label="GeoTools Suite - Home" onclick="if(typeof loadPage==='function'){loadPage('');return false;}">
-        <span class="nav-logo-mark" aria-hidden="true"></span>
-        <span class="nav-logo-copy">
-          <span class="nav-logo-text">GeoTools Suite</span>
-          <span class="nav-logo-kicker" data-current-page-label>Home</span>
-        </span>
-      </a>
     </div>
   </header>
 
-  <aside class="sidebar-unified" id="mobile-main-menu" role="navigation" aria-label="Main navigation">
-    <div class="sidebar-head">
-      <p class="sidebar-title">Navigation</p>
-      <p class="sidebar-subtitle">Atlas-inspired access to every survey workflow.</p>
-    </div>
-    <div class="nav-links-unified"></div>
-  </aside>
-  <div class="sidebar-backdrop" data-sidebar-backdrop></div>
   <section class="shell-main-slot" id="shell-main-slot"></section>
+
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+
+  <div class="more-drawer" id="more-drawer" role="dialog" aria-label="More tools" aria-hidden="true">
+    <div class="drawer-handle" aria-hidden="true"></div>
+    <p class="drawer-title">More Tools</p>
+    <div class="drawer-grid" id="drawer-grid"></div>
+  </div>
+
+  <nav class="bottom-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-links-unified" id="bottom-nav-links"></div>
+  </nav>
 </div>

@@ -1,11 +1,13 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#060c18" />
     <title>GeoTools Suite</title>
 
-        <!-- Unified shared modules (registry-driven navigation/dashboard) -->
     <script src="./shared/js/tools-registry.js"></script>
     <script src="./shared/js/dashboard.js"></script>
     <script src="./shared/js/crs-registry.js"></script>
@@ -13,17 +15,10 @@
     <script src="./shared/js/keyboard-navigation.js"></script>
     <script src="./shared/js/notification-system.js"></script>
 
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap"
-      rel="stylesheet"
-    />
-
-    <!-- Global libraries for SPA tools -->
     <script src="./vendor/proj4.js"></script>
     <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
     <script src="./vendor/leaflet/leaflet.js"></script>
 
-    <!-- Global styles -->
     <link rel="stylesheet" href="./shared/css/theme.css" />
     <link rel="stylesheet" href="./styles.css" />
   </head>
@@ -31,44 +26,50 @@
   <body data-active-page="home">
     <div id="app-container">
       <main id="view-content" class="dashboard-view" tabindex="-1" aria-busy="false">
-        <section class="app-section surface" aria-label="Applications launcher">
-          <div class="section-head">
-            <div class="section-copy">
-              <p class="section-kicker">GeoTools Suite</p>
-              <h2>Survey tools</h2>
-              <p class="section-subtitle">
-                Local survey utilities for coordinate conversion, file workflows, and field calculations.
-              </p>
-            </div>
-            <span class="section-count" data-tool-count-label="geotools">6 tools ready</span>
-          </div>
 
+        <div class="dash-hero">
+          <p class="hero-greeting">Welcome Back</p>
+          <h1 class="hero-title">Survey <span>Tools</span></h1>
+          <p class="hero-desc">Professional coordinate conversion, file workflows, and field calculations.</p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-value" data-tool-count-label="geotools">6</div>
+              <div class="hero-stat-label">Tools</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-value">DLTM</div>
+              <div class="hero-stat-label">System</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-value">100%</div>
+              <div class="hero-stat-label">Offline</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-strip">
+          <button class="quick-chip active" type="button" onclick="if(typeof loadPage==='function')loadPage('')">
+            <span class="quick-chip-dot"></span>All Tools
+          </button>
+          <button class="quick-chip" type="button" onclick="if(typeof loadPage==='function')loadPage('coordinate-tools')">
+            Coordinates
+          </button>
+          <button class="quick-chip" type="button" onclick="if(typeof loadPage==='function')loadPage('file-converter')">
+            Files
+          </button>
+          <button class="quick-chip" type="button" onclick="if(typeof loadPage==='function')loadPage('area-calculator')">
+            Area
+          </button>
+        </div>
+
+        <section class="app-section" aria-label="Survey tools">
+          <p class="section-label">Survey Tools</p>
           <div class="grid" data-tools-grid="geotools"></div>
         </section>
 
-        <section class="app-section surface" aria-label="Site tools launcher">
-          <div class="section-head">
-            <div class="section-copy">
-              <p class="section-kicker">GeoTools Suite</p>
-              <h2>Site Tools</h2>
-              <p class="section-subtitle">
-                Website utilities and internal helpers can be surfaced here when they are ready.
-              </p>
-            </div>
-            <span class="section-count" data-tool-count-label="site-tools">0 tools ready</span>
-          </div>
-
-          <div class="grid" data-tools-grid="site-tools"></div>
-        </section>
       </main>
     </div>
 
     <script src="./shared/js/app-shell.js"></script>
-    <div class="legal-line" aria-label="Copyright notice">© 2026 GeoTools Suite — All rights reserved.</div>
   </body>
 </html>
-
-
-
-
-
