@@ -308,6 +308,23 @@
     }
   }
 
+  // ── Back button ───────────────────────────────────────────
+
+  function bindBackButton() {
+    const backBtn = document.getElementById("header-back-btn");
+    if (!backBtn || backBtn.dataset.backBound) return;
+    backBtn.dataset.backBound = "true";
+    backBtn.addEventListener("click", () => {
+      closeDrawer();
+      if (typeof window.loadPage === "function") {
+        window.loadPage("");
+      } else {
+        window.location.href = getBasePath() + "/index.html";
+      }
+      updatePageIndicator("home");
+    });
+  }
+
   // ── Main init ────────────────────────────────────────────
 
   function ensureShellReady() {
@@ -316,6 +333,7 @@
     mountShellContent();
     updatePageIndicator("home");
     bindEventsOnce();
+    bindBackButton();
   }
 
   async function loadNavbar() {
