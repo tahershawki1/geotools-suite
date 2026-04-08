@@ -52,6 +52,13 @@
       group: "geotools",
     },
     {
+      id: "height-converter",
+      title: "Height Converter",
+      desc: "Ellipsoid → Orthometric height conversion (H = h − N) with batch support.",
+      pagePath: "pages/height-converter.html",
+      icon: "⛰️",
+    },
+    {
       id: "area-calculator",
       title: "Area Calculator",
       desc: "Auto area/perimeter from coordinates with drawing helpers.",
