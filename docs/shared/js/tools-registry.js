@@ -52,6 +52,13 @@
       group: "geotools",
     },
     {
+      id: "height-converter",
+      title: "Height Converter",
+      desc: "Convert ellipsoidal (GPS) heights to orthometric (MSL) heights using geoid undulation H = h − N.",
+      pagePath: "pages/height-converter.html",
+      icon: "📏",
+    },
+    {
       id: "area-calculator",
       title: "Area Calculator",
       desc: "Auto area/perimeter from coordinates with drawing helpers.",

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Height Converter (Ellipsoidal → Orthometric) - GeoTools Suite</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="./css/height-converter.css" />
+  <script src="./js/height-converter.js"></script>
+</head>
+<body>
+
+<div class="container-hc">
+  <!-- Tabs -->
+  <div class="hc-tabs">
+    <div class="hc-tab active" onclick="switchHcTab(this, 'single')">Single Conversion</div>
+    <div class="hc-tab" onclick="switchHcTab(this, 'batch')">Batch Conversion (CSV)</div>
+    <div class="hc-tab" onclick="switchHcTab(this, 'info')">About the Formula</div>
+  </div>
+
+  <div class="content-hc">
+
+    <!-- ===== SINGLE ===== -->
+    <div id="section-hc-single" class="tool-section active">
+
+      <div class="info-box">
+        Convert a <strong>GPS / ellipsoidal height (h)</strong> to an
+        <strong>orthometric height (H)</strong> above mean sea level using a known
+        <strong>geoid undulation (N)</strong>: &nbsp;<code>H = h − N</code>
+      </div>
+
+      <!-- Geoid preset -->
+      <div class="geoid-presets">
+        <label>Region / Geoid Preset (EGM96 approximate N values)</label>
+        <select id="hc-preset-single"></select>
+      </div>
+
+      <!-- Inputs -->
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="hc-h-single">Ellipsoidal Height h (m)</label>
+          <input
+            type="number"
+            id="hc-h-single"
+            placeholder="e.g. 35.250"
+            step="0.001"
+            aria-label="Ellipsoidal height in metres"
+          />
+        </div>
+        <div class="input-group">
+          <label for="hc-n-single">Geoid Undulation N (m)</label>
+          <input
+            type="number"
+            id="hc-n-single"
+            placeholder="e.g. 17.500"
+            step="0.001"
+            aria-label="Geoid undulation N in metres"
+          />
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="btn-calc" onclick="runSingleHc()">Convert Now ✨</button>
+        <button class="btn-nav-top" onclick="
+          document.getElementById('hc-h-single').value='';
+          document.getElementById('hc-n-single').value='';
+          document.getElementById('hc-preset-single').selectedIndex=0;
+          document.getElementById('hc-n-single').readOnly=false;
+          document.getElementById('res-box-hc-single').style.display='none';
+        ">🗑️ Clear</button>
+      </div>
+
+      <!-- Result -->
+      <div id="res-box-hc-single" class="result-card" style="display:none;">
+        <div class="result-head">
+          <div>
+            <div class="result-title">Conversion Result</div>
+            <div class="result-sub">H = h − N</div>
+          </div>
+          <div class="result-actions">
+            <button class="btn-mini" onclick="copySingleHcResult()">Copy H</button>
+          </div>
+        </div>
+
+        <div class="result-grid-3">
+          <div class="result-field">
+            <div class="field-label">Ellipsoidal Height (h)</div>
+            <div class="field-line">
+              <span class="field-value" id="hc-res-h">-</span>
+            </div>
+          </div>
+          <div class="result-field">
+            <div class="field-label">Geoid Undulation (N)</div>
+            <div class="field-line">
+              <span class="field-value" id="hc-res-n">-</span>
+            </div>
+          </div>
+          <div class="result-field">
+            <div class="field-label">Orthometric Height (H)</div>
+            <div class="field-line">
+              <span class="field-value" style="color:var(--primary);" id="hc-res-H">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-note" id="hc-res-note"></div>
+      </div>
+    </div>
+
+    <!-- ===== BATCH ===== -->
+    <div id="section-hc-batch" class="tool-section">
+
+      <div class="info-box">
+        Paste or upload a CSV file with rows in the format:<br />
+        <code>ID, h</code> &nbsp;or&nbsp; <code>h</code> (one row per point).<br />
+        A single geoid undulation <strong>N</strong> is applied to all rows.
+      </div>
+
+      <!-- Geoid preset -->
+      <div class="geoid-presets">
+        <label>Region / Geoid Preset</label>
+        <select id="hc-preset-batch"></select>
+      </div>
+
+      <div class="input-group" style="max-width:260px; margin-bottom:16px;">
+        <label for="hc-n-batch">Geoid Undulation N (m)</label>
+        <input
+          type="number"
+          id="hc-n-batch"
+          placeholder="e.g. 17.500"
+          step="0.001"
+          aria-label="Geoid undulation N for batch"
+        />
+      </div>
+
+      <!-- Paste area -->
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-weight:700; margin-bottom:8px;">
+          Paste Coordinates (ID, h — one per line)
+        </label>
+        <textarea
+          id="hc-batch-paste"
+          rows="8"
+          placeholder="Examples:&#10;1, 35.250&#10;2, 36.100&#10;3, 34.875&#10;Or just heights:&#10;35.250&#10;36.100"
+          style="width:100%; padding:12px; border-radius:14px; border:1px solid var(--border); font-family:monospace; box-sizing:border-box;"
+        ></textarea>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
+          <button class="btn-nav-top" onclick="runBatchHc()">Convert Paste</button>
+          <button class="btn-nav-top" onclick="document.getElementById('hc-batch-paste').value=''">Clear</button>
+        </div>
+      </div>
+
+      <!-- File upload -->
+      <div
+        class="batch-dropzone"
+        onclick="document.getElementById('hcBatchFile').click()"
+        role="button"
+        tabindex="0"
+        aria-label="Upload CSV file"
+        onkeydown="if(event.key==='Enter'||event.key===' ')this.click();"
+      >
+        <span style="font-size:40px;">📄</span>
+        <h3 style="margin:10px 0;">Click to Upload CSV File</h3>
+        <p style="font-size:13px; color:var(--text-muted);">
+          File must have columns: <code>ID, h</code> or just <code>h</code>
+        </p>
+        <input
+          type="file"
+          id="hcBatchFile"
+          style="display:none;"
+          accept=".csv,.txt"
+          onchange="handleBatchFileHc(this)"
+        />
+      </div>
+
+      <!-- Results table -->
+      <div class="results-table-wrap" id="hcBatchResultsWrap">
+        <div style="padding:15px; background:var(--card-bg); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+          <strong id="hcBatchCount">0 rows converted</strong>
+          <button class="btn-nav-top" onclick="downloadBatchHc()">Download CSV 💾</button>
+        </div>
+        <div style="max-height:400px; overflow-y:auto;">
+          <table id="hcBatchTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>h (m)</th>
+                <th>N (m)</th>
+                <th>H (m)</th>
+                <th>Code</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== INFO ===== -->
+    <div id="section-hc-info" class="tool-section">
+      <div class="info-box" style="font-size:14px; line-height:1.8;">
+        <strong>Ellipsoidal vs. Orthometric Heights</strong><br /><br />
+
+        GPS / GNSS receivers measure <strong>ellipsoidal height (h)</strong> —
+        the geometric distance from the surface to the WGS84 reference ellipsoid.<br /><br />
+
+        Surveying and engineering work requires <strong>orthometric height (H)</strong>
+        — the height above the geoid (an equipotential surface approximating mean sea level).<br /><br />
+
+        The conversion uses the <strong>geoid undulation N</strong>:<br />
+        <code style="font-size:16px; display:block; margin:10px 0; padding:10px; background:var(--bg); border-radius:8px; border:1px solid var(--border);">
+          H = h − N
+        </code>
+
+        Where:<br />
+        &nbsp;&nbsp;<strong>h</strong> = ellipsoidal height from GPS (metres)<br />
+        &nbsp;&nbsp;<strong>N</strong> = geoid undulation from a geoid model (e.g. EGM96 or EGM2008)<br />
+        &nbsp;&nbsp;<strong>H</strong> = orthometric height above mean sea level (metres)<br /><br />
+
+        <strong>Getting accurate N values:</strong><br />
+        For precise work, use the official geoid undulation at your exact location from:
+        <ul style="margin:6px 0 0 18px;">
+          <li>NOAA NGS Online Geoid Calculator</li>
+          <li>NGA EGM2008 geoid grid files</li>
+          <li>Your national mapping authority's geoid model</li>
+        </ul>
+        The preset values in this tool are <em>approximate regional averages</em> suitable
+        for preliminary calculations only.
+      </div>
+    </div>
+
+  </div><!-- /content-hc -->
+</div><!-- /container-hc -->
+
+<div class="standalone-footer" data-standalone-only="true" style="text-align:center; padding:20px; margin-top:40px; border-top:1px solid #e2e8f0; color:#64748b; font-size:14px;">
+  <p>&copy; 2026 All rights reserved - GeoTools Suite</p>
+</div>
+
+</body>
+</html>
